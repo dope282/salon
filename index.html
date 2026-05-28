@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Гламур Салон</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root {
+  --pink:#FF6B9D; --pink-light:#FFE4EE; --pink-dark:#E91E8C;
+  --gold:#C9A84C; --gold-light:#F5E6C8;
+  --cream:#FFF9F5;
+  --gray-100:#F8F9FA; --gray-200:#E9ECEF; --gray-500:#6C757D; --gray-800:#343A40;
+  --dark:#1A1A2E;
+  --shadow-sm:0 2px 8px rgba(0,0,0,.08);
+  --shadow-md:0 4px 20px rgba(0,0,0,.12);
+  --shadow-lg:0 8px 40px rgba(0,0,0,.16);
+  --r-sm:8px; --r-md:16px; --r-lg:24px; --r-xl:32px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;color:var(--dark);background:var(--cream);overflow-x:hidden}
+
+/* NAVBAR */
+.navbar{position:fixed;top:0;left:0;right:0;z-index:1000;padding:16px 48px;display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.96);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,107,157,.1);transition:all .3s}
+.navbar.scrolled{box-shadow:var(--shadow-md)}
+.logo-text{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--gold);letter-spacing:1px;display:block;line-height:1.2}
+.logo-sub{font-size:9px;letter-spacing:3px;color:var(--gray-500);text-transform:uppercase}
+.nav-links{display:flex;list-style:none;gap:32px}
+.nav-links a{text-decoration:none;color:var(--gray-800);font-size:14px;font-weight:500;transition:color .3s;position:relative}
+.nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;background:var(--pink);transition:width .3s}
+.nav-links a:hover::after{width:100%}
+.nav-links a:hover{color:var(--pink)}
+.nav-actions{display:flex;align-items:center;gap:12px}
+.btn-primary{background:linear-gradient(135deg,var(--pink),var(--pink-dark));color:#fff;border:none;padding:12px 28px;border-radius:50px;font-size:14px;font-weight:600;cursor:pointer;transition:all .3s;box-shadow:0 4px 15px rgba(255,107,157,.4)}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(255,107,157,.5)}
+.btn-outline{background:transparent;color:var(--pink);border:2px solid var(--pink);padding:10px 22px;border-radius:50px;font-size:14px;font-weight:600;cursor:pointer;transition:all .3s}
+.btn-outline:hover{background:var(--pink);color:#fff}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:4px}
+.hamburger span{display:block;width:24px;height:2px;background:var(--dark);border-radius:2px;transition:all .3s}
+.mob-menu{display:none;position:fixed;top:72px;left:0;right:0;background:#fff;padding:20px 40px;box-shadow:var(--shadow-md);z-index:999;flex-direction:column;gap:12px}
+.mob-menu.open{display:flex}
+.mob-menu a{text-decoration:none;color:var(--dark);font-size:15px;font-weight:500;padding:8px 0;border-bottom:1px solid var(--gray-100)}
+
+/* HERO */
+.hero{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:100px 48px 60px;position:relative;overflow:hidden;background:linear-gradient(135deg,#FFF0F5 0%,#FFF9F5 55%,#F5F0FF 100%)}
+.hero-inner{display:flex;align-items:center;gap:72px;max-width:1240px;width:100%;position:relative;z-index:2}
+.hero-blob{position:absolute;border-radius:50%;pointer-events:none;z-index:0}
+.hero-blob:nth-child(1){width:680px;height:680px;top:-200px;right:-80px;background:linear-gradient(135deg,rgba(255,107,157,.13),rgba(201,168,76,.07));animation:blob 9s ease-in-out infinite}
+.hero-blob:nth-child(2){width:300px;height:300px;bottom:-80px;left:140px;background:linear-gradient(135deg,rgba(201,168,76,.1),rgba(255,107,157,.07));animation:blob 11s ease-in-out infinite reverse}
+@keyframes blob{0%,100%{transform:translateY(0) rotate(0deg)}50%{transform:translateY(-28px) rotate(4deg)}}
+.hero-content{flex:0 0 auto;width:min(520px,48%);position:relative}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;background:var(--pink-light);color:var(--pink-dark);padding:8px 20px;border-radius:50px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:24px}
+.hero-badge::before{content:'';width:8px;height:8px;border-radius:50%;background:var(--pink);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.5);opacity:.6}}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(36px,3.8vw,56px);font-weight:700;line-height:1.13;margin-bottom:20px}
+.hero h1 .grad{background:linear-gradient(135deg,var(--pink),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{font-size:16px;color:var(--gray-500);line-height:1.75;margin-bottom:36px;max-width:420px}
+.hero-btns{display:flex;gap:16px;margin-bottom:48px;flex-wrap:wrap}
+.hero-stats{display:flex;gap:36px;flex-wrap:wrap}
+.stat-num{font-family:'Playfair Display',serif;font-size:28px;font-weight:700;display:block}
+.stat-lbl{font-size:12px;color:var(--gray-500)}
+.hero-visual{flex:1;display:flex;justify-content:center;align-items:center;position:relative;min-width:0}
+.hero-img-wrap{width:clamp(340px,32vw,460px);height:clamp(420px,40vw,560px);border-radius:var(--r-xl);overflow:hidden;box-shadow:var(--shadow-lg);background:linear-gradient(145deg,#FFD6E8,#FF9EC3,#FF6B9D);display:flex;align-items:center;justify-content:center;font-size:clamp(90px,9vw,130px);position:relative;flex-shrink:0}
+.hero-img-wrap::after{content:'';position:absolute;inset:0;background:linear-gradient(to top,rgba(233,30,140,.28),transparent 55%)}
+.float-card{position:absolute;background:#fff;border-radius:var(--r-md);padding:14px 18px;box-shadow:var(--shadow-lg);white-space:nowrap;z-index:3}
+.float-card-1{bottom:44px;left:-20px;animation:fc 6s ease-in-out infinite}
+.float-card-2{top:44px;right:-20px;animation:fc 6s ease-in-out infinite 3s}
+@keyframes fc{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+.fc-lbl{font-size:11px;color:var(--gray-500);margin-bottom:3px}
+.fc-val{font-size:16px;font-weight:700;color:var(--dark)}
+.fc-sub{font-size:11px;color:var(--pink);margin-top:2px}
+
+/* PROMO */
+.promo-section{padding:60px 48px}
+.promo-banner{background:linear-gradient(135deg,#FF6B9D,#C850C0 50%,#4158D0);border-radius:var(--r-xl);padding:56px 64px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between;gap:32px}
+.promo-banner::before{content:'';position:absolute;top:-40%;left:-30%;width:180%;height:200%;background:radial-gradient(circle at 25% 50%,rgba(255,255,255,.12),transparent 55%);pointer-events:none}
+.promo-content{z-index:2;flex:1}
+.promo-tag{display:inline-block;background:rgba(255,255,255,.2);color:#fff;padding:6px 18px;border-radius:50px;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}
+.promo-title{font-family:'Playfair Display',serif;font-size:42px;font-weight:700;color:#fff;line-height:1.1;margin-bottom:6px}
+.promo-pct{font-size:86px;font-weight:900;color:#fff;line-height:1;text-shadow:0 6px 24px rgba(0,0,0,.25);margin-bottom:4px}
+.promo-all{font-family:'Playfair Display',serif;font-size:26px;color:rgba(255,255,255,.9);font-style:italic;margin-bottom:32px}
+.btn-white{background:#fff;color:var(--pink-dark);border:none;padding:14px 36px;border-radius:50px;font-size:15px;font-weight:700;cursor:pointer;transition:all .3s}
+.btn-white:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(0,0,0,.2)}
+.promo-badge-wrap{position:relative;z-index:2;flex-shrink:0}
+.promo-badge{width:104px;height:104px;border-radius:50%;background:var(--gold);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;font-weight:800;text-align:center;line-height:1.4;letter-spacing:.5px;animation:spin 12s linear infinite}
+@keyframes spin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.promo-img-box{width:280px;height:260px;border-radius:var(--r-lg);background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:90px;z-index:2;flex-shrink:0}
+
+/* SECTION */
+.sec-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:40px}
+.sec-title{font-family:'Playfair Display',serif;font-size:32px;font-weight:700}
+.sec-title span{color:var(--pink)}
+.btn-ghost{background:var(--pink-light);color:var(--pink-dark);border:none;padding:10px 24px;border-radius:50px;font-size:13px;font-weight:600;cursor:pointer;transition:all .3s}
+.btn-ghost:hover{background:var(--pink);color:#fff}
+
+/* ARTISTS */
+.artists-section{padding:60px 48px}
+.artists-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:24px}
+.artist-card{background:#fff;border-radius:var(--r-lg);padding:28px 20px;text-align:center;box-shadow:var(--shadow-sm);transition:all .35s;cursor:pointer;border:2px solid transparent}
+.artist-card:hover{transform:translateY(-8px);box-shadow:var(--shadow-lg);border-color:var(--pink-light)}
+.artist-av{width:92px;height:92px;border-radius:50%;margin:0 auto 16px;border:3px solid var(--pink-light);background:linear-gradient(135deg,#FFD6E8,#FFBCD9);display:flex;align-items:center;justify-content:center;font-size:40px;transition:border-color .3s}
+.artist-card:hover .artist-av{border-color:var(--pink)}
+.artist-name{font-weight:700;font-size:15px;margin-bottom:4px}
+.artist-role{font-size:12px;color:var(--gray-500);margin-bottom:8px}
+.artist-stars{display:flex;align-items:center;justify-content:center;gap:4px;font-size:13px;color:var(--gold);margin-bottom:16px}
+.artist-stars span{color:var(--gray-500);font-size:12px}
+.btn-book{width:100%;background:linear-gradient(135deg,var(--pink),var(--pink-dark));color:#fff;border:none;padding:10px;border-radius:50px;font-size:13px;font-weight:600;cursor:pointer;transition:all .3s}
+.btn-book:hover{box-shadow:0 6px 20px rgba(255,107,157,.45);transform:translateY(-2px)}
+
+/* SERVICES */
+.services-section{padding:60px 48px;background:#fff}
+.services-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+.svc-card{background:var(--cream);border-radius:var(--r-lg);padding:28px 22px;display:flex;align-items:center;gap:16px;transition:all .3s;cursor:pointer;border:2px solid transparent}
+.svc-card:hover{background:var(--pink-light);border-color:var(--pink);transform:translateY(-4px);box-shadow:var(--shadow-md)}
+.svc-icon{width:56px;height:56px;background:linear-gradient(135deg,#FFE4EE,#FFD6E8);border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.svc-name{font-weight:700;font-size:15px;margin-bottom:3px}
+.svc-desc{font-size:12px;color:var(--gray-500);margin-bottom:6px}
+.svc-price{font-size:16px;font-weight:700;color:var(--pink)}
+
+/* FEATURES */
+.features-section{padding:80px 48px;background:linear-gradient(135deg,#FFF0F5,#FFF9F5)}
+.features-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:28px}
+.feat-card{text-align:center;padding:40px 24px;background:#fff;border-radius:var(--r-xl);box-shadow:var(--shadow-sm);transition:all .35s}
+.feat-card:hover{transform:translateY(-8px);box-shadow:var(--shadow-lg)}
+.feat-icon{width:72px;height:72px;border-radius:20px;background:linear-gradient(135deg,var(--pink-light),#FFD6E8);display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 20px}
+.feat-title{font-size:16px;font-weight:700;margin-bottom:8px}
+.feat-desc{font-size:13px;color:var(--gray-500);line-height:1.65}
+
+/* FOOTER */
+.footer{background:var(--dark);color:#fff;padding:64px 48px 28px}
+.footer-grid{display:grid;grid-template-columns:2fr 1fr 1fr 1.4fr;gap:48px;margin-bottom:48px}
+.footer-desc{color:rgba(255,255,255,.6);font-size:14px;line-height:1.75;margin:16px 0 24px}
+.socials{display:flex;gap:12px}
+.soc-a{width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;color:#fff;text-decoration:none;font-size:16px;transition:all .2s}
+.soc-a:hover{background:var(--pink);transform:translateY(-2px)}
+.f-heading{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:2px;color:var(--gold);margin-bottom:18px}
+.f-links{list-style:none}
+.f-links li{margin-bottom:10px}
+.f-links a{color:rgba(255,255,255,.55);text-decoration:none;font-size:14px;transition:color .2s}
+.f-links a:hover{color:var(--pink)}
+.f-contact-row{display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.55);font-size:14px;margin-bottom:10px}
+.f-contact-row i{color:var(--pink);width:16px}
+.nl-row{display:flex;gap:8px;margin-top:10px}
+.nl-input{flex:1;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:50px;padding:10px 16px;color:#fff;font-size:13px;outline:none}
+.nl-input::placeholder{color:rgba(255,255,255,.4)}
+.nl-input:focus{border-color:var(--pink)}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.1);padding-top:24px;text-align:center;color:rgba(255,255,255,.35);font-size:13px}
+
+/* BOOKING MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);backdrop-filter:blur(5px);z-index:2000;display:none;align-items:center;justify-content:center;padding:20px}
+.overlay.active{display:flex}
+.modal{background:#fff;border-radius:var(--r-xl);width:100%;max-width:800px;max-height:90vh;overflow-y:auto;padding:44px;position:relative;animation:mIn .3s ease}
+@keyframes mIn{from{transform:scale(.92) translateY(16px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+.modal-x{position:absolute;top:20px;right:20px;width:36px;height:36px;border-radius:50%;border:none;background:var(--gray-100);cursor:pointer;font-size:16px;color:var(--gray-500);transition:all .2s;display:flex;align-items:center;justify-content:center}
+.modal-x:hover{background:var(--pink-light);color:var(--pink)}
+.steps-row{display:flex;align-items:center;margin-bottom:40px}
+.step-item{display:flex;flex-direction:column;align-items:center;gap:8px;flex:1;position:relative}
+.step-item:not(:last-child)::after{content:'';position:absolute;top:19px;left:60%;width:80%;height:2px;background:var(--gray-200);z-index:0}
+.step-item.done:not(:last-child)::after,.step-item.cur:not(:last-child)::after{background:var(--pink)}
+.step-circle{width:40px;height:40px;border-radius:50%;border:2px solid var(--gray-200);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--gray-500);background:#fff;transition:all .3s;position:relative;z-index:1}
+.step-item.cur .step-circle{border-color:var(--pink);background:var(--pink);color:#fff}
+.step-item.done .step-circle{border-color:var(--pink);background:var(--pink);color:#fff}
+.step-lbl{font-size:12px;color:var(--gray-500);font-weight:500;text-align:center}
+.step-item.cur .step-lbl{color:var(--pink);font-weight:700}
+.sc{display:none}.sc.active{display:block}
+.sc h3{font-family:'Playfair Display',serif;font-size:22px;margin-bottom:24px}
+.svc-sel-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.svc-sel-card{border:2px solid var(--gray-200);border-radius:var(--r-md);padding:18px;cursor:pointer;transition:all .3s;display:flex;align-items:center;gap:12px}
+.svc-sel-card:hover{border-color:var(--pink-light);background:var(--pink-light)}
+.svc-sel-card.sel{border-color:var(--pink);background:var(--pink-light)}
+.svc-sel-ico{width:48px;height:48px;border-radius:var(--r-sm);background:var(--gray-100);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;transition:background .3s}
+.svc-sel-card.sel .svc-sel-ico{background:var(--pink)}
+.svc-sel-name{font-weight:600;font-size:14px;margin-bottom:3px}
+.svc-sel-price{font-size:13px;color:var(--pink);font-weight:600}
+.art-sel-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.art-sel-card{border:2px solid var(--gray-200);border-radius:var(--r-md);padding:18px 14px;text-align:center;cursor:pointer;transition:all .3s}
+.art-sel-card:hover{border-color:var(--pink-light)}
+.art-sel-card.sel{border-color:var(--pink);background:var(--pink-light)}
+.art-sel-av{width:70px;height:70px;border-radius:50%;margin:0 auto 10px;background:linear-gradient(135deg,#FFD6E8,#FFBCD9);display:flex;align-items:center;justify-content:center;font-size:30px}
+.cal-booking{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.cal-wrap h4,.time-wrap h4{font-size:12px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:1px;margin-bottom:14px}
+.calendar{border:1px solid var(--gray-200);border-radius:var(--r-md);overflow:hidden}
+.cal-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:var(--gray-100)}
+.cal-nav-btn{width:30px;height:30px;border-radius:50%;border:none;background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--gray-500);transition:all .2s;font-size:16px}
+.cal-nav-btn:hover{background:var(--pink);color:#fff}
+.cal-month{font-weight:700;font-size:14px}
+.cal-body{padding:14px}
+.cal-wk{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;margin-bottom:6px}
+.cal-wk span{font-size:11px;font-weight:700;color:var(--gray-500);padding:4px}
+.cal-days-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.cal-d{aspect-ratio:1;border-radius:50%;border:none;background:transparent;cursor:pointer;font-size:12px;color:var(--dark);transition:all .2s;display:flex;align-items:center;justify-content:center}
+.cal-d:hover:not(.cal-empty):not(:disabled){background:var(--pink-light);color:var(--pink)}
+.cal-d.cal-sel{background:var(--pink)!important;color:#fff!important;font-weight:700}
+.cal-d.cal-today{background:var(--pink-light);color:var(--pink);font-weight:700}
+.cal-d:disabled{color:var(--gray-200);cursor:not-allowed}
+.cal-empty{cursor:default;pointer-events:none}
+.time-slots-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.ts{border:2px solid var(--gray-200);border-radius:var(--r-sm);padding:10px;text-align:center;font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;background:#fff}
+.ts:hover{border-color:var(--pink);color:var(--pink)}
+.ts.sel{background:var(--pink);border-color:var(--pink);color:#fff;font-weight:700}
+.ts.unavail{background:var(--gray-100);color:var(--gray-200);cursor:not-allowed;pointer-events:none}
+.review-grid{display:grid;grid-template-columns:1fr 1fr;gap:28px}
+.review-box h4,.pay-box h4{font-size:16px;font-weight:700;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--gray-200)}
+.sum-item{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.sum-ico{width:44px;height:44px;border-radius:50%;background:var(--pink-light);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.sum-lbl{font-size:11px;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px}
+.sum-val{font-size:14px;font-weight:600}
+.sum-total{display:flex;justify-content:space-between;padding:14px 0;border-top:2px solid var(--gray-200);margin-top:6px}
+.sum-total .tl{font-size:15px;font-weight:700}
+.sum-total .tp{font-size:20px;font-weight:700;color:var(--pink)}
+.pay-opt{display:flex;align-items:center;gap:12px;padding:13px 16px;border:2px solid var(--gray-200);border-radius:var(--r-md);cursor:pointer;margin-bottom:10px;transition:all .2s}
+.pay-opt:hover{border-color:var(--pink-light)}
+.pay-opt.sel{border-color:var(--pink);background:var(--pink-light)}
+.pay-opt input{accent-color:var(--pink)}
+.pay-lbl{font-size:14px;font-weight:500}
+.modal-foot{display:flex;justify-content:space-between;margin-top:28px;padding-top:22px;border-top:1px solid var(--gray-200)}
+.btn-back{background:var(--gray-100);color:var(--gray-800);border:none;padding:12px 28px;border-radius:50px;font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-back:hover{background:var(--gray-200)}
+
+/* TOAST */
+.toast{position:fixed;bottom:32px;right:32px;background:var(--dark);color:#fff;padding:15px 22px;border-radius:var(--r-md);font-size:14px;font-weight:500;z-index:9999;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow-lg);transform:translateY(80px);opacity:0;transition:all .4s ease}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.ok{background:linear-gradient(135deg,#38A169,#276749)}
+.toast.err{background:linear-gradient(135deg,#E53E3E,#C53030)}
+
+/* FADE-UP */
+.fade-up{opacity:0;transform:translateY(28px);transition:opacity .65s ease,transform .65s ease}
+.fade-up.vis{opacity:1;transform:translateY(0)}
+
+/* ===== RESPONSIVE ===== */
+@media(max-width:1200px){
+  .navbar{padding:16px 32px}
+  .artists-grid{grid-template-columns:repeat(3,1fr)}
+  .services-grid{grid-template-columns:repeat(2,1fr)}
+  .features-grid{grid-template-columns:repeat(2,1fr)}
+  .footer-grid{grid-template-columns:1fr 1fr;gap:32px}
+  .hero,.promo-section,.artists-section,.services-section,.features-section{padding-left:32px;padding-right:32px}
+  .footer{padding-left:32px;padding-right:32px}
+}
+@media(max-width:900px){
+  .navbar{padding:14px 20px}
+  .nav-links{display:none}
+  .hamburger{display:flex}
+  /* Hero */
+  .hero{padding:88px 20px 48px}
+  .hero-inner{flex-direction:column;text-align:center;gap:36px}
+  .hero-content{width:100%;max-width:560px}
+  .hero h1{font-size:clamp(30px,8vw,48px)}
+  .hero p{margin:0 auto 28px;font-size:15px}
+  .hero-btns{justify-content:center;flex-wrap:wrap}
+  .hero-stats{justify-content:center;gap:20px}
+  .stat-num{font-size:22px}
+  .hero-visual{width:100%}
+  .hero-img-wrap{width:280px;height:340px;font-size:88px}
+  .float-card-1{left:-4px;bottom:16px}
+  .float-card-2{right:-4px;top:16px}
+  .fc-val{font-size:13px}
+  .fc-lbl,.fc-sub{font-size:10px}
+  /* Promo */
+  .promo-section{padding:36px 20px}
+  .promo-banner{flex-direction:column;padding:36px 28px;text-align:center;gap:20px}
+  .promo-title{font-size:30px}
+  .promo-pct{font-size:62px}
+  .promo-all{font-size:20px;margin-bottom:20px}
+  /* Sections */
+  .artists-section,.services-section,.features-section{padding:44px 20px}
+  .artists-grid{grid-template-columns:repeat(2,1fr);gap:16px}
+  .sec-title{font-size:26px}
+  /* Booking */
+  .svc-sel-grid{grid-template-columns:repeat(2,1fr)}
+  .art-sel-grid{grid-template-columns:repeat(2,1fr)}
+  .cal-booking,.review-grid{grid-template-columns:1fr}
+  /* Footer */
+  .footer{padding:44px 20px 24px}
+}
+@media(max-width:640px){
+  /* Navbar */
+  .navbar{padding:12px 16px}
+  .logo-text{font-size:18px}
+  .btn-primary{padding:10px 18px;font-size:13px}
+  .mob-menu{padding:16px 20px;top:64px}
+  /* Hero */
+  .hero{padding:76px 16px 36px}
+  .hero-inner{gap:24px}
+  .hero h1{font-size:clamp(26px,9vw,38px)}
+  .hero p{font-size:14px;margin-bottom:20px}
+  .hero-btns{gap:10px}
+  .btn-outline{padding:8px 16px;font-size:13px}
+  .hero-img-wrap{width:230px;height:280px;font-size:70px}
+  .hero-stats{gap:14px;flex-wrap:wrap}
+  .stat-num{font-size:20px}
+  .stat-lbl{font-size:11px}
+  /* Float cards - smaller */
+  .float-card{padding:10px 14px;border-radius:var(--r-sm)}
+  .float-card-1{left:-8px}
+  .float-card-2{right:-8px}
+  /* Promo */
+  .promo-section{padding:28px 16px}
+  .promo-banner{padding:28px 20px;border-radius:var(--r-lg)}
+  .promo-title{font-size:24px}
+  .promo-pct{font-size:50px}
+  .promo-all{font-size:18px;margin-bottom:16px}
+  .promo-img-box,.promo-badge-wrap{display:none}
+  /* Sections */
+  .artists-section,.services-section,.features-section{padding:32px 16px}
+  .artists-grid{grid-template-columns:repeat(2,1fr);gap:12px}
+  .artist-card{padding:20px 14px}
+  .artist-av{width:68px;height:68px;font-size:28px}
+  .artist-name{font-size:13px}
+  .artist-role{font-size:11px}
+  .artist-stars{font-size:12px;margin-bottom:12px}
+  .btn-book{font-size:12px;padding:8px}
+  .services-grid{grid-template-columns:1fr;gap:10px}
+  .svc-card{padding:20px 16px}
+  .features-grid{grid-template-columns:1fr;gap:14px}
+  .feat-card{padding:28px 20px}
+  .sec-header{flex-wrap:wrap;gap:10px}
+  .sec-title{font-size:22px}
+  /* Footer */
+  .footer-grid{grid-template-columns:1fr;gap:24px}
+  .footer{padding:32px 16px 20px}
+  /* Booking modal - bottom sheet style */
+  .overlay{padding:0;align-items:flex-end}
+  .modal{
+    border-radius:var(--r-xl) var(--r-xl) 0 0;
+    max-height:92vh;
+    padding:24px 16px 20px;
+    width:100%;
+    max-width:100%;
+  }
+  .modal::before{
+    content:'';display:block;width:40px;height:4px;
+    background:var(--gray-200);border-radius:2px;
+    margin:0 auto 20px;
+  }
+  .steps-row{margin-bottom:24px}
+  .step-circle{width:32px;height:32px;font-size:12px}
+  .step-lbl{font-size:10px}
+  .step-item:not(:last-child)::after{left:58%;width:84%;top:15px}
+  .sc h3{font-size:18px;margin-bottom:16px}
+  .svc-sel-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .svc-sel-card{padding:12px 10px;gap:8px}
+  .svc-sel-ico{width:36px;height:36px;font-size:16px;flex-shrink:0}
+  .svc-sel-name{font-size:12px}
+  .svc-sel-price{font-size:12px}
+  .art-sel-grid{grid-template-columns:1fr 1fr;gap:8px}
+  .art-sel-card{padding:14px 10px}
+  .art-sel-av{width:56px;height:56px;font-size:24px}
+  .artist-stars{font-size:12px}
+  .time-slots-grid{grid-template-columns:repeat(4,1fr);gap:6px}
+  .ts{padding:8px 4px;font-size:12px}
+  .cal-wk span{font-size:10px;padding:2px}
+  .cal-d{font-size:11px}
+  .modal-foot{padding-top:14px;margin-top:16px;gap:10px}
+  .btn-back{padding:10px 20px;font-size:13px}
+  .sum-item{gap:8px}
+  .sum-ico{width:36px;height:36px;font-size:15px}
+  .sum-lbl{font-size:10px}
+  .sum-val{font-size:13px}
+  .review-box h4,.pay-box h4{font-size:14px;margin-bottom:12px}
+  .pay-opt{padding:10px 12px;gap:8px}
+  .pay-lbl{font-size:13px}
+}
+@media(max-width:400px){
+  .hero-img-wrap{width:190px;height:230px;font-size:56px}
+  .float-card-1,.float-card-2{display:none}
+  .artists-grid{grid-template-columns:1fr}
+  .svc-sel-grid{grid-template-columns:1fr}
+  .art-sel-grid{grid-template-columns:1fr 1fr}
+  .time-slots-grid{grid-template-columns:1fr 1fr}
+  .hero-btns{flex-direction:column;align-items:center}
+  .btn-outline{width:100%;text-align:center}
+}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--gray-100)}
+::-webkit-scrollbar-thumb{background:var(--pink-light);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--pink)}
+
+/* LOGIN MODAL */
+.login-overlay{position:fixed;inset:0;background:rgba(26,26,46,.55);backdrop-filter:blur(6px);z-index:2000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
+.login-overlay.open{opacity:1;pointer-events:all}
+.login-modal{background:#fff;border-radius:var(--r-xl);padding:44px 40px;width:min(440px,92vw);position:relative;transform:translateY(24px) scale(.97);transition:transform .35s cubic-bezier(.34,1.56,.64,1);box-shadow:0 24px 80px rgba(0,0,0,.18)}
+.login-overlay.open .login-modal{transform:translateY(0) scale(1)}
+.login-close{position:absolute;top:18px;right:20px;background:var(--gray-100);border:none;width:34px;height:34px;border-radius:50%;font-size:16px;cursor:pointer;color:var(--gray-500);display:flex;align-items:center;justify-content:center;transition:background .2s}
+.login-close:hover{background:var(--pink-light);color:var(--pink)}
+.login-logo{text-align:center;margin-bottom:6px}
+.login-logo span{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--gold)}
+.login-title{font-family:'Playfair Display',serif;font-size:26px;font-weight:700;text-align:center;margin-bottom:6px}
+.login-sub{font-size:14px;color:var(--gray-500);text-align:center;margin-bottom:32px}
+.login-field{margin-bottom:18px}
+.login-field label{display:block;font-size:13px;font-weight:600;color:var(--dark);margin-bottom:7px}
+.login-field input{width:100%;padding:12px 16px;border:2px solid var(--gray-200);border-radius:var(--r-md);font-size:15px;font-family:'Inter',sans-serif;outline:none;transition:border .25s,box-shadow .25s;background:var(--gray-100)}
+.login-field input:focus{border-color:var(--pink);box-shadow:0 0 0 4px rgba(255,107,157,.12);background:#fff}
+.login-forgot{display:block;text-align:right;font-size:12px;color:var(--pink);text-decoration:none;margin-top:4px;cursor:pointer}
+.login-forgot:hover{text-decoration:underline}
+.login-btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--pink),var(--pink-dark));color:#fff;border:none;border-radius:50px;font-size:15px;font-weight:700;cursor:pointer;margin-top:8px;transition:all .3s;box-shadow:0 4px 16px rgba(255,107,157,.4)}
+.login-btn:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(255,107,157,.5)}
+.login-divider{display:flex;align-items:center;gap:12px;margin:20px 0;color:var(--gray-500);font-size:13px}
+.login-divider::before,.login-divider::after{content:'';flex:1;height:1px;background:var(--gray-200)}
+.login-register{text-align:center;font-size:13px;color:var(--gray-500);margin-top:16px}
+.login-register a{color:var(--pink);font-weight:600;text-decoration:none;cursor:pointer}
+.login-register a:hover{text-decoration:underline}
+.login-err{background:#fff0f0;color:#d32f2f;border-radius:var(--r-sm);padding:10px 14px;font-size:13px;margin-bottom:14px;display:none}
+.login-err.show{display:block}
+</style>
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar" id="navbar">
+  <div class="logo">
+    <span class="logo-text">Glamour</span>
+    <span class="logo-sub">Салон</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#home">Нүүр</a></li>
+    <li><a href="#services">Үйлчилгээ</a></li>
+    <li><a href="#artists">Уран бүтээлчид</a></li>
+    <li><a href="#about">Бидний тухай</a></li>
+    <li><a href="#contact">Холбоо барих</a></li>
+  </ul>
+  <div class="nav-actions">
+    <button class="btn-outline" onclick="openLogin()">Нэвтрэх</button>
+    <button class="btn-primary" onclick="openBooking()">Цаг захиалах</button>
+    <div class="hamburger" onclick="toggleMob()"><span></span><span></span><span></span></div>
+  </div>
+</nav>
+<div class="mob-menu" id="mobMenu">
+  <a href="#home" onclick="closeMob()">Нүүр</a>
+  <a href="#services" onclick="closeMob()">Үйлчилгээ</a>
+  <a href="#artists" onclick="closeMob()">Уран бүтээлчид</a>
+  <a href="#about" onclick="closeMob()">Бидний тухай</a>
+  <a href="#contact" onclick="closeMob()">Холбоо барих</a>
+  <button class="btn-outline" style="margin-top:8px;width:100%" onclick="openLogin();closeMob()">Нэвтрэх</button>
+  <button class="btn-primary" style="margin-top:8px" onclick="openBooking();closeMob()">Цаг захиалах</button>
+</div>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-blob"></div>
+  <div class="hero-blob"></div>
+  <div class="hero-inner">
+  <div class="hero-content">
+    <div class="hero-badge">Гоо · Итгэл · Та</div>
+    <h1>Таны <span class="grad">Гоо Сайхны</span> Туршлагыг Дээшлүүлэе</h1>
+    <p>Мэргэжлийн уран бүтээлчидтэйгээ цаг захиалж, зөвхөн танд зориулсан тансаг салоны үйлчилгээг мэдрээрэй.</p>
+    <div class="hero-btns">
+      <button class="btn-primary" onclick="openBooking()">Цаг захиалах &nbsp;→</button>
+      <button class="btn-outline" onclick="document.getElementById('services').scrollIntoView({behavior:'smooth'})">Үйлчилгээ үзэх</button>
+    </div>
+    <div class="hero-stats">
+      <div><span class="stat-num">2,500+</span><span class="stat-lbl">Баяртай үйлчлүүлэгч</span></div>
+      <div><span class="stat-num">15+</span><span class="stat-lbl">Мэргэжлийн уран бүтээлч</span></div>
+      <div><span class="stat-num">4.9★</span><span class="stat-lbl">Дундаж үнэлгээ</span></div>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="hero-img-wrap">💇‍♀️</div>
+    <div class="float-card float-card-1">
+      <div class="fc-lbl">Дараагийн цаг</div>
+      <div class="fc-val">5-р сар 15, 10:00</div>
+      <div class="fc-sub">Үс будах · Алис Жонсон</div>
+    </div>
+    <div class="float-card float-card-2">
+      <div class="fc-lbl">Өнөөдрийн захиалга</div>
+      <div class="fc-val">28 цаг захиалга</div>
+      <div class="fc-sub">↑ 12% өмнөх долоо хоногоос</div>
+    </div>
+  </div>
+  </div><!-- /.hero-inner -->
+</section>
+
+<!-- PROMO BANNER -->
+<section class="promo-section" id="about">
+  <div class="promo-banner fade-up">
+    <div class="promo-content">
+      <div class="promo-tag">✨ Тусгай санал</div>
+      <div class="promo-title">Зуны Гялалзалт</div>
+      <div class="promo-pct">30% ХЯМДРАЛ</div>
+      <div class="promo-all">Бүх үйлчилгээнд</div>
+      <button class="btn-white" onclick="openBooking()">Одоо захиалах →</button>
+    </div>
+    <div class="promo-badge-wrap">
+      <div class="promo-badge">ХЯЗГААРЛАГДМАЛ<br>ХУГАЦАА!</div>
+    </div>
+    <div class="promo-img-box">💅</div>
+  </div>
+</section>
+
+<!-- ARTISTS -->
+<section class="artists-section" id="artists">
+  <div class="sec-header fade-up">
+    <h2 class="sec-title">Манай Шилдэг <span>Уран Бүтээлчид</span></h2>
+    <button class="btn-ghost">Бүгдийг харах</button>
+  </div>
+  <div class="artists-grid fade-up">
+    <div class="artist-card"><div class="artist-av">👩‍🦱</div><div class="artist-name">Алис Жонсон</div><div class="artist-role">Үсчин</div><div class="artist-stars">⭐ 4.9 <span>(120)</span></div><button class="btn-book" onclick="openBooking()">Цаг захиалах</button></div>
+    <div class="artist-card"><div class="artist-av">👩‍🦰</div><div class="artist-name">Sophia Ли</div><div class="artist-role">Будагч мэргэжилтэн</div><div class="artist-stars">⭐ 4.8 <span>(96)</span></div><button class="btn-book" onclick="openBooking()">Цаг захиалах</button></div>
+    <div class="artist-card"><div class="artist-av">👩</div><div class="artist-name">Эмма Браун</div><div class="artist-role">Үсчин</div><div class="artist-stars">⭐ 4.8 <span>(110)</span></div><button class="btn-book" onclick="openBooking()">Цаг захиалах</button></div>
+    <div class="artist-card"><div class="artist-av">👩‍🦳</div><div class="artist-name">Оливиа Мартинез</div><div class="artist-role">Гримчин</div><div class="artist-stars">⭐ 4.8 <span>(88)</span></div><button class="btn-book" onclick="openBooking()">Цаг захиалах</button></div>
+    <div class="artist-card"><div class="artist-av">🧑‍🎨</div><div class="artist-name">Миа Томпсон</div><div class="artist-role">Хумсны мэргэжилтэн</div><div class="artist-stars">⭐ 4.9 <span>(75)</span></div><button class="btn-book" onclick="openBooking()">Цаг захиалах</button></div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="services-section" id="services">
+  <div class="sec-header fade-up">
+    <h2 class="sec-title">Манай <span>Үйлчилгээ</span></h2>
+    <button class="btn-ghost">Бүх үйлчилгээ</button>
+  </div>
+  <div class="services-grid fade-up">
+    <div class="svc-card"><div class="svc-icon">✂️</div><div><div class="svc-name">Үс тайрах & Засах</div><div class="svc-desc">Эмэгтэй, эрэгтэй & хүүхэд</div><div class="svc-price">₮35,000+</div></div></div>
+    <div class="svc-card"><div class="svc-icon">🎨</div><div><div class="svc-name">Үс будах</div><div class="svc-desc">Хайлайт, Балаяж & бусад</div><div class="svc-price">₮65,000+</div></div></div>
+    <div class="svc-card"><div class="svc-icon">💆</div><div><div class="svc-name">Үсний эмчилгээ</div><div class="svc-desc">Тэжээх & сэргээх</div><div class="svc-price">₮45,000+</div></div></div>
+    <div class="svc-card"><div class="svc-icon">💅</div><div><div class="svc-name">Маникюр</div><div class="svc-desc">Сонгодог & Гель</div><div class="svc-price">₮28,000+</div></div></div>
+    <div class="svc-card"><div class="svc-icon">🦶</div><div><div class="svc-name">Педикюр</div><div class="svc-desc">Тайвшрал & сэргэлт</div><div class="svc-price">₮35,000+</div></div></div>
+    <div class="svc-card"><div class="svc-icon">💄</div><div><div class="svc-name">Нүүрний будалт</div><div class="svc-desc">Баяр & хуримын</div><div class="svc-price">₮70,000+</div></div></div>
+    <div class="svc-card"><div class="svc-icon">🧖</div><div><div class="svc-name">Нүүрний засал</div><div class="svc-desc">Гүнзгий цэвэрлэгээ & гэрэлтүүлэх</div><div class="svc-price">₮55,000+</div></div></div>
+    <div class="svc-card"><div class="svc-icon">🌿</div><div><div class="svc-name">Хөмсөг засах</div><div class="svc-desc">Утас & лав</div><div class="svc-price">₮18,000+</div></div></div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="features-section">
+  <div class="sec-header fade-up" style="flex-direction:column;align-items:center;text-align:center;gap:8px;margin-bottom:48px">
+    <h2 class="sec-title">Яагаад <span>Гламур Салон</span>-г Сонгох вэ?</h2>
+    <p style="color:var(--gray-500);font-size:15px">Тансаг гоо сайхны туршлага, бүр ирэх удаа</p>
+  </div>
+  <div class="features-grid fade-up">
+    <div class="feat-card"><div class="feat-icon">📅</div><div class="feat-title">Хялбар захиалга</div><div class="feat-desc">Хэдхэн товшилтоор цагаа захиалаарай, хаана ч, хэзээ ч боломжтой</div></div>
+    <div class="feat-card"><div class="feat-icon">🏆</div><div class="feat-title">Шилдэг мэргэжилтнүүд</div><div class="feat-desc">Гэрчилгээтэй, туршлагатай гоо сайхны мэргэжилтнүүд таны хүсэлд нийцүүлэн үйлчилнэ</div></div>
+    <div class="feat-card"><div class="feat-icon">✨</div><div class="feat-title">Тансаг бүтээгдэхүүн</div><div class="feat-desc">Зөвхөн хамгийн өндөр чанарын гоо сайхны болон үсний тосолгооны бүтээгдэхүүн ашигладаг</div></div>
+    <div class="feat-card"><div class="feat-icon">💖</div><div class="feat-title">Үйлчлүүлэгчийн Сэтгэл Ханамж</div><div class="feat-desc">Таны сэтгэл ханамж манай тэргүүлэх зорилго, бүр ирэх удаа баталгаатай</div></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer" id="contact">
+  <div class="footer-grid">
+    <div>
+      <div class="logo" style="margin-bottom:0"><span class="logo-text">Glamour</span><span class="logo-sub" style="color:rgba(255,255,255,.4)">Салон</span></div>
+      <p class="footer-desc">Таны гоо сайхныг нээн гаргана. Өнөөдөр цагаа захиалж, ялгаатай байдлыг мэдрээрэй. Өмнөх шиг тансаг үйлчилгээг мэдрэ.</p>
+      <div class="socials">
+        <a href="#" class="soc-a"><i class="fab fa-instagram"></i></a>
+        <a href="#" class="soc-a"><i class="fab fa-facebook"></i></a>
+        <a href="#" class="soc-a"><i class="fab fa-twitter"></i></a>
+        <a href="#" class="soc-a"><i class="fab fa-tiktok"></i></a>
+      </div>
+    </div>
+    <div>
+      <div class="f-heading">Хурдан холбоос</div>
+      <ul class="f-links"><li><a href="#">Нүүр</a></li><li><a href="#">Үйлчилгээ</a></li><li><a href="#">Уран бүтээлчид</a></li><li><a href="#">Бидний тухай</a></li><li><a href="#">Холбоо барих</a></li></ul>
+    </div>
+    <div>
+      <div class="f-heading">Дэмжлэг</div>
+      <ul class="f-links"><li><a href="#">Түгээмэл асуулт</a></li><li><a href="#">Захиалгын дүрэм</a></li><li><a href="#">Цуцлалт</a></li><li><a href="#">Нууцлалын бодлого</a></li><li><a href="#">Үйлчилгээний нөхцөл</a></li></ul>
+    </div>
+    <div>
+      <div class="f-heading">Холбоо барих</div>
+      <div class="f-contact-row"><i class="fas fa-phone"></i>(976) 9911-2233</div>
+      <div class="f-contact-row"><i class="fas fa-envelope"></i>info@glamoursalon.mn</div>
+      <div class="f-contact-row"><i class="fas fa-map-marker-alt"></i>Сүхбаатар дүүрэг, Улаанбаатар</div>
+      <div style="margin-top:20px">
+        <div class="f-heading">Мэдээллийн хуудас</div>
+        <p style="color:rgba(255,255,255,.5);font-size:13px">Тусгай санал, шинэчлэлт авахын тулд бүртгүүлэх</p>
+        <div class="nl-row">
+          <input class="nl-input" type="email" placeholder="Имэйл хаягаа оруулна уу">
+          <button class="btn-primary" style="padding:10px 18px;font-size:13px">Бүртгүүлэх</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom">© 2024 Гламур Салон. Бүх эрх хуулиар хамгаалагдсан. ❤️-р бүтээсэн</div>
+</footer>
+
+<!-- LOGIN MODAL -->
+<div class="login-overlay" id="loginOverlay" onclick="handleLoginOverlayClick(event)">
+  <div class="login-modal" id="loginModal">
+    <button class="login-close" onclick="closeLogin()">✕</button>
+    <div class="login-logo"><span>Glamour</span></div>
+    <h2 class="login-title">Тавтай морил</h2>
+    <p class="login-sub">Та өөрийн бүртгэлээр нэвтэрнэ үү</p>
+    <div class="login-err" id="loginErr">Имэйл эсвэл нууц үг буруу байна.</div>
+    <div class="login-field">
+      <label>Имэйл хаяг</label>
+      <input type="email" id="loginEmail" placeholder="name@example.com" autocomplete="email">
+    </div>
+    <div class="login-field">
+      <label>Нууц үг</label>
+      <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password">
+      <a class="login-forgot">Нууц үгээ мартсан уу?</a>
+    </div>
+    <button class="login-btn" onclick="doLogin()">Нэвтрэх</button>
+    <div class="login-divider">эсвэл</div>
+    <div class="login-register">Бүртгэл байхгүй юу? <a onclick="closeLogin();openBooking()">Цаг захиалж бүртгүүлэх</a></div>
+  </div>
+</div>
+
+<!-- BOOKING MODAL -->
+<div class="overlay" id="bookingOverlay">
+  <div class="modal" id="bookingModal">
+    <button class="modal-x" onclick="closeBooking()">✕</button>
+    <div class="steps-row">
+      <div class="step-item cur" id="si-1"><div class="step-circle">1</div><div class="step-lbl">Үйлчилгээ</div></div>
+      <div class="step-item" id="si-2"><div class="step-circle">2</div><div class="step-lbl">Уран бүтээлч</div></div>
+      <div class="step-item" id="si-3"><div class="step-circle">3</div><div class="step-lbl">Огноо & Цаг</div></div>
+      <div class="step-item" id="si-4"><div class="step-circle">4</div><div class="step-lbl">Хянах</div></div>
+    </div>
+
+    <!-- 1-р алхам: Үйлчилгээ -->
+    <div class="sc active" id="sc-1">
+      <h3>Үйлчилгээ сонгох</h3>
+      <div class="svc-sel-grid">
+        <div class="svc-sel-card" onclick="selSvc(this,'Үс тайрах & Засах',35000,'✂️')"><div class="svc-sel-ico">✂️</div><div><div class="svc-sel-name">Үс тайрах & Засах</div><div class="svc-sel-price">₮35,000+</div></div></div>
+        <div class="svc-sel-card" onclick="selSvc(this,'Үс будах',65000,'🎨')"><div class="svc-sel-ico">🎨</div><div><div class="svc-sel-name">Үс будах</div><div class="svc-sel-price">₮65,000+</div></div></div>
+        <div class="svc-sel-card" onclick="selSvc(this,'Үсний эмчилгээ',45000,'💆')"><div class="svc-sel-ico">💆</div><div><div class="svc-sel-name">Үсний эмчилгээ</div><div class="svc-sel-price">₮45,000+</div></div></div>
+        <div class="svc-sel-card" onclick="selSvc(this,'Маникюр',28000,'💅')"><div class="svc-sel-ico">💅</div><div><div class="svc-sel-name">Маникюр</div><div class="svc-sel-price">₮28,000+</div></div></div>
+        <div class="svc-sel-card" onclick="selSvc(this,'Педикюр',35000,'🦶')"><div class="svc-sel-ico">🦶</div><div><div class="svc-sel-name">Педикюр</div><div class="svc-sel-price">₮35,000+</div></div></div>
+        <div class="svc-sel-card" onclick="selSvc(this,'Нүүрний будалт',70000,'💄')"><div class="svc-sel-ico">💄</div><div><div class="svc-sel-name">Нүүрний будалт</div><div class="svc-sel-price">₮70,000+</div></div></div>
+      </div>
+    </div>
+
+    <!-- 2-р алхам: Уран бүтээлч -->
+    <div class="sc" id="sc-2">
+      <h3>Уран бүтээлч сонгох</h3>
+      <div class="art-sel-grid">
+        <div class="art-sel-card" onclick="selArt(this,'Алис Жонсон')"><div class="art-sel-av">👩‍🦱</div><div class="artist-name">Алис Жонсон</div><div class="artist-role">Үсчин</div><div class="artist-stars">⭐ 4.9</div></div>
+        <div class="art-sel-card" onclick="selArt(this,'Sophia Ли')"><div class="art-sel-av">👩‍🦰</div><div class="artist-name">Sophia Ли</div><div class="artist-role">Будагч</div><div class="artist-stars">⭐ 4.8</div></div>
+        <div class="art-sel-card" onclick="selArt(this,'Эмма Браун')"><div class="art-sel-av">👩</div><div class="artist-name">Эмма Браун</div><div class="artist-role">Үсчин</div><div class="artist-stars">⭐ 4.8</div></div>
+        <div class="art-sel-card" onclick="selArt(this,'Оливиа Мартинез')"><div class="art-sel-av">👩‍🦳</div><div class="artist-name">Оливиа</div><div class="artist-role">Гримчин</div><div class="artist-stars">⭐ 4.8</div></div>
+      </div>
+    </div>
+
+    <!-- 3-р алхам: Огноо & Цаг -->
+    <div class="sc" id="sc-3">
+      <h3>Огноо & Цаг сонгох</h3>
+      <div class="cal-booking">
+        <div class="cal-wrap">
+          <h4>Огноо сонгох</h4>
+          <div class="calendar">
+            <div class="cal-head">
+              <button class="cal-nav-btn" onclick="chgMonth(-1)">‹</button>
+              <span class="cal-month" id="calMonth"></span>
+              <button class="cal-nav-btn" onclick="chgMonth(1)">›</button>
+            </div>
+            <div class="cal-body">
+              <div class="cal-wk"><span>Ня</span><span>Да</span><span>Мя</span><span>Лх</span><span>Пү</span><span>Ба</span><span>Бя</span></div>
+              <div class="cal-days-grid" id="calDays"></div>
+            </div>
+          </div>
+        </div>
+        <div class="time-wrap">
+          <h4>Цаг сонгох</h4>
+          <div class="time-slots-grid">
+            <button class="ts" onclick="selTime(this,'09:00')">09:00</button>
+            <button class="ts" onclick="selTime(this,'10:00')">10:00</button>
+            <button class="ts" onclick="selTime(this,'11:00')">11:00</button>
+            <button class="ts" onclick="selTime(this,'12:00')">12:00</button>
+            <button class="ts" onclick="selTime(this,'13:00')">13:00</button>
+            <button class="ts" onclick="selTime(this,'14:00')">14:00</button>
+            <button class="ts unavail" disabled>15:00</button>
+            <button class="ts" onclick="selTime(this,'16:00')">16:00</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4-р алхам: Хянах -->
+    <div class="sc" id="sc-4">
+      <h3>Хянах & Баталгаажуулах</h3>
+      <div class="review-grid">
+        <div class="review-box">
+          <h4>Захиалгын хураангуй</h4>
+          <div class="sum-item"><div class="sum-ico" id="sumIco">✂️</div><div><div class="sum-lbl">Үйлчилгээ</div><div class="sum-val" id="sumSvc">—</div></div><div style="margin-left:auto;font-weight:700" id="sumPriceRight">₮0</div></div>
+          <div class="sum-item"><div class="sum-ico">👩‍🦱</div><div><div class="sum-lbl">Уран бүтээлч</div><div class="sum-val" id="sumArt">—</div></div></div>
+          <div class="sum-item"><div class="sum-ico">📅</div><div><div class="sum-lbl">Огноо & Цаг</div><div class="sum-val" id="sumDT">—</div></div></div>
+          <div class="sum-total"><span class="tl">Нийт үнэ</span><span class="tp" id="sumTotal">₮0</span></div>
+        </div>
+        <div class="pay-box">
+          <h4>Төлбөрийн арга</h4>
+          <div class="pay-opt sel" onclick="selPay(this)"><input type="radio" name="pay" checked><span style="font-size:20px">💳</span><span class="pay-lbl">Кредит / Дебит карт</span></div>
+          <div class="pay-opt" onclick="selPay(this)"><input type="radio" name="pay"><span style="font-size:20px">📱</span><span class="pay-lbl">QPay</span></div>
+          <div class="pay-opt" onclick="selPay(this)"><input type="radio" name="pay"><span style="font-size:20px">💵</span><span class="pay-lbl">Ирэхэд бэлнээр</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-foot">
+      <button class="btn-back" id="backBtn" onclick="prevStep()" style="visibility:hidden">← Буцах</button>
+      <button class="btn-primary" id="nextBtn" onclick="nextStep()">Дараах →</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toastEl"><span id="toastIco">✓</span><span id="toastMsg">Амжилттай!</span></div>
+
+<script>
+let step=1, bk={svc:null,price:0,ico:'✂️',art:null,date:null,time:null};
+let calY=new Date().getFullYear(), calM=new Date().getMonth();
+
+window.addEventListener('scroll',()=>{
+  document.getElementById('navbar').classList.toggle('scrolled',window.scrollY>20);
+});
+
+function toggleMob(){document.getElementById('mobMenu').classList.toggle('open')}
+function closeMob(){document.getElementById('mobMenu').classList.remove('open')}
+
+function openLogin(){
+  document.getElementById('loginOverlay').classList.add('open');
+  document.body.style.overflow='hidden';
+  setTimeout(()=>document.getElementById('loginEmail').focus(),350);
+}
+function closeLogin(){
+  document.getElementById('loginOverlay').classList.remove('open');
+  document.body.style.overflow='';
+  document.getElementById('loginErr').classList.remove('show');
+}
+function handleLoginOverlayClick(e){if(e.target===document.getElementById('loginOverlay'))closeLogin()}
+function doLogin(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const pass=document.getElementById('loginPass').value;
+  const err=document.getElementById('loginErr');
+  if(!email||!pass){err.textContent='Бүх талбарыг бөглөнө үү.';err.classList.add('show');return}
+  // Demo: accept any non-empty credentials
+  err.classList.remove('show');
+  closeLogin();
+}
+
+function openBooking(){
+  document.getElementById('bookingOverlay').classList.add('active');
+  document.body.style.overflow='hidden';
+  renderCal();
+}
+function closeBooking(){
+  document.getElementById('bookingOverlay').classList.remove('active');
+  document.body.style.overflow='';
+  resetBk();
+}
+function resetBk(){
+  step=1; bk={svc:null,price:0,ico:'✂️',art:null,date:null,time:null};
+  updateUI();
+  document.querySelectorAll('.svc-sel-card,.art-sel-card,.ts').forEach(e=>e.classList.remove('sel'));
+}
+
+function nextStep(){
+  if(step===1&&!bk.svc){toast('Үйлчилгээ сонгоно уу','err');return}
+  if(step===2&&!bk.art){toast('Уран бүтээлч сонгоно уу','err');return}
+  if(step===3&&(!bk.date||!bk.time)){toast('Огноо болон цагаа сонгоно уу','err');return}
+  if(step===4){confirmBk();return}
+  step++;
+  if(step===4)updateSummary();
+  updateUI();
+}
+function prevStep(){if(step>1){step--;updateUI()}}
+
+function updateUI(){
+  for(let i=1;i<=4;i++){
+    const si=document.getElementById('si-'+i);
+    const sc=document.getElementById('sc-'+i);
+    si.className='step-item';
+    sc.className='sc';
+    const c=si.querySelector('.step-circle');
+    if(i<step){si.classList.add('done');c.textContent='✓'}
+    else if(i===step){si.classList.add('cur');c.textContent=i}
+    else{c.textContent=i}
+    if(i===step)sc.classList.add('active');
+  }
+  document.getElementById('backBtn').style.visibility=step>1?'visible':'hidden';
+  document.getElementById('nextBtn').textContent=step===4?'✓ Захиалга баталгаажуулах':'Дараах →';
+}
+
+function selSvc(el,name,price,ico){
+  document.querySelectorAll('.svc-sel-card').forEach(e=>e.classList.remove('sel'));
+  el.classList.add('sel');
+  bk.svc=name; bk.price=price; bk.ico=ico;
+}
+function selArt(el,name){
+  document.querySelectorAll('.art-sel-card').forEach(e=>e.classList.remove('sel'));
+  el.classList.add('sel');
+  bk.art=name;
+}
+function selTime(el,t){
+  document.querySelectorAll('.ts:not(.unavail)').forEach(e=>e.classList.remove('sel'));
+  el.classList.add('sel'); bk.time=t;
+}
+function selPay(el){
+  document.querySelectorAll('.pay-opt').forEach(e=>{e.classList.remove('sel');e.querySelector('input').checked=false});
+  el.classList.add('sel'); el.querySelector('input').checked=true;
+}
+function updateSummary(){
+  document.getElementById('sumIco').textContent=bk.ico;
+  document.getElementById('sumSvc').textContent=bk.svc||'—';
+  document.getElementById('sumPriceRight').textContent='₮'+bk.price.toLocaleString();
+  document.getElementById('sumArt').textContent=bk.art||'—';
+  const d=bk.date?bk.date.toLocaleDateString('mn-MN',{year:'numeric',month:'long',day:'numeric'}):'—';
+  document.getElementById('sumDT').textContent=d+' · '+(bk.time||'—');
+  document.getElementById('sumTotal').textContent='₮'+bk.price.toLocaleString();
+}
+function confirmBk(){closeBooking();toast('Захиалга баталгаажлаа! Удахгүй уулзана 🎉','ok')}
+
+const MONTHS=['Нэгдүгээр сар','Хоёрдугаар сар','Гуравдугаар сар','Дөрөвдүгээр сар','Тавдугаар сар','Зургаадугаар сар','Долдугаар сар','Наймдугаар сар','Есдүгээр сар','Аравдугаар сар','Арван нэгдүгээр сар','Арван хоёрдугаар сар'];
+function renderCal(){
+  document.getElementById('calMonth').textContent=MONTHS[calM]+' '+calY;
+  const fd=new Date(calY,calM,1).getDay();
+  const dim=new Date(calY,calM+1,0).getDate();
+  const today=new Date(); today.setHours(0,0,0,0);
+  let h='';
+  for(let i=0;i<fd;i++)h+='<button class="cal-d cal-empty"></button>';
+  for(let d=1;d<=dim;d++){
+    const dt=new Date(calY,calM,d);
+    const past=dt<today;
+    const isT=dt.toDateString()===today.toDateString();
+    const isSel=bk.date&&dt.toDateString()===bk.date.toDateString();
+    let cls='cal-d'+(isT&&!past?' cal-today':'')+(isSel?' cal-sel':'');
+    h+=`<button class="${cls}" ${past?'disabled':''} onclick="pickDay(${d})">${d}</button>`;
+  }
+  document.getElementById('calDays').innerHTML=h;
+}
+function pickDay(d){bk.date=new Date(calY,calM,d);renderCal()}
+function chgMonth(dir){calM+=dir;if(calM<0){calM=11;calY--}if(calM>11){calM=0;calY++}renderCal()}
+
+function toast(msg,type='ok'){
+  const el=document.getElementById('toastEl');
+  el.className='toast '+type;
+  document.getElementById('toastIco').textContent=type==='ok'?'✓':'✕';
+  document.getElementById('toastMsg').textContent=msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t=setTimeout(()=>el.classList.remove('show'),3400);
+}
+
+const obs=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('vis')}),{threshold:.1});
+document.querySelectorAll('.fade-up').forEach(e=>obs.observe(e));
+document.getElementById('bookingOverlay').addEventListener('click',function(e){if(e.target===this)closeBooking()});
+
+renderCal();
+</script>
+</body>
+</html>

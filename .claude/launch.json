@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Glamour Salon",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "C:\\Users\\Dope\\Desktop\\Salon"],
+      "port": 3000,
+      "autoPort": true
+    }
+  ]
+}

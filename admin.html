@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Гламур Салон — Админ</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+:root{
+  --pink:#FF6B9D;--pink-light:#FFE4EE;--pink-dark:#E91E8C;
+  --gold:#C9A84C;--gold-light:#F5E6C8;
+  --cream:#FFF9F5;
+  --gray-50:#FAFAFA;--gray-100:#F8F9FA;--gray-200:#E9ECEF;
+  --gray-400:#CED4DA;--gray-500:#6C757D;--gray-800:#343A40;
+  --dark:#1A1A2E;
+  --green:#38A169;--yellow:#D69E2E;--red:#E53E3E;
+  --shadow-sm:0 2px 8px rgba(0,0,0,.07);
+  --shadow-md:0 4px 20px rgba(0,0,0,.1);
+  --shadow-lg:0 8px 40px rgba(0,0,0,.14);
+  --r-sm:8px;--r-md:14px;--r-lg:20px;--r-xl:28px;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',sans-serif;color:var(--dark);background:var(--gray-50);overflow-x:hidden;display:flex;height:100vh}
+
+/* SIDEBAR */
+.sidebar{width:260px;background:#fff;border-right:1px solid var(--gray-200);display:flex;flex-direction:column;flex-shrink:0;height:100vh;position:sticky;top:0;overflow-y:auto}
+.sb-logo{padding:24px 20px;border-bottom:1px solid var(--gray-200);display:flex;align-items:center;gap:12px}
+.sb-logo-icon{width:42px;height:42px;border-radius:var(--r-sm);background:linear-gradient(135deg,var(--pink),var(--pink-dark));display:flex;align-items:center;justify-content:center;font-size:20px;color:#fff;flex-shrink:0}
+.sb-logo-text{font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--gold);line-height:1.1}
+.sb-logo-sub{font-size:9px;letter-spacing:2px;color:var(--gray-500);text-transform:uppercase}
+.sb-section{padding:12px 10px 6px;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--gray-400)}
+.sb-nav{list-style:none;padding:0 10px}
+.sb-nav li{margin-bottom:2px}
+.sb-nav a{display:flex;align-items:center;gap:11px;padding:11px 14px;border-radius:var(--r-md);text-decoration:none;color:var(--gray-500);font-size:14px;font-weight:500;transition:all .2s;cursor:pointer}
+.sb-nav a:hover,.sb-nav a.active{background:var(--pink-light);color:var(--pink)}
+.sb-nav a .nav-badge{margin-left:auto;background:var(--pink);color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:50px}
+.sb-nav a i{width:18px;text-align:center;font-size:15px}
+.sb-divider{height:1px;background:var(--gray-200);margin:10px 20px}
+.sb-logout a{color:#E53E3E!important}
+.sb-logout a:hover{background:#FFF5F5!important;color:#C53030!important}
+.sb-user{padding:16px 20px;border-top:1px solid var(--gray-200);display:flex;align-items:center;gap:12px;margin-top:auto}
+.sb-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,var(--pink),var(--pink-dark));display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;font-weight:700;flex-shrink:0}
+.sb-user-name{font-size:14px;font-weight:600;line-height:1.2}
+.sb-user-role{font-size:11px;color:var(--gray-500)}
+
+/* MAIN */
+.main{flex:1;overflow-y:auto;padding:28px 32px}
+
+/* TOP BAR */
+.topbar{display:flex;justify-content:space-between;align-items:center;margin-bottom:28px}
+.topbar-left h2{font-family:'Playfair Display',serif;font-size:24px;font-weight:700}
+.topbar-left .breadcrumb{font-size:12px;color:var(--gray-500);margin-top:3px}
+.topbar-left .breadcrumb span{color:var(--pink)}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.search-box{display:flex;align-items:center;gap:8px;background:#fff;border:1px solid var(--gray-200);border-radius:50px;padding:9px 18px;width:220px;transition:border-color .2s}
+.search-box:focus-within{border-color:var(--pink)}
+.search-box input{border:none;outline:none;font-size:13px;width:100%;background:transparent}
+.search-box i{color:var(--gray-400);font-size:13px}
+.topbar-icon-btn{width:40px;height:40px;border-radius:50%;border:1px solid var(--gray-200);background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--gray-500);transition:all .2s;position:relative}
+.topbar-icon-btn:hover{border-color:var(--pink);color:var(--pink)}
+.notif-dot{position:absolute;top:8px;right:8px;width:8px;height:8px;background:var(--pink);border-radius:50%;border:2px solid #fff}
+.btn-primary{background:linear-gradient(135deg,var(--pink),var(--pink-dark));color:#fff;border:none;padding:10px 22px;border-radius:50px;font-size:13px;font-weight:600;cursor:pointer;transition:all .3s;box-shadow:0 4px 12px rgba(255,107,157,.35);display:inline-flex;align-items:center;gap:6px}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(255,107,157,.45)}
+.btn-ghost{background:var(--pink-light);color:var(--pink-dark);border:none;padding:8px 18px;border-radius:50px;font-size:13px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-ghost:hover{background:var(--pink);color:#fff}
+.btn-outline-sm{background:transparent;color:var(--gray-500);border:1px solid var(--gray-200);padding:7px 16px;border-radius:50px;font-size:12px;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-outline-sm:hover{border-color:var(--pink);color:var(--pink)}
+
+/* STAT CARDS */
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-bottom:24px}
+.stat-card{background:#fff;border-radius:var(--r-lg);padding:22px;box-shadow:var(--shadow-sm);display:flex;justify-content:space-between;align-items:flex-start;transition:all .3s;border:2px solid transparent}
+.stat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow-md);border-color:var(--pink-light)}
+.sc-lbl{font-size:12px;color:var(--gray-500);margin-bottom:6px;font-weight:500}
+.sc-val{font-size:26px;font-weight:700;margin-bottom:4px;font-family:'Playfair Display',serif}
+.sc-chg{font-size:11px;color:var(--green);font-weight:600;display:flex;align-items:center;gap:3px}
+.sc-chg.down{color:var(--red)}
+.sc-ico{width:48px;height:48px;border-radius:var(--r-md);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.sc-ico.pink{background:var(--pink-light)}
+.sc-ico.gold{background:var(--gold-light)}
+.sc-ico.green{background:#F0FFF4}
+.sc-ico.blue{background:#EBF8FF}
+
+/* CARD */
+.card{background:#fff;border-radius:var(--r-lg);padding:22px;box-shadow:var(--shadow-sm)}
+.card-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.card-title{font-size:16px;font-weight:700}
+
+/* TABLE */
+table{width:100%;border-collapse:collapse}
+th{text-align:left;font-size:11px;font-weight:700;color:var(--gray-400);text-transform:uppercase;letter-spacing:.5px;padding:10px 14px;border-bottom:2px solid var(--gray-100)}
+td{padding:13px 14px;font-size:13px;border-bottom:1px solid var(--gray-100);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--gray-50)}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:50px;font-size:11px;font-weight:700}
+.badge::before{content:'';width:6px;height:6px;border-radius:50%}
+.badge.ok{background:#F0FFF4;color:var(--green)}.badge.ok::before{background:var(--green)}
+.badge.pend{background:#FFFBEB;color:var(--yellow)}.badge.pend::before{background:var(--yellow)}
+.badge.fail{background:#FFF5F5;color:var(--red)}.badge.fail::before{background:var(--red)}
+.badge.info{background:#EBF8FF;color:#3182CE}.badge.info::before{background:#3182CE}
+
+/* GRID LAYOUTS */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:20px}
+
+/* ARTIST CARD */
+.artist-card{background:#fff;border-radius:var(--r-lg);padding:24px 20px;text-align:center;box-shadow:var(--shadow-sm);transition:all .3s;border:2px solid transparent}
+.artist-card:hover{transform:translateY(-4px);box-shadow:var(--shadow-md);border-color:var(--pink-light)}
+.artist-av{width:80px;height:80px;border-radius:50%;margin:0 auto 14px;border:3px solid var(--pink-light);background:linear-gradient(135deg,#FFD6E8,#FFBCD9);display:flex;align-items:center;justify-content:center;font-size:36px}
+.artist-name{font-weight:700;font-size:15px;margin-bottom:3px}
+.artist-role{font-size:12px;color:var(--gray-500);margin-bottom:6px}
+.artist-stars{font-size:13px;color:var(--gold);margin-bottom:14px}
+
+/* SCHEDULE */
+.schedule-row{display:flex;gap:8px;align-items:center;padding:12px 0;border-bottom:1px solid var(--gray-100)}
+.schedule-row:last-child{border-bottom:none}
+.sch-time{font-size:12px;font-weight:700;color:var(--gray-500);width:50px;flex-shrink:0}
+.sch-bar{flex:1;background:var(--pink-light);border-radius:var(--r-sm);padding:8px 12px;border-left:3px solid var(--pink)}
+.sch-name{font-size:13px;font-weight:600}
+.sch-sub{font-size:11px;color:var(--gray-500);margin-top:2px}
+
+/* MINI STAT */
+.mini-stat{background:var(--gray-50);border-radius:var(--r-md);padding:14px 16px;display:flex;align-items:center;gap:12px}
+.mini-stat-ico{width:36px;height:36px;border-radius:var(--r-sm);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+
+/* CHART PLACEHOLDER */
+.chart-placeholder{height:160px;background:linear-gradient(to bottom,var(--pink-light),rgba(255,228,238,0));border-radius:var(--r-md);display:flex;align-items:flex-end;padding:16px;gap:8px;overflow:hidden}
+.chart-bar{flex:1;border-radius:4px 4px 0 0;background:linear-gradient(to top,var(--pink),var(--pink-light));opacity:.7;transition:opacity .2s;cursor:pointer}
+.chart-bar:hover{opacity:1}
+
+/* FORM */
+.form-group{margin-bottom:16px}
+.form-label{font-size:12px;font-weight:700;color:var(--gray-500);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px;display:block}
+.form-input{width:100%;border:2px solid var(--gray-200);border-radius:var(--r-md);padding:10px 14px;font-size:14px;outline:none;transition:border-color .2s;background:#fff}
+.form-input:focus{border-color:var(--pink)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.form-select{width:100%;border:2px solid var(--gray-200);border-radius:var(--r-md);padding:10px 14px;font-size:14px;outline:none;background:#fff;cursor:pointer}
+.form-select:focus{border-color:var(--pink)}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(4px);z-index:2000;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-overlay.active{display:flex}
+.modal-box{background:#fff;border-radius:var(--r-xl);width:100%;max-width:520px;max-height:90vh;overflow-y:auto;padding:32px;position:relative;animation:mIn .25s ease}
+@keyframes mIn{from{transform:scale(.94) translateY(12px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+.modal-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;margin-bottom:20px}
+.modal-close{position:absolute;top:16px;right:16px;width:34px;height:34px;border-radius:50%;border:none;background:var(--gray-100);cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;color:var(--gray-500)}
+.modal-close:hover{background:var(--pink-light);color:var(--pink)}
+.modal-foot{display:flex;justify-content:flex-end;gap:10px;margin-top:20px;padding-top:16px;border-top:1px solid var(--gray-100)}
+
+/* TOAST */
+.toast{position:fixed;bottom:28px;right:28px;color:#fff;padding:14px 20px;border-radius:var(--r-md);font-size:14px;font-weight:500;z-index:9999;display:flex;align-items:center;gap:10px;box-shadow:var(--shadow-lg);transform:translateY(80px);opacity:0;transition:all .35s ease;min-width:260px}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.ok{background:linear-gradient(135deg,#38A169,#276749)}
+.toast.err{background:linear-gradient(135deg,#E53E3E,#C53030)}
+.toast.info{background:linear-gradient(135deg,#3182CE,#2B6CB0)}
+
+/* VIEW TOGGLE */
+.view{display:none}.view.active{display:block}
+
+/* ===== RESPONSIVE ===== */
+/* Mobile sidebar drawer */
+.sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:998;backdrop-filter:blur(2px)}
+.sb-overlay.active{display:block}
+.mob-sb-btn{display:none;width:38px;height:38px;border-radius:var(--r-sm);border:1px solid var(--gray-200);background:#fff;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;color:var(--gray-800);font-size:16px}
+/* Table wrapper for horizontal scroll */
+.tbl-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tbl-scroll table{min-width:560px}
+
+@media(max-width:1100px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .main{padding:24px}
+}
+@media(max-width:900px){
+  /* Sidebar becomes a slide-in drawer */
+  .sidebar{
+    position:fixed;left:0;top:0;bottom:0;z-index:999;
+    transform:translateX(-100%);
+    transition:transform .3s ease;
+    box-shadow:var(--shadow-lg);
+    width:260px;
+  }
+  .sidebar.open{transform:translateX(0)}
+  .sb-overlay{display:none}
+  .sb-overlay.active{display:block}
+  .mob-sb-btn{display:flex}
+  /* Main takes full width */
+  .main{padding:20px}
+  body{display:block}
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:14px}
+  .two-col,.three-col{grid-template-columns:1fr}
+  /* Topbar */
+  .topbar{flex-wrap:wrap;gap:12px;margin-bottom:20px}
+  .topbar-right{flex:1;justify-content:flex-end}
+  .search-box{width:180px}
+  /* Chart */
+  .chart-placeholder{height:120px}
+}
+@media(max-width:640px){
+  .main{padding:16px}
+  .stats-grid{grid-template-columns:1fr 1fr;gap:12px}
+  .stat-card{padding:16px;flex-direction:column;gap:10px;align-items:flex-start}
+  .sc-val{font-size:22px}
+  .sc-ico{width:40px;height:40px;font-size:17px;border-radius:var(--r-sm)}
+  /* Topbar */
+  .topbar{gap:10px;margin-bottom:16px}
+  .topbar-left h2{font-size:20px}
+  .topbar-left .breadcrumb{font-size:11px}
+  .search-box{display:none}
+  .topbar-right{gap:8px}
+  /* Tables scroll */
+  .card{padding:16px}
+  .card-header{flex-wrap:wrap;gap:8px}
+  /* Artist grid */
+  #v-artists>div{grid-template-columns:1fr 1fr!important}
+  .artist-card{padding:18px 14px}
+  .artist-av{width:64px;height:64px;font-size:28px}
+  /* Modal */
+  .modal-overlay{padding:0;align-items:flex-end}
+  .modal-box{
+    border-radius:var(--r-xl) var(--r-xl) 0 0;
+    max-height:90vh;
+    padding:24px 16px;
+    width:100%;
+    max-width:100%;
+  }
+  .modal-box::before{content:'';display:block;width:36px;height:4px;background:var(--gray-200);border-radius:2px;margin:0 auto 16px}
+  .form-row{grid-template-columns:1fr}
+  /* Schedule */
+  .schedule-row{flex-wrap:wrap;gap:4px}
+  .sch-time{width:auto;font-size:11px}
+  /* Topbar btn text */
+  .btn-primary span.btn-text{display:none}
+}
+@media(max-width:420px){
+  .stats-grid{grid-template-columns:1fr}
+  #v-artists>div{grid-template-columns:1fr!important}
+  .topbar-icon-btn{display:none}
+}
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:var(--gray-100)}
+::-webkit-scrollbar-thumb{background:var(--pink-light);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--pink)}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-logo-icon">💇‍♀️</div>
+    <div>
+      <div class="sb-logo-text">Glamour</div>
+      <div class="sb-logo-sub">Админ панель</div>
+    </div>
+  </div>
+
+  <div class="sb-section">Үндсэн цэс</div>
+  <ul class="sb-nav">
+    <li><a class="active" onclick="sw('dashboard',this)"><i class="fas fa-th-large"></i> Хяналтын самбар</a></li>
+    <li><a onclick="sw('appointments',this)"><i class="fas fa-calendar-check"></i> Захиалгууд <span class="nav-badge">5</span></a></li>
+    <li><a onclick="sw('customers',this)"><i class="fas fa-users"></i> Үйлчлүүлэгчид</a></li>
+    <li><a onclick="sw('artists',this)"><i class="fas fa-cut"></i> Уран бүтээлчид</a></li>
+  </ul>
+
+  <div class="sb-section">Удирдлага</div>
+  <ul class="sb-nav">
+    <li><a onclick="sw('services',this)"><i class="fas fa-star"></i> Үйлчилгээнүүд</a></li>
+    <li><a onclick="sw('payments',this)"><i class="fas fa-credit-card"></i> Төлбөрүүд</a></li>
+    <li><a onclick="sw('promos',this)"><i class="fas fa-tag"></i> Урамшуулал</a></li>
+    <li><a onclick="sw('reports',this)"><i class="fas fa-chart-bar"></i> Тайлан</a></li>
+  </ul>
+
+  <div class="sb-section">Систем</div>
+  <ul class="sb-nav">
+    <li><a onclick="sw('settings',this)"><i class="fas fa-cog"></i> Тохиргоо</a></li>
+    <li class="sb-logout"><a href="index.html"><i class="fas fa-sign-out-alt"></i> Гол хуудас руу буцах</a></li>
+  </ul>
+
+  <div class="sb-user">
+    <div class="sb-avatar">А</div>
+    <div>
+      <div class="sb-user-name">Админ</div>
+      <div class="sb-user-role">Системийн зохицуулагч</div>
+    </div>
+  </div>
+</aside>
+
+<!-- Sidebar overlay for mobile -->
+<div class="sb-overlay" id="sbOverlay" onclick="closeSidebar()"></div>
+
+<!-- MAIN CONTENT -->
+<main class="main">
+
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-left" style="display:flex;align-items:center;gap:12px">
+      <button class="mob-sb-btn" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+      <div>
+        <h2 id="pageTitle">Хяналтын самбар</h2>
+        <div class="breadcrumb" id="pageBreadcrumb">Гламур Салон › <span>Хяналтын самбар</span></div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" placeholder="Хайх...">
+      </div>
+      <div class="topbar-icon-btn" onclick="toast('Мэдэгдэл байхгүй байна','info')">
+        <i class="fas fa-bell"></i>
+        <div class="notif-dot"></div>
+      </div>
+      <button class="btn-primary" onclick="openModal('newBooking')"><i class="fas fa-plus"></i> <span class="btn-text">Шинэ захиалга</span></button>
+    </div>
+  </div>
+
+  <!-- ===== DASHBOARD ===== -->
+  <div class="view active" id="v-dashboard">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div><div class="sc-lbl">Нийт захиалга</div><div class="sc-val">128</div><div class="sc-chg">↑ 12% энэ сард</div></div>
+        <div class="sc-ico pink">📅</div>
+      </div>
+      <div class="stat-card">
+        <div><div class="sc-lbl">Нийт орлого</div><div class="sc-val">₮8.2М</div><div class="sc-chg">↑ 18% энэ сард</div></div>
+        <div class="sc-ico gold">💰</div>
+      </div>
+      <div class="stat-card">
+        <div><div class="sc-lbl">Шинэ үйлчлүүлэгч</div><div class="sc-val">86</div><div class="sc-chg">↑ 8% энэ сард</div></div>
+        <div class="sc-ico green">👥</div>
+      </div>
+      <div class="stat-card">
+        <div><div class="sc-lbl">Нийт уран бүтээлч</div><div class="sc-val">12</div><div class="sc-chg">Идэвхтэй</div></div>
+        <div class="sc-ico blue">✂️</div>
+      </div>
+    </div>
+
+    <div class="two-col" style="margin-bottom:20px">
+      <!-- Chart -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Орлогын график (7 хоног)</div>
+          <button class="btn-ghost" style="font-size:12px;padding:6px 14px">Сар</button>
+        </div>
+        <div class="chart-placeholder">
+          <div class="chart-bar" style="height:40%"></div>
+          <div class="chart-bar" style="height:65%"></div>
+          <div class="chart-bar" style="height:50%"></div>
+          <div class="chart-bar" style="height:80%"></div>
+          <div class="chart-bar" style="height:55%"></div>
+          <div class="chart-bar" style="height:90%"></div>
+          <div class="chart-bar" style="height:70%"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--gray-400);margin-top:8px">
+          <span>Да</span><span>Мя</span><span>Лх</span><span>Пү</span><span>Ба</span><span>Бя</span><span>Ня</span>
+        </div>
+      </div>
+
+      <!-- Today schedule -->
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Өнөөдрийн хуваарь</div>
+          <span style="font-size:12px;color:var(--gray-500)">5 захиалга</span>
+        </div>
+        <div class="schedule-row"><div class="sch-time">10:00</div><div class="sch-bar"><div class="sch-name">Жессика Миллер</div><div class="sch-sub">Үс тайрах · Алис Жонсон</div></div></div>
+        <div class="schedule-row"><div class="sch-time">11:30</div><div class="sch-bar"><div class="sch-name">Эмили Дэвис</div><div class="sch-sub">Үс будах · Sophia Ли</div></div></div>
+        <div class="schedule-row"><div class="sch-time">13:00</div><div class="sch-bar"><div class="sch-name">Сара Вилсон</div><div class="sch-sub">Кератин · Эмма Браун</div></div></div>
+        <div class="schedule-row"><div class="sch-time">14:30</div><div class="sch-bar"><div class="sch-name">Лаура Тэйлор</div><div class="sch-sub">Маникюр · Миа Томпсон</div></div></div>
+        <div class="schedule-row"><div class="sch-time">16:00</div><div class="sch-bar"><div class="sch-name">Анна Гарсиа</div><div class="sch-sub">Будалт · Оливиа Мартинез</div></div></div>
+      </div>
+    </div>
+
+    <!-- Recent appointments table -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Ойрын захиалгууд</div>
+        <button class="btn-ghost" onclick="sw('appointments',document.querySelector('.sb-nav a:nth-child(2)'))">Бүгдийг харах</button>
+      </div>
+      <table>
+        <thead><tr><th>Цаг</th><th>Үйлчлүүлэгч</th><th>Үйлчилгээ</th><th>Уран бүтээлч</th><th>Статус</th><th>Үйлдэл</th></tr></thead>
+        <tbody>
+          <tr><td>10:00</td><td>Жессика Миллер</td><td>Үс тайрах & Засах</td><td>Алис Жонсон</td><td><span class="badge ok">Батлагдсан</span></td><td><button class="btn-outline-sm" onclick="toast('Захиалга нээгдлээ','info')">Харах</button></td></tr>
+          <tr><td>11:30</td><td>Эмили Дэвис</td><td>Үс будах</td><td>Sophia Ли</td><td><span class="badge ok">Батлагдсан</span></td><td><button class="btn-outline-sm" onclick="toast('Захиалга нээгдлээ','info')">Харах</button></td></tr>
+          <tr><td>13:00</td><td>Сара Вилсон</td><td>Кератин эмчилгээ</td><td>Эмма Браун</td><td><span class="badge pend">Хүлээгдэж байна</span></td><td><button class="btn-outline-sm" onclick="toast('Захиалга нээгдлээ','info')">Харах</button></td></tr>
+          <tr><td>14:30</td><td>Лаура Тэйлор</td><td>Маникюр</td><td>Миа Томпсон</td><td><span class="badge ok">Батлагдсан</span></td><td><button class="btn-outline-sm" onclick="toast('Захиалга нээгдлээ','info')">Харах</button></td></tr>
+          <tr><td>16:00</td><td>Анна Гарсиа</td><td>Нүүрний будалт</td><td>Оливиа Мартинез</td><td><span class="badge ok">Батлагдсан</span></td><td><button class="btn-outline-sm" onclick="toast('Захиалга нээгдлээ','info')">Харах</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== APPOINTMENTS ===== -->
+  <div class="view" id="v-appointments">
+    <div class="card" style="margin-bottom:20px">
+      <div class="card-header">
+        <div class="card-title">Бүх захиалгууд</div>
+        <div style="display:flex;gap:8px">
+          <select class="form-select" style="width:auto;padding:7px 14px;font-size:13px">
+            <option>Бүх статус</option>
+            <option>Батлагдсан</option>
+            <option>Хүлээгдэж байна</option>
+            <option>Цуцлагдсан</option>
+          </select>
+          <button class="btn-primary" onclick="openModal('newBooking')"><i class="fas fa-plus"></i> Нэмэх</button>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>#</th><th>Үйлчлүүлэгч</th><th>Үйлчилгээ</th><th>Уран бүтээлч</th><th>Огноо & Цаг</th><th>Статус</th><th>Үйлдэл</th></tr></thead>
+        <tbody>
+          <tr><td>#001</td><td>Жессика Миллер</td><td>Үс тайрах & Засах</td><td>Алис Жонсон</td><td>5-р сар 15, 10:00</td><td><span class="badge ok">Батлагдсан</span></td><td style="display:flex;gap:6px"><button class="btn-outline-sm" onclick="openModal('editBooking')">Засах</button><button class="btn-outline-sm" style="color:var(--red);border-color:var(--red)" onclick="toast('Захиалга цуцлагдлаа','err')">Цуцлах</button></td></tr>
+          <tr><td>#002</td><td>Эмили Дэвис</td><td>Үс будах</td><td>Sophia Ли</td><td>5-р сар 15, 11:30</td><td><span class="badge ok">Батлагдсан</span></td><td style="display:flex;gap:6px"><button class="btn-outline-sm" onclick="openModal('editBooking')">Засах</button><button class="btn-outline-sm" style="color:var(--red);border-color:var(--red)" onclick="toast('Захиалга цуцлагдлаа','err')">Цуцлах</button></td></tr>
+          <tr><td>#003</td><td>Сара Вилсон</td><td>Кератин эмчилгээ</td><td>Эмма Браун</td><td>5-р сар 15, 13:00</td><td><span class="badge pend">Хүлээгдэж байна</span></td><td style="display:flex;gap:6px"><button class="btn-outline-sm" onclick="openModal('editBooking')">Засах</button><button class="btn-outline-sm" style="color:var(--green);border-color:var(--green)" onclick="toast('Захиалга батлагдлаа','ok')">Батлах</button></td></tr>
+          <tr><td>#004</td><td>Лаура Тэйлор</td><td>Маникюр</td><td>Миа Томпсон</td><td>5-р сар 16, 14:30</td><td><span class="badge ok">Батлагдсан</span></td><td style="display:flex;gap:6px"><button class="btn-outline-sm" onclick="openModal('editBooking')">Засах</button><button class="btn-outline-sm" style="color:var(--red);border-color:var(--red)" onclick="toast('Захиалга цуцлагдлаа','err')">Цуцлах</button></td></tr>
+          <tr><td>#005</td><td>Анна Гарсиа</td><td>Нүүрний будалт</td><td>Оливиа Мартинез</td><td>5-р сар 16, 16:00</td><td><span class="badge fail">Цуцлагдсан</span></td><td style="display:flex;gap:6px"><button class="btn-outline-sm" onclick="toast('Дахин идэвхжүүллээ','ok')">Сэргээх</button></td></tr>
+          <tr><td>#006</td><td>Нина Браун</td><td>Педикюр</td><td>Миа Томпсон</td><td>5-р сар 17, 10:00</td><td><span class="badge info">Шинэ</span></td><td style="display:flex;gap:6px"><button class="btn-outline-sm" onclick="openModal('editBooking')">Засах</button><button class="btn-outline-sm" style="color:var(--green);border-color:var(--green)" onclick="toast('Батлагдлаа','ok')">Батлах</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== CUSTOMERS ===== -->
+  <div class="view" id="v-customers">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Үйлчлүүлэгчид</div>
+        <button class="btn-primary" onclick="openModal('newCustomer')"><i class="fas fa-plus"></i> Нэмэх</button>
+      </div>
+      <table>
+        <thead><tr><th>Нэр</th><th>Имэйл</th><th>Утас</th><th>Нийт зочлолт</th><th>Нийт төлсөн</th><th>Сүүлчийн зочлолт</th><th>Үйлдэл</th></tr></thead>
+        <tbody>
+          <tr><td>Жессика Миллер</td><td>jessica@mail.com</td><td>(976) 9911-0001</td><td>8</td><td>₮580,000</td><td>5-р сар 15</td><td><button class="btn-outline-sm" onclick="toast('Үйлчлүүлэгчийн дэлгэрэнгүй','info')">Харах</button></td></tr>
+          <tr><td>Эмили Дэвис</td><td>emily@mail.com</td><td>(976) 9911-0002</td><td>5</td><td>₮390,000</td><td>5-р сар 15</td><td><button class="btn-outline-sm" onclick="toast('Үйлчлүүлэгчийн дэлгэрэнгүй','info')">Харах</button></td></tr>
+          <tr><td>Сара Вилсон</td><td>sarah@mail.com</td><td>(976) 9911-0003</td><td>12</td><td>₮920,000</td><td>5-р сар 14</td><td><button class="btn-outline-sm" onclick="toast('Үйлчлүүлэгчийн дэлгэрэнгүй','info')">Харах</button></td></tr>
+          <tr><td>Лаура Тэйлор</td><td>laura@mail.com</td><td>(976) 9911-0004</td><td>3</td><td>₮130,000</td><td>5-р сар 13</td><td><button class="btn-outline-sm" onclick="toast('Үйлчлүүлэгчийн дэлгэрэнгүй','info')">Харах</button></td></tr>
+          <tr><td>Анна Гарсиа</td><td>anna@mail.com</td><td>(976) 9911-0005</td><td>6</td><td>₮440,000</td><td>5-р сар 12</td><td><button class="btn-outline-sm" onclick="toast('Үйлчлүүлэгчийн дэлгэрэнгүй','info')">Харах</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== ARTISTS ===== -->
+  <div class="view" id="v-artists">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-bottom:20px">
+      <div class="artist-card"><div class="artist-av">👩‍🦱</div><div class="artist-name">Алис Жонсон</div><div class="artist-role">Үсчин</div><div class="artist-stars">⭐ 4.9 <span style="color:var(--gray-500);font-size:12px">(120)</span></div><div style="display:flex;gap:6px;justify-content:center"><button class="btn-outline-sm" onclick="toast('Профайл нээгдлээ','info')">Дэлгэрэнгүй</button><button class="btn-ghost" style="font-size:12px;padding:7px 14px" onclick="openModal('editArtist')">Засах</button></div></div>
+      <div class="artist-card"><div class="artist-av">👩‍🦰</div><div class="artist-name">Sophia Ли</div><div class="artist-role">Будагч мэргэжилтэн</div><div class="artist-stars">⭐ 4.8 <span style="color:var(--gray-500);font-size:12px">(96)</span></div><div style="display:flex;gap:6px;justify-content:center"><button class="btn-outline-sm" onclick="toast('Профайл нээгдлээ','info')">Дэлгэрэнгүй</button><button class="btn-ghost" style="font-size:12px;padding:7px 14px" onclick="openModal('editArtist')">Засах</button></div></div>
+      <div class="artist-card"><div class="artist-av">👩</div><div class="artist-name">Эмма Браун</div><div class="artist-role">Үсчин</div><div class="artist-stars">⭐ 4.8 <span style="color:var(--gray-500);font-size:12px">(110)</span></div><div style="display:flex;gap:6px;justify-content:center"><button class="btn-outline-sm" onclick="toast('Профайл нээгдлээ','info')">Дэлгэрэнгүй</button><button class="btn-ghost" style="font-size:12px;padding:7px 14px" onclick="openModal('editArtist')">Засах</button></div></div>
+      <div class="artist-card"><div class="artist-av">👩‍🦳</div><div class="artist-name">Оливиа Мартинез</div><div class="artist-role">Гримчин</div><div class="artist-stars">⭐ 4.8 <span style="color:var(--gray-500);font-size:12px">(88)</span></div><div style="display:flex;gap:6px;justify-content:center"><button class="btn-outline-sm" onclick="toast('Профайл нээгдлээ','info')">Дэлгэрэнгүй</button><button class="btn-ghost" style="font-size:12px;padding:7px 14px" onclick="openModal('editArtist')">Засах</button></div></div>
+      <div class="artist-card"><div class="artist-av">🧑‍🎨</div><div class="artist-name">Миа Томпсон</div><div class="artist-role">Хумсны мэргэжилтэн</div><div class="artist-stars">⭐ 4.9 <span style="color:var(--gray-500);font-size:12px">(75)</span></div><div style="display:flex;gap:6px;justify-content:center"><button class="btn-outline-sm" onclick="toast('Профайл нээгдлээ','info')">Дэлгэрэнгүй</button><button class="btn-ghost" style="font-size:12px;padding:7px 14px" onclick="openModal('editArtist')">Засах</button></div></div>
+      <!-- Add new artist card -->
+      <div class="artist-card" style="border:2px dashed var(--gray-200);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;cursor:pointer;min-height:220px" onclick="openModal('editArtist')">
+        <div style="width:60px;height:60px;border-radius:50%;background:var(--pink-light);display:flex;align-items:center;justify-content:center;font-size:28px">+</div>
+        <div style="font-size:14px;font-weight:600;color:var(--gray-400)">Шинэ уран бүтээлч нэмэх</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SERVICES ===== -->
+  <div class="view" id="v-services">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Үйлчилгээнүүд</div>
+        <button class="btn-primary" onclick="openModal('editService')"><i class="fas fa-plus"></i> Нэмэх</button>
+      </div>
+      <table>
+        <thead><tr><th>Үйлчилгээний нэр</th><th>Ангилал</th><th>Үнэ</th><th>Хугацаа</th><th>Захиалга тоо</th><th>Статус</th><th>Үйлдэл</th></tr></thead>
+        <tbody>
+          <tr><td>✂️ Үс тайрах & Засах</td><td>Үс</td><td>₮35,000+</td><td>45 мин</td><td>38</td><td><span class="badge ok">Идэвхтэй</span></td><td><button class="btn-outline-sm" onclick="openModal('editService')">Засах</button></td></tr>
+          <tr><td>🎨 Үс будах</td><td>Үс</td><td>₮65,000+</td><td>120 мин</td><td>42</td><td><span class="badge ok">Идэвхтэй</span></td><td><button class="btn-outline-sm" onclick="openModal('editService')">Засах</button></td></tr>
+          <tr><td>💆 Үсний эмчилгээ</td><td>Үс</td><td>₮45,000+</td><td>60 мин</td><td>8</td><td><span class="badge ok">Идэвхтэй</span></td><td><button class="btn-outline-sm" onclick="openModal('editService')">Засах</button></td></tr>
+          <tr><td>💅 Маникюр</td><td>Хумс</td><td>₮28,000+</td><td>45 мин</td><td>18</td><td><span class="badge ok">Идэвхтэй</span></td><td><button class="btn-outline-sm" onclick="openModal('editService')">Засах</button></td></tr>
+          <tr><td>🦶 Педикюр</td><td>Хумс</td><td>₮35,000+</td><td>60 мин</td><td>12</td><td><span class="badge ok">Идэвхтэй</span></td><td><button class="btn-outline-sm" onclick="openModal('editService')">Засах</button></td></tr>
+          <tr><td>💄 Нүүрний будалт</td><td>Гоо сайхан</td><td>₮70,000+</td><td>90 мин</td><td>22</td><td><span class="badge ok">Идэвхтэй</span></td><td><button class="btn-outline-sm" onclick="openModal('editService')">Засах</button></td></tr>
+          <tr><td>🧖 Нүүрний засал</td><td>Арьс</td><td>₮55,000+</td><td>75 мин</td><td>10</td><td><span class="badge pend">Түр зогссон</span></td><td><button class="btn-outline-sm" onclick="openModal('editService')">Засах</button></td></tr>
+          <tr><td>🌿 Хөмсөг засах</td><td>Гоо сайхан</td><td>₮18,000+</td><td>20 мин</td><td>25</td><td><span class="badge ok">Идэвхтэй</span></td><td><button class="btn-outline-sm" onclick="openModal('editService')">Засах</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== PAYMENTS ===== -->
+  <div class="view" id="v-payments">
+    <div class="stats-grid" style="margin-bottom:20px">
+      <div class="stat-card"><div><div class="sc-lbl">Энэ сарын орлого</div><div class="sc-val">₮8.2М</div><div class="sc-chg">↑ 18%</div></div><div class="sc-ico gold">💰</div></div>
+      <div class="stat-card"><div><div class="sc-lbl">Амжилттай төлбөр</div><div class="sc-val">114</div><div class="sc-chg">89% амжилттай</div></div><div class="sc-ico green">✅</div></div>
+      <div class="stat-card"><div><div class="sc-lbl">Хүлээгдэж буй</div><div class="sc-val">8</div><div class="sc-chg down">Шийдэх шаардлагатай</div></div><div class="sc-ico pink">⏳</div></div>
+      <div class="stat-card"><div><div class="sc-lbl">Дундаж чек</div><div class="sc-val">₮64,000</div><div class="sc-chg">↑ 5%</div></div><div class="sc-ico blue">📊</div></div>
+    </div>
+    <div class="card">
+      <div class="card-header"><div class="card-title">Төлбөрийн түүх</div></div>
+      <table>
+        <thead><tr><th>Огноо</th><th>Үйлчлүүлэгч</th><th>Үйлчилгээ</th><th>Дүн</th><th>Арга</th><th>Статус</th></tr></thead>
+        <tbody>
+          <tr><td>5-р сар 15</td><td>Жессика Миллер</td><td>Үс тайрах</td><td>₮35,000</td><td>Карт</td><td><span class="badge ok">Төлөгдсөн</span></td></tr>
+          <tr><td>5-р сар 15</td><td>Эмили Дэвис</td><td>Үс будах</td><td>₮85,000</td><td>QPay</td><td><span class="badge ok">Төлөгдсөн</span></td></tr>
+          <tr><td>5-р сар 14</td><td>Сара Вилсон</td><td>Кератин</td><td>₮110,000</td><td>Бэлэн</td><td><span class="badge pend">Хүлээгдэж байна</span></td></tr>
+          <tr><td>5-р сар 14</td><td>Лаура Тэйлор</td><td>Маникюр</td><td>₮48,000</td><td>Карт</td><td><span class="badge ok">Төлөгдсөн</span></td></tr>
+          <tr><td>5-р сар 13</td><td>Анна Гарсиа</td><td>Нүүрний будалт</td><td>₮70,000</td><td>QPay</td><td><span class="badge fail">Амжилтгүй</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== PROMOS ===== -->
+  <div class="view" id="v-promos">
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Урамшуулал & Хямдрал</div>
+        <button class="btn-primary" onclick="openModal('editPromo')"><i class="fas fa-plus"></i> Нэмэх</button>
+      </div>
+      <table>
+        <thead><tr><th>Нэр</th><th>Хямдрал</th><th>Хүчинтэй хүртэл</th><th>Ашиглалт</th><th>Статус</th><th>Үйлдэл</th></tr></thead>
+        <tbody>
+          <tr><td>☀️ Зуны Гялалзалт</td><td>30% ХЯМДРАЛ</td><td>2024-06-30</td><td>142 удаа</td><td><span class="badge ok">Идэвхтэй</span></td><td><button class="btn-outline-sm" onclick="openModal('editPromo')">Засах</button></td></tr>
+          <tr><td>🎁 Тавтай морил</td><td>15% ХЯМДРАЛ</td><td>Байнгын</td><td>89 удаа</td><td><span class="badge ok">Идэвхтэй</span></td><td><button class="btn-outline-sm" onclick="openModal('editPromo')">Засах</button></td></tr>
+          <tr><td>⭐ Байнгын үйлчлүүлэгч</td><td>20% ХЯМДРАЛ</td><td>2024-12-31</td><td>0 удаа</td><td><span class="badge info">Төлөвлөгдсөн</span></td><td><button class="btn-outline-sm" onclick="openModal('editPromo')">Засах</button></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ===== REPORTS ===== -->
+  <div class="view" id="v-reports">
+    <div class="stats-grid" style="margin-bottom:20px">
+      <div class="stat-card"><div><div class="sc-lbl">Сарын орлого</div><div class="sc-val">₮8.2М</div><div class="sc-chg">↑ 18% өмнөх сараас</div></div><div class="sc-ico gold">📊</div></div>
+      <div class="stat-card"><div><div class="sc-lbl">Хамгийн их үйлчилгээ</div><div class="sc-val">Үс будах</div><div class="sc-chg">42 захиалга</div></div><div class="sc-ico pink">🏆</div></div>
+      <div class="stat-card"><div><div class="sc-lbl">Шилдэг уран бүтээлч</div><div class="sc-val">Алис Жонсон</div><div class="sc-chg">28 захиалга</div></div><div class="sc-ico green">⭐</div></div>
+      <div class="stat-card"><div><div class="sc-lbl">Дундаж үнэлгээ</div><div class="sc-val">4.87</div><div class="sc-chg">128 сэтгэгдлээс</div></div><div class="sc-ico blue">💬</div></div>
+    </div>
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header"><div class="card-title">Үйлчилгээний тайлан</div></div>
+        <table>
+          <thead><tr><th>Үйлчилгээ</th><th>Захиалга</th><th>Орлого</th><th>Дундаж</th></tr></thead>
+          <tbody>
+            <tr><td>Үс будах</td><td>42</td><td>₮2,940,000</td><td>₮70,000</td></tr>
+            <tr><td>Үс тайрах & Засах</td><td>38</td><td>₮1,330,000</td><td>₮35,000</td></tr>
+            <tr><td>Нүүрний будалт</td><td>22</td><td>₮1,540,000</td><td>₮70,000</td></tr>
+            <tr><td>Маникюр</td><td>18</td><td>₮504,000</td><td>₮28,000</td></tr>
+            <tr><td>Үсний эмчилгээ</td><td>8</td><td>₮360,000</td><td>₮45,000</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">Уран бүтээлчийн тайлан</div></div>
+        <table>
+          <thead><tr><th>Уран бүтээлч</th><th>Захиалга</th><td>Орлого</td><th>Үнэлгээ</th></tr></thead>
+          <tbody>
+            <tr><td>Алис Жонсон</td><td>28</td><td>₮1,680,000</td><td>⭐ 4.9</td></tr>
+            <tr><td>Sophia Ли</td><td>24</td><td>₮1,920,000</td><td>⭐ 4.8</td></tr>
+            <tr><td>Эмма Браун</td><td>22</td><td>₮1,210,000</td><td>⭐ 4.8</td></tr>
+            <tr><td>Оливиа Мартинез</td><td>18</td><td>₮1,260,000</td><td>⭐ 4.8</td></tr>
+            <tr><td>Миа Томпсон</td><td>16</td><td>₮608,000</td><td>⭐ 4.9</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SETTINGS ===== -->
+  <div class="view" id="v-settings">
+    <div class="two-col">
+      <div class="card">
+        <div class="card-title" style="margin-bottom:20px">Салоны мэдээлэл</div>
+        <div class="form-group"><label class="form-label">Салоны нэр</label><input class="form-input" value="Гламур Салон"></div>
+        <div class="form-group"><label class="form-label">Утас</label><input class="form-input" value="(976) 9911-2233"></div>
+        <div class="form-group"><label class="form-label">Имэйл</label><input class="form-input" value="info@glamoursalon.mn"></div>
+        <div class="form-group"><label class="form-label">Хаяг</label><input class="form-input" value="Сүхбаатар дүүрэг, Улаанбаатар"></div>
+        <div class="form-group"><label class="form-label">Ажлын цаг</label>
+          <div class="form-row">
+            <input class="form-input" value="09:00">
+            <input class="form-input" value="20:00">
+          </div>
+        </div>
+        <button class="btn-primary" onclick="toast('Мэдээлэл хадгалагдлаа','ok')">Хадгалах</button>
+      </div>
+      <div class="card">
+        <div class="card-title" style="margin-bottom:20px">Нууц үг солих</div>
+        <div class="form-group"><label class="form-label">Одоогийн нууц үг</label><input class="form-input" type="password" placeholder="••••••••"></div>
+        <div class="form-group"><label class="form-label">Шинэ нууц үг</label><input class="form-input" type="password" placeholder="••••••••"></div>
+        <div class="form-group"><label class="form-label">Нууц үг давтах</label><input class="form-input" type="password" placeholder="••••••••"></div>
+        <button class="btn-primary" onclick="toast('Нууц үг шинэчлэгдлээ','ok')">Шинэчлэх</button>
+
+        <div class="card-title" style="margin:24px 0 16px">Мэдэгдэл</div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <label style="display:flex;justify-content:space-between;align-items:center;font-size:14px">Захиалга батлагдах<input type="checkbox" checked style="accent-color:var(--pink);width:16px;height:16px"></label>
+          <label style="display:flex;justify-content:space-between;align-items:center;font-size:14px">Шинэ захиалга<input type="checkbox" checked style="accent-color:var(--pink);width:16px;height:16px"></label>
+          <label style="display:flex;justify-content:space-between;align-items:center;font-size:14px">Захиалга цуцлагдах<input type="checkbox" style="accent-color:var(--pink);width:16px;height:16px"></label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- MODALS -->
+<div class="modal-overlay" id="modalOverlay">
+  <!-- New Booking Modal -->
+  <div class="modal-box" id="modal-newBooking">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">Шинэ захиалга нэмэх</div>
+    <div class="form-group"><label class="form-label">Үйлчлүүлэгч</label><input class="form-input" placeholder="Үйлчлүүлэгчийн нэр"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Үйлчилгээ</label>
+        <select class="form-select"><option>Үс тайрах & Засах</option><option>Үс будах</option><option>Маникюр</option><option>Педикюр</option><option>Нүүрний будалт</option></select>
+      </div>
+      <div class="form-group"><label class="form-label">Уран бүтээлч</label>
+        <select class="form-select"><option>Алис Жонсон</option><option>Sophia Ли</option><option>Эмма Браун</option><option>Оливиа Мартинез</option><option>Миа Томпсон</option></select>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Огноо</label><input class="form-input" type="date"></div>
+      <div class="form-group"><label class="form-label">Цаг</label><input class="form-input" type="time" value="10:00"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Тэмдэглэл</label><input class="form-input" placeholder="Нэмэлт тэмдэглэл..."></div>
+    <div class="modal-foot">
+      <button class="btn-outline-sm" onclick="closeModal()">Болих</button>
+      <button class="btn-primary" onclick="closeModal();toast('Захиалга амжилттай нэмэгдлээ','ok')">Хадгалах</button>
+    </div>
+  </div>
+
+  <!-- Edit Booking Modal -->
+  <div class="modal-box" id="modal-editBooking" style="display:none">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">Захиалга засах</div>
+    <div class="form-group"><label class="form-label">Үйлчлүүлэгч</label><input class="form-input" value="Жессика Миллер"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Үйлчилгээ</label>
+        <select class="form-select"><option selected>Үс тайрах & Засах</option><option>Үс будах</option><option>Маникюр</option></select>
+      </div>
+      <div class="form-group"><label class="form-label">Статус</label>
+        <select class="form-select"><option>Батлагдсан</option><option>Хүлээгдэж байна</option><option>Цуцлагдсан</option></select>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-outline-sm" onclick="closeModal()">Болих</button>
+      <button class="btn-primary" onclick="closeModal();toast('Захиалга шинэчлэгдлээ','ok')">Хадгалах</button>
+    </div>
+  </div>
+
+  <!-- Edit Artist Modal -->
+  <div class="modal-box" id="modal-editArtist" style="display:none">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">Уран бүтээлчийн мэдээлэл</div>
+    <div class="form-group"><label class="form-label">Бүтэн нэр</label><input class="form-input" value="Алис Жонсон"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Мэргэжил</label><input class="form-input" value="Үсчин"></div>
+      <div class="form-group"><label class="form-label">Туршлага (жил)</label><input class="form-input" type="number" value="5"></div>
+    </div>
+    <div class="form-group"><label class="form-label">Утас</label><input class="form-input" value="(976) 9900-0001"></div>
+    <div class="modal-foot">
+      <button class="btn-outline-sm" onclick="closeModal()">Болих</button>
+      <button class="btn-primary" onclick="closeModal();toast('Мэдээлэл шинэчлэгдлээ','ok')">Хадгалах</button>
+    </div>
+  </div>
+
+  <!-- Edit Service Modal -->
+  <div class="modal-box" id="modal-editService" style="display:none">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">Үйлчилгээ засах</div>
+    <div class="form-group"><label class="form-label">Нэр</label><input class="form-input" value="Үс тайрах & Засах"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Үнэ (₮)</label><input class="form-input" type="number" value="35000"></div>
+      <div class="form-group"><label class="form-label">Хугацаа (мин)</label><input class="form-input" type="number" value="45"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-outline-sm" onclick="closeModal()">Болих</button>
+      <button class="btn-primary" onclick="closeModal();toast('Үйлчилгээ шинэчлэгдлээ','ok')">Хадгалах</button>
+    </div>
+  </div>
+
+  <!-- Edit Promo Modal -->
+  <div class="modal-box" id="modal-editPromo" style="display:none">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">Урамшуулал засах</div>
+    <div class="form-group"><label class="form-label">Нэр</label><input class="form-input" value="Зуны Гялалзалт"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Хямдрал (%)</label><input class="form-input" type="number" value="30"></div>
+      <div class="form-group"><label class="form-label">Дуусах огноо</label><input class="form-input" type="date" value="2024-06-30"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-outline-sm" onclick="closeModal()">Болих</button>
+      <button class="btn-primary" onclick="closeModal();toast('Урамшуулал шинэчлэгдлээ','ok')">Хадгалах</button>
+    </div>
+  </div>
+
+  <!-- New Customer Modal -->
+  <div class="modal-box" id="modal-newCustomer" style="display:none">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-title">Шинэ үйлчлүүлэгч нэмэх</div>
+    <div class="form-group"><label class="form-label">Бүтэн нэр</label><input class="form-input" placeholder="Нэр оруулна уу"></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Утас</label><input class="form-input" placeholder="(976) 9900-0000"></div>
+      <div class="form-group"><label class="form-label">Имэйл</label><input class="form-input" placeholder="example@mail.com"></div>
+    </div>
+    <div class="modal-foot">
+      <button class="btn-outline-sm" onclick="closeModal()">Болих</button>
+      <button class="btn-primary" onclick="closeModal();toast('Үйлчлүүлэгч нэмэгдлээ','ok')">Хадгалах</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toastEl"><span id="toastIco">✓</span><span id="toastMsg">Амжилттай!</span></div>
+
+<script>
+const viewTitles = {
+  dashboard:'Хяналтын самбар', appointments:'Захиалгууд', customers:'Үйлчлүүлэгчид',
+  artists:'Уран бүтээлчид', services:'Үйлчилгээнүүд', payments:'Төлбөрүүд',
+  promos:'Урамшуулал', reports:'Тайлан', settings:'Тохиргоо'
+};
+
+function sw(view, el) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  const target = document.getElementById('v-' + view);
+  if (target) target.classList.add('active');
+  document.querySelectorAll('.sb-nav a').forEach(a => a.classList.remove('active'));
+  if (el) el.classList.add('active');
+  document.getElementById('pageTitle').textContent = viewTitles[view] || view;
+  document.getElementById('pageBreadcrumb').innerHTML = 'Гламур Салон › <span>' + (viewTitles[view] || view) + '</span>';
+  return false;
+}
+
+let activeModal = null;
+const modals = ['newBooking','editBooking','editArtist','editService','editPromo','newCustomer'];
+
+function openModal(name) {
+  modals.forEach(m => {
+    const el = document.getElementById('modal-' + m);
+    if (el) el.style.display = m === name ? '' : 'none';
+  });
+  document.getElementById('modalOverlay').classList.add('active');
+  activeModal = name;
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('active');
+  activeModal = null;
+}
+
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+function toast(msg, type = 'ok') {
+  const el = document.getElementById('toastEl');
+  el.className = 'toast ' + type;
+  document.getElementById('toastIco').textContent = type === 'ok' ? '✓' : type === 'err' ? '✕' : 'ℹ';
+  document.getElementById('toastMsg').textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.classList.remove('show'), 3400);
+}
+
+function toggleSidebar() {
+  const sb = document.querySelector('.sidebar');
+  const ov = document.getElementById('sbOverlay');
+  sb.classList.toggle('open');
+  ov.classList.toggle('active');
+  document.body.style.overflow = sb.classList.contains('open') ? 'hidden' : '';
+}
+function closeSidebar() {
+  document.querySelector('.sidebar').classList.remove('open');
+  document.getElementById('sbOverlay').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+// Wrap all tables in tbl-scroll div for mobile horizontal scroll
+document.querySelectorAll('.card table').forEach(t => {
+  if (!t.parentElement.classList.contains('tbl-scroll')) {
+    const w = document.createElement('div');
+    w.className = 'tbl-scroll';
+    t.parentNode.insertBefore(w, t);
+    w.appendChild(t);
+  }
+});
+
+// Close sidebar when a nav item is clicked on mobile
+document.querySelectorAll('.sb-nav a').forEach(a => {
+  a.addEventListener('click', () => {
+    if (window.innerWidth <= 900) closeSidebar();
+  });
+});
+</script>
+</body>
+</html>
