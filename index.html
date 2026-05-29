@@ -3,28 +3,28 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Гламур Салон — Тансаг Гоо Сайхны Үйлчилгээ</title>
+<title>Hatantsetsey lash Beauty Salon — Tансаг Гоо Сайхны Үйлчилгээ</title>
 
 <!-- SEO -->
-<meta name="description" content="Мэргэжлийн уран бүтээлчидтэйгээ цаг захиалж, зөвхөн танд зориулсан тансаг салоны үйлчилгээг мэдрээрэй. Үс засах, маникюр, нүүрний будалт болон бусад.">
-<meta name="keywords" content="салон, гоо сайхан, үс засах, маникюр, цаг захиалах, Улаанбаатар">
-<meta name="author" content="Гламур Салон">
+<meta name="description" content="Hatantsetsey lash Beauty Salon — Lash, Brow Lami, Nail, Wax үйлчилгээг мэргэжлийн уран бүтээлчидтэйгээ мэдрээрэй. Өнөөдөр цаг захиалаарай.">
+<meta name="keywords" content="hatantsetsey lash, lash salon, brow lami, nail, wax, гоо сайхан, цаг захиалах, Улаанбаатар">
+<meta name="author" content="Hatantsetsey lash Beauty Salon">
 
 <!-- Open Graph (Facebook, Messenger, Telegram, Viber) -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://salon-smoky-xi.vercel.app/">
-<meta property="og:title" content="Гламур Салон — Тансаг Гоо Сайхны Үйлчилгээ">
-<meta property="og:description" content="Мэргэжлийн уран бүтээлчидтэйгээ цаг захиалж, тансаг салоны үйлчилгээг мэдрээрэй. 2,500+ баяртай үйлчлүүлэгч · 15+ мэргэжлийн уран бүтээлч · 4.9★ үнэлгээ.">
+<meta property="og:title" content="Hatantsetsey lash Beauty Salon">
+<meta property="og:description" content="Lash, Brow Lami, Nail, Wax — мэргэжлийн уран бүтээлчидтэйгээ цаг захиалж тансаг үйлчилгээг мэдрээрэй.">
 <meta property="og:image" content="https://salon-smoky-xi.vercel.app/og-image.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="mn_MN">
-<meta property="og:site_name" content="Гламур Салон">
+<meta property="og:site_name" content="Hatantsetsey lash Beauty Salon">
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Гламур Салон — Тансаг Гоо Сайхны Үйлчилгээ">
-<meta name="twitter:description" content="Мэргэжлийн уран бүтээлчидтэйгээ цаг захиалж, тансаг салоны үйлчилгээг мэдрээрэй.">
+<meta name="twitter:title" content="Hatantsetsey lash Beauty Salon">
+<meta name="twitter:description" content="Lash, Brow Lami, Nail, Wax — мэргэжлийн уран бүтээлчидтэйгээ цаг захиалж тансаг үйлчилгээг мэдрээрэй.">
 <meta name="twitter:image" content="https://salon-smoky-xi.vercel.app/og-image.png">
 
 <!-- Favicon -->
@@ -52,6 +52,8 @@ body{font-family:'Inter',sans-serif;color:var(--dark);background:var(--cream);ov
 .navbar.scrolled{box-shadow:var(--shadow-md)}
 .logo-text{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--gold);letter-spacing:1px;display:block;line-height:1.2}
 .logo-sub{font-size:9px;letter-spacing:3px;color:var(--gray-500);text-transform:uppercase}
+.logo-img{height:48px;width:auto;display:block;object-fit:contain}
+.logo-img-footer{height:44px;width:auto;display:block;object-fit:contain;filter:brightness(0) invert(1)}
 .nav-links{display:flex;list-style:none;gap:32px}
 .nav-links a{text-decoration:none;color:var(--gray-800);font-size:14px;font-weight:500;transition:color .3s;position:relative}
 .nav-links a::after{content:'';position:absolute;bottom:-4px;left:0;width:0;height:2px;background:var(--pink);transition:width .3s}
@@ -309,6 +311,7 @@ body{font-family:'Inter',sans-serif;color:var(--dark);background:var(--cream);ov
   /* Navbar */
   .navbar{padding:12px 16px}
   .logo-text{font-size:18px}
+  .logo-img{height:38px}
   .btn-primary{padding:10px 18px;font-size:13px;min-height:44px}
   .mob-menu{padding:16px 20px;top:62px}
   .mob-menu a{padding:12px 0;font-size:15px}
@@ -455,8 +458,7 @@ body{font-family:'Inter',sans-serif;color:var(--dark);background:var(--cream);ov
 <!-- NAVBAR -->
 <nav class="navbar" id="navbar">
   <div class="logo">
-    <span class="logo-text">Glamour</span>
-    <span class="logo-sub">Салон</span>
+    <img src="logo.jpg" alt="Hatantsetsey lash Beauty Salon" class="logo-img">
   </div>
   <ul class="nav-links">
     <li><a href="#home">Нүүр</a></li>
@@ -584,7 +586,7 @@ body{font-family:'Inter',sans-serif;color:var(--dark);background:var(--cream);ov
 <footer class="footer" id="contact">
   <div class="footer-grid">
     <div>
-      <div class="logo" style="margin-bottom:0"><span class="logo-text">Glamour</span><span class="logo-sub" style="color:rgba(255,255,255,.4)">Салон</span></div>
+      <div class="logo" style="margin-bottom:0"><img src="logo.jpg" alt="Hatantsetsey lash Beauty Salon" class="logo-img-footer"></div>
       <p class="footer-desc">Таны гоо сайхныг нээн гаргана. Өнөөдөр цагаа захиалж, ялгаатай байдлыг мэдрээрэй. Өмнөх шиг тансаг үйлчилгээг мэдрэ.</p>
       <div class="socials">
         <a href="#" class="soc-a"><i class="fab fa-instagram"></i></a>
@@ -623,7 +625,7 @@ body{font-family:'Inter',sans-serif;color:var(--dark);background:var(--cream);ov
 <div class="login-overlay" id="loginOverlay" onclick="handleLoginOverlayClick(event)">
   <div class="login-modal" id="loginModal">
     <button class="login-close" onclick="closeLogin()">✕</button>
-    <div class="login-logo"><span>Glamour</span></div>
+    <div class="login-logo"><img src="logo.jpg" alt="Hatantsetsey lash" style="height:40px;width:auto;display:block;margin:0 auto"></div>
     <h2 class="login-title">Тавтай морил</h2>
     <p class="login-sub">Та өөрийн бүртгэлээр нэвтэрнэ үү</p>
     <div class="login-err" id="loginErr">Имэйл эсвэл нууц үг буруу байна.</div>
