@@ -6,6 +6,11 @@ const nextConfig = {
       { protocol: 'https', hostname: 'zbyibqszdwqngzpgsstn.supabase.co' },
     ],
   },
+  async redirects() {
+    return [
+      { source: '/favicon.ico', destination: '/logo.jpg', permanent: false },
+    ];
+  },
   experimental: {},
 };
 
