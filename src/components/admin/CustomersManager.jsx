@@ -1,5 +1,5 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 
 const STATUS_COLORS = {
@@ -13,7 +13,7 @@ export default function CustomersManager({ showToast }) {
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading]   = useState(true);
   const [search, setSearch]     = useState('');
-  const [filter, setFilter]     = useState('all');
+  const [expanded, setExpanded] = useState(null);
 
   useEffect(() => { load(); }, []);
 
@@ -34,19 +34,40 @@ export default function CustomersManager({ showToast }) {
     showToast('Төлөв шинэчлэгдлээ ✓', 'ok');
   };
 
-  const filtered = bookings.filter(b => {
-    const matchFilter = filter === 'all' || b.status === filter;
-    const q = search.toLowerCase();
-    const matchSearch = !q ||
-      b.customer_name?.toLowerCase().includes(q) ||
-      b.customer_phone?.includes(q) ||
-      b.customer_email?.toLowerCase().includes(q) ||
-      b.service_name?.toLowerCase().includes(q);
-    return matchFilter && matchSearch;
-  });
+  // Хэрэглэгчээр бүлэглэх — имэйлтэй бол имэйлээр, үгүй бол утсаар
+  const customers = useMemo(() => {
+    const map = new Map();
+    bookings.forEach(b => {
+      const key = (b.customer_email || b.customer_phone || 'unknown').toLowerCase();
+      if (!map.has(key)) {
+        map.set(key, { key, email: b.customer_email || null, phone: b.customer_phone || null, bookings: [] });
+      }
+      const c = map.get(key);
+      c.bookings.push(b);
+      if (b.customer_email && !c.email) c.email = b.customer_email;
+      if (b.customer_phone && !c.phone) c.phone = b.customer_phone;
+    });
+    return [...map.values()].map(c => {
+      const total     = c.bookings.length;
+      const completed = c.bookings.filter(b => b.status === 'completed').length;
+      const upcoming  = c.bookings.filter(b => b.status === 'pending' || b.status === 'confirmed').length;
+      const spent     = c.bookings.filter(b => b.status !== 'cancelled').reduce((s,b) => s + (b.total_price || 0), 0);
+      const dates     = c.bookings.map(b => b.booking_date).filter(Boolean).sort();
+      const lastVisit = dates[dates.length - 1] || null;
+      return { ...c, total, completed, upcoming, spent, lastVisit };
+    }).sort((a, b) => b.completed - a.completed || b.total - a.total);
+  }, [bookings]);
 
-  // Unique customers by phone
-  const uniqueCustomers = [...new Map(bookings.map(b => [b.customer_phone, b])).values()];
+  const filtered = useMemo(() => {
+    const q = search.toLowerCase().trim();
+    if (!q) return customers;
+    return customers.filter(c =>
+      c.phone?.includes(q) || c.email?.toLowerCase().includes(q)
+    );
+  }, [customers, search]);
+
+  const totalCompleted = bookings.filter(b => b.status === 'completed').length;
+  const totalRevenue   = bookings.filter(b => b.status !== 'cancelled').reduce((s,b) => s + (b.total_price || 0), 0);
 
   const inp = { padding: '9px 13px', borderRadius: 10, border: '1.5px solid var(--gray-200)', fontSize: 13, fontFamily: 'Inter,sans-serif', outline: 'none', color: 'var(--dark)', background: '#fff' };
 
@@ -56,10 +77,10 @@ export default function CustomersManager({ showToast }) {
       {/* Stats */}
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill,minmax(140px,1fr))', gap: 12 }}>
         {[
-          { label: 'Нийт үйлчлүүлэгч', value: uniqueCustomers.length, icon: '👥', color: 'var(--pink)' },
-          { label: 'Нийт захиалга',     value: bookings.length,         icon: '📋', color: '#6366f1' },
-          { label: 'Хүлээгдэж байна',   value: bookings.filter(b=>b.status==='pending').length,   icon: '⏳', color: '#f59e0b' },
-          { label: 'Дууссан',           value: bookings.filter(b=>b.status==='completed').length,  icon: '✅', color: 'var(--green)' },
+          { label: 'Нийт үйлчлүүлэгч',  value: customers.length, icon: '👥', color: 'var(--pink)' },
+          { label: 'Нийт захиалга',      value: bookings.length,  icon: '📋', color: '#6366f1' },
+          { label: 'Үйлчилгээ авсан',    value: totalCompleted,   icon: '✅', color: 'var(--green)' },
+          { label: 'Нийт орлого',        value: `₮${totalRevenue.toLocaleString()}`, icon: '💰', color: '#f59e0b' },
         ].map(s => (
           <div key={s.label} className="card" style={{ padding: '16px 14px', textAlign: 'center' }}>
             <div style={{ fontSize: 28, marginBottom: 4 }}>{s.icon}</div>
@@ -69,25 +90,13 @@ export default function CustomersManager({ showToast }) {
         ))}
       </div>
 
-      {/* Filters */}
-      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
+      {/* Search */}
+      <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
         <input
           type="text" value={search} onChange={e => setSearch(e.target.value)}
-          placeholder="Нэр, утас, имэйл хайх..."
+          placeholder="Утас, имэйл хайх..."
           style={{ ...inp, flex: 1, minWidth: 180 }}
         />
-        <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-          {['all','pending','confirmed','completed','cancelled'].map(f => (
-            <button key={f} onClick={() => setFilter(f)}
-              style={{ padding: '8px 14px', borderRadius: 50, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '1.5px solid', transition: 'all .15s',
-                borderColor: filter === f ? 'var(--pink)' : 'var(--gray-200)',
-                background:  filter === f ? 'var(--pink-light)' : '#fff',
-                color:       filter === f ? 'var(--pink-dark)' : 'var(--gray-500)',
-              }}>
-              {f === 'all' ? 'Бүгд' : STATUS_COLORS[f]?.label}
-            </button>
-          ))}
-        </div>
       </div>
 
       {/* Table */}
@@ -106,68 +115,99 @@ export default function CustomersManager({ showToast }) {
             <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
               <thead>
                 <tr style={{ background: 'var(--gray-100)', borderBottom: '1.5px solid var(--gray-200)' }}>
-                  {['Үйлчлүүлэгч','Утас / Имэйл','Үйлчилгээ','Огноо & Цаг','Үнэ','Төлөв','Үйлдэл'].map(h => (
+                  {['Үйлчлүүлэгч','Холбоо барих','Захиалсан','Үйлчилгээ авсан','Нийт төлсөн','Сүүлчийн',''].map(h => (
                     <th key={h} style={{ padding: '12px 14px', textAlign: 'left', fontWeight: 700, color: 'var(--gray-500)', fontSize: 11, textTransform: 'uppercase', letterSpacing: .6, whiteSpace: 'nowrap' }}>{h}</th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {filtered.map((b, i) => {
-                  const st = STATUS_COLORS[b.status] || STATUS_COLORS.pending;
+                {filtered.map((c, i) => {
+                  const primary = c.email || c.phone || '?';
+                  const isOpen  = expanded === c.key;
                   return (
-                    <tr key={b.id} style={{ borderBottom: '1px solid var(--gray-200)', background: i % 2 === 0 ? '#fff' : '#fafafa', transition: 'background .15s' }}>
+                    <FragmentRow key={c.key}>
+                      <tr
+                        onClick={() => setExpanded(isOpen ? null : c.key)}
+                        style={{ borderBottom: isOpen ? 'none' : '1px solid var(--gray-200)', background: i % 2 === 0 ? '#fff' : '#fafafa', cursor: 'pointer' }}>
 
-                      {/* Customer */}
-                      <td style={{ padding: '12px 14px', whiteSpace: 'nowrap' }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'linear-gradient(135deg,#FFD6E8,#FFBCD9)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14, color: 'var(--pink-dark)', flexShrink: 0 }}>
-                            {b.customer_name?.[0]?.toUpperCase() || '?'}
+                        {/* Customer */}
+                        <td style={{ padding: '12px 14px', whiteSpace: 'nowrap' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'linear-gradient(135deg,#FFD6E8,#FFBCD9)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 800, fontSize: 14, color: 'var(--pink-dark)', flexShrink: 0 }}>
+                              {primary[0]?.toUpperCase() || '?'}
+                            </div>
+                            <span style={{ fontWeight: 600, color: 'var(--dark)', maxWidth: 200, overflow: 'hidden', textOverflow: 'ellipsis' }}>{primary}</span>
                           </div>
-                          <span style={{ fontWeight: 600, color: 'var(--dark)' }}>{b.customer_name}</span>
-                        </div>
-                      </td>
+                        </td>
 
-                      {/* Contact */}
-                      <td style={{ padding: '12px 14px' }}>
-                        <div style={{ fontWeight: 600, color: 'var(--dark)' }}>{b.customer_phone}</div>
-                        {b.customer_email && <div style={{ fontSize: 11, color: 'var(--gray-500)' }}>{b.customer_email}</div>}
-                      </td>
+                        {/* Contact */}
+                        <td style={{ padding: '12px 14px' }}>
+                          <div style={{ fontWeight: 600, color: 'var(--dark)' }}>{c.phone || '—'}</div>
+                          {c.email && <div style={{ fontSize: 11, color: 'var(--gray-500)' }}>{c.email}</div>}
+                        </td>
 
-                      {/* Service */}
-                      <td style={{ padding: '12px 14px' }}>
-                        <div style={{ fontWeight: 600, color: 'var(--dark)', maxWidth: 150 }}>{b.service_name}</div>
-                        <div style={{ fontSize: 11, color: 'var(--gray-500)' }}>{b.artist_name}</div>
-                      </td>
+                        {/* Total bookings */}
+                        <td style={{ padding: '12px 14px', whiteSpace: 'nowrap' }}>
+                          <span style={{ fontWeight: 700, color: 'var(--dark)' }}>{c.total}</span>
+                          {c.upcoming > 0 && <span style={{ fontSize: 11, color: '#1D4ED8', marginLeft: 6 }}>({c.upcoming} удахгүй)</span>}
+                        </td>
 
-                      {/* Date */}
-                      <td style={{ padding: '12px 14px', whiteSpace: 'nowrap' }}>
-                        <div style={{ fontWeight: 600, color: 'var(--dark)' }}>{b.booking_date}</div>
-                        <div style={{ fontSize: 11, color: 'var(--gray-500)' }}>{b.booking_time}</div>
-                      </td>
+                        {/* Completed count — key metric */}
+                        <td style={{ padding: '12px 14px', whiteSpace: 'nowrap' }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 12px', borderRadius: 50, background: '#F0FDF4', color: '#15803D', fontWeight: 800, fontSize: 14 }}>
+                            ✅ {c.completed}
+                            <span style={{ fontWeight: 500, fontSize: 11 }}>удаа</span>
+                          </span>
+                        </td>
 
-                      {/* Price */}
-                      <td style={{ padding: '12px 14px', fontWeight: 700, color: 'var(--pink-dark)', whiteSpace: 'nowrap' }}>
-                        {b.total_price ? `₮${b.total_price.toLocaleString()}` : '—'}
-                      </td>
+                        {/* Spent */}
+                        <td style={{ padding: '12px 14px', fontWeight: 700, color: 'var(--pink-dark)', whiteSpace: 'nowrap' }}>
+                          {c.spent ? `₮${c.spent.toLocaleString()}` : '—'}
+                        </td>
 
-                      {/* Status */}
-                      <td style={{ padding: '12px 14px' }}>
-                        <span style={{ padding: '4px 10px', borderRadius: 50, fontSize: 11, fontWeight: 700, background: st.bg, color: st.color, whiteSpace: 'nowrap' }}>
-                          {st.label}
-                        </span>
-                      </td>
+                        {/* Last visit */}
+                        <td style={{ padding: '12px 14px', whiteSpace: 'nowrap', color: 'var(--gray-500)', fontSize: 12 }}>
+                          {c.lastVisit || '—'}
+                        </td>
 
-                      {/* Actions */}
-                      <td style={{ padding: '12px 14px' }}>
-                        <select value={b.status} onChange={e => updateStatus(b.id, e.target.value)}
-                          style={{ ...inp, padding: '5px 8px', fontSize: 12, cursor: 'pointer' }}>
-                          <option value="pending">Хүлээгдэж байна</option>
-                          <option value="confirmed">Баталгаажсан</option>
-                          <option value="completed">Дууссан</option>
-                          <option value="cancelled">Цуцалсан</option>
-                        </select>
-                      </td>
-                    </tr>
+                        {/* Expand arrow */}
+                        <td style={{ padding: '12px 14px', color: 'var(--gray-400)', fontSize: 12 }}>
+                          {isOpen ? '▲' : '▼'}
+                        </td>
+                      </tr>
+
+                      {/* Expanded — booking history */}
+                      {isOpen && (
+                        <tr style={{ borderBottom: '1px solid var(--gray-200)', background: '#FFFBF5' }}>
+                          <td colSpan={7} style={{ padding: '8px 14px 16px 14px' }}>
+                            <div style={{ fontSize: 11, fontWeight: 700, color: 'var(--gray-500)', textTransform: 'uppercase', letterSpacing: .6, margin: '8px 0 6px' }}>
+                              Захиалгын түүх ({c.bookings.length})
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                              {c.bookings.map(b => {
+                                const st = STATUS_COLORS[b.status] || STATUS_COLORS.pending;
+                                return (
+                                  <div key={b.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '8px 12px', background: '#fff', borderRadius: 10, border: '1px solid var(--gray-200)', flexWrap: 'wrap' }}>
+                                    <span style={{ fontSize: 12, color: 'var(--gray-500)', minWidth: 90 }}>{b.booking_date} {b.booking_time}</span>
+                                    <span style={{ fontWeight: 600, color: 'var(--dark)', flex: 1, minWidth: 120 }}>{b.service_name}</span>
+                                    <span style={{ fontSize: 12, color: 'var(--gray-500)' }}>👩 {b.artist_name}</span>
+                                    {b.notes && <span style={{ fontSize: 11, color: 'var(--gray-500)', fontStyle: 'italic' }} title={b.notes}>📝 {b.notes}</span>}
+                                    <span style={{ fontWeight: 700, color: 'var(--pink-dark)', fontSize: 12 }}>{b.total_price ? `₮${b.total_price.toLocaleString()}` : ''}</span>
+                                    <select value={b.status} onChange={e => updateStatus(b.id, e.target.value)}
+                                      style={{ ...inp, padding: '4px 8px', fontSize: 11, cursor: 'pointer', background: st.bg, color: st.color, fontWeight: 700, borderColor: 'transparent' }}>
+                                      <option value="pending">Хүлээгдэж байна</option>
+                                      <option value="confirmed">Баталгаажсан</option>
+                                      <option value="completed">Дууссан</option>
+                                      <option value="cancelled">Цуцалсан</option>
+                                    </select>
+                                  </div>
+                                );
+                              })}
+                            </div>
+                          </td>
+                        </tr>
+                      )}
+                    </FragmentRow>
                   );
                 })}
               </tbody>
@@ -177,8 +217,13 @@ export default function CustomersManager({ showToast }) {
       </div>
 
       <div style={{ fontSize: 12, color: 'var(--gray-500)', textAlign: 'right' }}>
-        Нийт <strong>{filtered.length}</strong> захиалга · <strong>{uniqueCustomers.length}</strong> үйлчлүүлэгч
+        Нийт <strong>{filtered.length}</strong> үйлчлүүлэгч · <strong>{bookings.length}</strong> захиалга
       </div>
     </div>
   );
+}
+
+// Fragment wrapper that allows two <tr> siblings with a single key
+function FragmentRow({ children }) {
+  return <>{children}</>;
 }

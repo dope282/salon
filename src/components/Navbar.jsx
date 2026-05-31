@@ -43,15 +43,15 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className={`fixed top-0 left-0 right-0 z-[1000] px-12 py-4 flex items-center justify-between transition-all duration-300 max-[900px]:px-5 max-[640px]:px-4 ${scrolled ? 'bg-[rgba(255,250,245,.98)] backdrop-blur-2xl shadow-[0_2px_20px_rgba(201,168,76,.12)] border-b border-gold/10' : 'bg-[rgba(255,250,245,.92)] backdrop-blur-xl'}`}>
+      <nav className={`fixed top-0 left-0 right-0 z-[1000] px-12 py-4 flex items-center justify-between transition-all duration-300 max-[900px]:px-5 max-[640px]:px-4 max-[640px]:py-3 ${scrolled ? 'bg-[rgba(255,250,245,.98)] backdrop-blur-2xl shadow-[0_2px_20px_rgba(201,168,76,.12)] border-b border-gold/10' : 'bg-[rgba(255,250,245,.92)] backdrop-blur-xl'}`}>
 
         <div className="flex-shrink-0">
-          <Image src="/logo.png" alt="Hatantsetsey lash Beauty Salon" width={130} height={52} style={{ height: 52, width: 'auto' }} priority />
+          <Image src="/logo.png" alt="Hatantsetsey lash Beauty Salon" width={130} height={52} className="h-[52px] w-auto max-[640px]:h-10" priority />
         </div>
 
         {/* Desktop links */}
-        <ul className="hidden md:flex list-none gap-9">
-          {[['home','Нүүр'],['services','Үйлчилгээ'],['packages','Багц'],['products','Бүтээгдэхүүн'],['artists','Уран бүтээлчид'],['about','Бидний тухай'],['contact','Холбоо барих']].map(([id,label]) => (
+        <ul className="hidden lg:flex list-none gap-9 max-[1100px]:gap-6">
+          {[['home','Нүүр'],['services','Үйлчилгээ'],['packages','Багц'],['products','Бүтээгдэхүүн'],['artists','Артистууд'],['about','Бидний тухай'],['contact','Холбоо барих']].map(([id,label]) => (
             <li key={id}>
               <a href={`#${id}`} className="nav-link text-[13px] font-medium text-dark/70 hover:text-gold-dark tracking-wide"
                 onClick={e => { e.preventDefault(); scrollTo(id); }}>
@@ -64,33 +64,35 @@ export default function Navbar() {
         {/* Actions */}
         <div className="flex items-center gap-3">
           {user ? (
-            <div className="hidden md:flex items-center gap-2">
+            <div className="hidden lg:flex items-center gap-2">
               <OutlineBtn onClick={openMyBookings}>📅 Захиалгууд</OutlineBtn>
               <div className="flex items-center gap-2 bg-gold-light/60 border border-gold/25 rounded-full py-1.5 pl-2 pr-3">
                 <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#B8960C] to-[#D4AF37] text-white text-xs font-bold flex items-center justify-center shadow-sm">
-                  {user.email[0].toUpperCase()}
+                  {(user.user_metadata?.full_name || user.email)[0].toUpperCase()}
                 </div>
-                <span className="text-xs font-medium text-dark max-w-[110px] truncate">{user.email}</span>
+                <span className="text-xs font-medium text-dark max-w-[110px] truncate">
+                  {user.user_metadata?.full_name || user.email}
+                </span>
                 {isAdmin && <a href="/admin" className="text-[10px] text-gold-dark font-bold no-underline uppercase tracking-wider">Admin</a>}
                 <button className="border-none bg-none text-gray-400 text-[11px] cursor-pointer hover:text-salon-red transition-colors ml-0.5" onClick={handleLogout}>✕</button>
               </div>
             </div>
           ) : (
-            <OutlineBtn className="hidden md:block" onClick={openAuth}>Нэвтрэх</OutlineBtn>
+            <OutlineBtn className="hidden lg:block" onClick={openAuth}>Нэвтрэх</OutlineBtn>
           )}
-          <GoldBtn onClick={openBooking}>Цаг захиалах</GoldBtn>
+          <GoldBtn className="max-[480px]:!px-4 max-[480px]:!text-[13px]" onClick={openBooking}>Цаг захиалах</GoldBtn>
 
           <button
-            className={`hamburger md:hidden flex flex-col gap-[5px] cursor-pointer p-1.5 bg-none border-none min-w-[44px] min-h-[44px] items-center justify-center${mobOpen ? ' open' : ''}`}
+            className={`hamburger lg:hidden flex flex-col gap-[5px] cursor-pointer p-1.5 bg-none border-none min-w-[44px] min-h-[44px] items-center justify-center${mobOpen ? ' open' : ''}`}
             onClick={() => setMobOpen(o => !o)} aria-label="Menu">
             <span /><span /><span />
           </button>
         </div>
       </nav>
 
-      <div className={`mob-backdrop fixed inset-0 top-[60px] bg-dark/30 z-[998] backdrop-blur-sm${mobOpen ? ' open' : ''}`} onClick={() => setMobOpen(false)} />
+      <div className={`mob-backdrop fixed inset-0 top-[84px] max-[640px]:top-[64px] bg-dark/30 z-[998] backdrop-blur-sm${mobOpen ? ' open' : ''}`} onClick={() => setMobOpen(false)} />
 
-      <div className={`mob-menu fixed top-[60px] left-0 right-0 bg-[#FFFAF5] px-5 pb-6 shadow-[0_16px_48px_rgba(0,0,0,.12)] z-[999] flex-col gap-0 border-t border-gold/15${mobOpen ? ' open' : ''}`}>
+      <div className={`mob-menu fixed top-[84px] max-[640px]:top-[64px] left-0 right-0 bg-[#FFFAF5] px-5 pb-6 shadow-[0_16px_48px_rgba(0,0,0,.12)] z-[999] flex-col gap-0 border-t border-gold/15 max-h-[calc(100vh-64px)] overflow-y-auto${mobOpen ? ' open' : ''}`}>
         {[['home','🏠','Нүүр'],['services','✂️','Үйлчилгээ'],['packages','🎁','Багц'],['products','🛍️','Бүтээгдэхүүн'],['artists','👩‍🎨','Уран бүтээлчид'],['about','💫','Бидний тухай'],['contact','📞','Холбоо барих']].map(([id,icon,label]) => (
           <a key={id} href={`#${id}`}
             className="flex items-center gap-3 text-dark/80 text-[15px] font-medium py-3.5 px-2 border-b border-gold/10 last:border-0 no-underline hover:text-gold-dark transition-colors"
@@ -103,8 +105,12 @@ export default function Navbar() {
             <>
               <div className="flex items-center justify-between px-3 py-2.5 bg-gold-light/60 rounded-xl border border-gold/20">
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#B8960C] to-[#D4AF37] text-white text-xs font-bold flex items-center justify-center">{user.email[0].toUpperCase()}</div>
-                  <span className="text-sm font-medium text-dark truncate max-w-[160px]">{user.email}</span>
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#B8960C] to-[#D4AF37] text-white text-xs font-bold flex items-center justify-center">
+                    {(user.user_metadata?.full_name || user.email)[0].toUpperCase()}
+                  </div>
+                  <span className="text-sm font-medium text-dark truncate max-w-[160px]">
+                    {user.user_metadata?.full_name || user.email}
+                  </span>
                 </div>
                 <button className="border-none bg-none text-salon-red text-xs font-semibold cursor-pointer" onClick={handleLogout}>Гарах</button>
               </div>

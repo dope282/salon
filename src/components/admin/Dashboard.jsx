@@ -166,7 +166,14 @@ export default function Dashboard({ bookings, onSwitchView }) {
   const todayBks  = bookings.filter(b => b.booking_date === today && b.status !== 'cancelled');
   const pendingBks= bookings.filter(b => b.status === 'pending');
   const totalRev  = bookings.filter(b => b.status !== 'cancelled').reduce((s,b) => s+(b.total_price||0), 0);
-  const recent    = [...bookings].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 5);
+
+  // Ойрын захиалгууд — цуцлаагүй, одооноос хойшхи, захиалсан цагаар нь эрэмбэлж хамгийн ойрыг нь
+  const now = new Date();
+  const bkDateTime = (b) => new Date(`${b.booking_date}T${b.booking_time || '00:00'}`);
+  const recent = bookings
+    .filter(b => b.status !== 'cancelled' && b.booking_date && bkDateTime(b) >= now)
+    .sort((a, b) => bkDateTime(a) - bkDateTime(b))
+    .slice(0, 5);
 
   const stats = [
     { lbl:'Нийт захиалга',        val:bookings.length,   chg:`${pendingBks.length} хүлээгдэж байна`, ico:'📅', cls:'pink' },
@@ -234,7 +241,7 @@ export default function Dashboard({ bookings, onSwitchView }) {
             <thead><tr><th>Огноо & Цаг</th><th>Үйлчлүүлэгч</th><th>Үйлчилгээ</th><th>Уран бүтээлч</th><th>Статус</th></tr></thead>
             <tbody>
               {recent.length === 0
-                ? <tr><td colSpan={5} style={{ textAlign:'center', padding:24, color:'var(--gray-500)' }}>Захиалга байхгүй байна</td></tr>
+                ? <tr><td colSpan={5} style={{ textAlign:'center', padding:24, color:'var(--gray-500)' }}>Ойролцоо хугацаанд захиалга байхгүй байна</td></tr>
                 : recent.map(b => (
                   <tr key={b.id}>
                     <td>{formatDT(b.booking_date, b.booking_time)}</td>

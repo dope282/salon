@@ -4,14 +4,76 @@ import { useUI } from '@/contexts/UIContext';
 import { supabase } from '@/lib/supabase';
 
 const DEFAULT_IMG = 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=700&q=85&auto=format&fit=crop';
+const TIMES_DEFAULT = ['09:00','10:00','11:00','12:00','13:00','14:00','16:00','17:00'];
+
+const generateSlots = (start, end, stepMin = 60) => {
+  const slots = [];
+  let [h, m] = start.split(':').map(Number);
+  const [eh, em] = end.split(':').map(Number);
+  while (h * 60 + m < eh * 60 + em) {
+    slots.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
+    m += stepMin; h += Math.floor(m / 60); m %= 60;
+  }
+  return slots;
+};
+
+// Хамгийн ойр сул цагийг бүх артистаас тооцоолох (14 хоногийн дотор)
+const findNearestSlot = (artists, schedMap, booked) => {
+  const now = new Date();
+  const nowMins = now.getHours() * 60 + now.getMinutes();
+  for (let off = 0; off < 14; off++) {
+    const d = new Date(now); d.setDate(now.getDate() + off);
+    const dow = d.getDay();
+    const ds  = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+    const isToday = off === 0;
+    let best = null; // { time, artist }
+    for (const a of artists) {
+      const sched = schedMap[a.id]?.find(s => s.day_of_week === dow);
+      if (sched && !sched.is_active) continue;
+      const slots = sched ? generateSlots(sched.start_time, sched.end_time, 60) : TIMES_DEFAULT;
+      for (const t of slots) {
+        const [h, mn] = t.split(':').map(Number);
+        if (isToday && h * 60 + mn <= nowMins) continue;
+        if (booked[`${a.name}|${ds}`]?.has(t)) continue;
+        if (!best || t < best.time) best = { time: t, artist: a.name };
+      }
+    }
+    if (best) return { date: d, time: best.time, artist: best.artist };
+  }
+  return null;
+};
 
 export default function Hero() {
   const { openBooking } = useUI();
   const [heroImg, setHeroImg] = useState(DEFAULT_IMG);
+  const [nextSlot, setNextSlot] = useState(null);
 
   useEffect(() => {
     supabase.from('site_settings').select('value').eq('key', 'hero_image_url').single()
       .then(({ data }) => { if (data?.value) setHeroImg(data.value); });
+
+    // Хамгийн ойр сул цаг
+    (async () => {
+      const today = new Date();
+      const todayStr = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+      const maxDay = new Date(today); maxDay.setDate(today.getDate() + 14);
+      const maxStr = `${maxDay.getFullYear()}-${String(maxDay.getMonth()+1).padStart(2,'0')}-${String(maxDay.getDate()).padStart(2,'0')}`;
+
+      const [{ data: aData }, { data: schedData }, { data: bkData }] = await Promise.all([
+        supabase.from('artists').select('id, name').eq('active', true).order('id'),
+        supabase.from('artist_schedules').select('*'),
+        supabase.from('bookings').select('artist_name, booking_date, booking_time')
+          .neq('status', 'cancelled').gte('booking_date', todayStr).lte('booking_date', maxStr),
+      ]);
+      if (!aData?.length) return;
+
+      const schedMap = {};
+      (schedData || []).forEach(r => { if (!schedMap[r.artist_id]) schedMap[r.artist_id] = []; schedMap[r.artist_id].push(r); });
+      const booked = {};
+      (bkData || []).forEach(b => { const k = `${b.artist_name}|${b.booking_date}`; if (!booked[k]) booked[k] = new Set(); booked[k].add(b.booking_time); });
+
+      setNextSlot(findNearestSlot(aData, schedMap, booked));
+    })();
   }, []);
 
   return (
@@ -80,10 +142,23 @@ export default function Hero() {
           </div>
 
           {/* Float cards */}
-          <div className="float-card-1 absolute bottom-11 left-[-20px] bg-white/95 backdrop-blur-sm rounded-2xl px-4 py-3.5 shadow-[0_8px_32px_rgba(0,0,0,.12)] whitespace-nowrap z-[3] border border-gold/15 max-[900px]:left-1 max-[900px]:bottom-3 max-[640px]:left-[-4px] max-[640px]:bottom-2 max-[640px]:px-3 max-[640px]:py-2">
-            <div className="text-[10px] text-gray-400 mb-0.5 uppercase tracking-[1px]">Дараагийн цаг</div>
-            <div className="text-[15px] font-bold text-dark max-[640px]:text-[13px]">5-р сар 15, 10:00</div>
-            <div className="text-[11px] text-gold-dark mt-0.5 font-medium">Үс будах · Алис Жонсон</div>
+          <div onClick={openBooking}
+            className="float-card-1 absolute bottom-11 left-[-20px] bg-white/95 backdrop-blur-sm rounded-2xl px-4 py-3.5 shadow-[0_8px_32px_rgba(0,0,0,.12)] whitespace-nowrap z-[3] border border-gold/15 cursor-pointer hover:shadow-[0_12px_40px_rgba(201,168,76,.25)] hover:border-gold/40 transition-all max-[900px]:left-1 max-[900px]:bottom-3 max-[640px]:left-[-4px] max-[640px]:bottom-2 max-[640px]:px-3 max-[640px]:py-2">
+            <div className="text-[10px] text-gray-400 mb-0.5 uppercase tracking-[1px] flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-green-500 inline-block" />
+              Хамгийн ойр сул цаг
+            </div>
+            {nextSlot ? (
+              <>
+                <div className="text-[15px] font-bold text-dark max-[640px]:text-[13px]">{nextSlot.date.getMonth()+1}-р сар {nextSlot.date.getDate()}, {nextSlot.time}</div>
+                <div className="text-[11px] text-gold-dark mt-0.5 font-medium">Сул байна · {nextSlot.artist}</div>
+              </>
+            ) : (
+              <>
+                <div className="text-[15px] font-bold text-dark max-[640px]:text-[13px]">Цаг захиалах</div>
+                <div className="text-[11px] text-gold-dark mt-0.5 font-medium">Боломжтой цагаа сонгоно уу</div>
+              </>
+            )}
           </div>
 
           <div className="float-card-2 absolute top-11 right-[-20px] bg-white/95 backdrop-blur-sm rounded-2xl px-4 py-3.5 shadow-[0_8px_32px_rgba(0,0,0,.12)] whitespace-nowrap z-[3] border border-gold/15 max-[900px]:right-1 max-[900px]:top-3 max-[640px]:right-[-4px] max-[640px]:top-2 max-[640px]:px-3 max-[640px]:py-2">

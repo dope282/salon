@@ -74,7 +74,7 @@ export default function BookingsTable({ bookings, onRefresh, showToast }) {
       <div className="tbl-scroll">
         <table>
           <thead>
-            <tr><th>#</th><th>Үйлчлүүлэгч</th><th>Утас</th><th>Үйлчилгээ</th><th>Уран бүтээлч</th><th>Огноо & Цаг</th><th>Статус</th><th>Үйлдэл</th></tr>
+            <tr><th>#</th><th>Утас</th><th>Үйлчилгээ</th><th>Уран бүтээлч</th><th>Огноо & Цаг</th><th>Тэмдэглэл</th><th>Статус</th><th>Үйлдэл</th></tr>
           </thead>
           <tbody>
             {filtered.length === 0
@@ -82,11 +82,13 @@ export default function BookingsTable({ bookings, onRefresh, showToast }) {
               : filtered.map(b => (
                 <tr key={b.id}>
                   <td style={{ fontSize:11, color:'var(--gray-500)' }}>{b.id.slice(0,6).toUpperCase()}</td>
-                  <td><strong>{b.customer_name}</strong></td>
-                  <td>{b.customer_phone}</td>
+                  <td><strong>{b.customer_phone}</strong></td>
                   <td>{b.service_name}</td>
                   <td>{b.artist_name}</td>
                   <td>{formatDT(b.booking_date, b.booking_time)}</td>
+                  <td style={{ maxWidth:200, fontSize:12, color: b.notes ? 'var(--dark)' : 'var(--gray-300)' }}>
+                    {b.notes ? <span title={b.notes}>📝 {b.notes}</span> : '—'}
+                  </td>
                   <td><span className={`badge ${badgeCls(b.status)}`}>{statusMn(b.status)}</span></td>
                   <td><ActionBtns b={b} /></td>
                 </tr>

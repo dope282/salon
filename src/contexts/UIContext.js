@@ -6,6 +6,7 @@ const UIContext = createContext(null);
 export function UIProvider({ children }) {
   const [bookingOpen, setBookingOpen]   = useState(false);
   const [bookingArtist, setBookingArtist] = useState(null);
+  const [bookingPackage, setBookingPackage] = useState(null);
   const [authOpen, setAuthOpen]         = useState(false);
   const [myBookingsOpen, setMyBookingsOpen] = useState(false);
   const [toast, setToast]               = useState({ show: false, msg: '', type: 'ok' });
@@ -17,9 +18,10 @@ export function UIProvider({ children }) {
     timerRef.current = setTimeout(() => setToast(t => ({ ...t, show: false })), 3400);
   }, []);
 
-  const openBooking = () => { setBookingArtist(null); setBookingOpen(true);  document.body.style.overflow = 'hidden'; };
-  const closeBooking = () => { setBookingOpen(false); setBookingArtist(null); document.body.style.overflow = ''; };
-  const openBookingForArtist = (artistName) => { setBookingArtist(artistName); setBookingOpen(true); document.body.style.overflow = 'hidden'; };
+  const openBooking = () => { setBookingArtist(null); setBookingPackage(null); setBookingOpen(true);  document.body.style.overflow = 'hidden'; };
+  const closeBooking = () => { setBookingOpen(false); setBookingArtist(null); setBookingPackage(null); document.body.style.overflow = ''; };
+  const openBookingForArtist = (artistName) => { setBookingArtist(artistName); setBookingPackage(null); setBookingOpen(true); document.body.style.overflow = 'hidden'; };
+  const openBookingForPackage = (pkg) => { setBookingArtist(null); setBookingPackage(pkg); setBookingOpen(true); document.body.style.overflow = 'hidden'; };
   const openAuth    = () => { setAuthOpen(true);     document.body.style.overflow = 'hidden'; };
   const closeAuth   = () => { setAuthOpen(false);    document.body.style.overflow = ''; };
   const openMyBookings  = () => { setMyBookingsOpen(true);  document.body.style.overflow = 'hidden'; };
@@ -31,7 +33,7 @@ export function UIProvider({ children }) {
   }, []);
 
   return (
-    <UIContext.Provider value={{ bookingOpen, bookingArtist, authOpen, myBookingsOpen, toast, showToast, openBooking, closeBooking, openBookingForArtist, openAuth, closeAuth, openMyBookings, closeMyBookings }}>
+    <UIContext.Provider value={{ bookingOpen, bookingArtist, bookingPackage, authOpen, myBookingsOpen, toast, showToast, openBooking, closeBooking, openBookingForArtist, openBookingForPackage, openAuth, closeAuth, openMyBookings, closeMyBookings }}>
       {children}
     </UIContext.Provider>
   );

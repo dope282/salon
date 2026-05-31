@@ -90,10 +90,6 @@ export default function AdminPage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-full px-4 py-2 w-[220px] max-[900px]:hidden focus-within:border-pink transition-all">
-              <i className="fas fa-search text-gray-300 text-[13px]" />
-              <input type="text" placeholder="Хайх..." className="border-none outline-none text-[13px] w-full bg-transparent" />
-            </div>
             <div onClick={() => showToast('Мэдэгдэл байхгүй байна', 'ok')}
               className="w-10 h-10 rounded-full border border-gray-200 bg-white flex items-center justify-center cursor-pointer text-gray-500 relative transition-all hover:border-pink hover:text-pink">
               <i className="fas fa-bell" />

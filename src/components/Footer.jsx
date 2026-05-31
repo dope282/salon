@@ -14,8 +14,8 @@ export default function Footer() {
             Hatantsetsey lash Beauty Salon — тансаглал, мэргэжил, итгэлийн нэгдэл. Та бидэнтэй хамт гоо сайхныхаа шинэ хуудсыг нээнэ үү.
           </p>
           <div className="flex gap-3">
-            {['instagram','facebook','tiktok','youtube'].map(s => (
-              <a key={s} href="#"
+            {['facebook'].map(s => (
+              <a key={s} href="https://www.facebook.com/Hatantsetsegsalon"
                 className="w-9 h-9 rounded-full bg-white/6 border border-white/10 flex items-center justify-center text-white/50 no-underline text-sm transition-all hover:bg-gold/20 hover:border-gold/30 hover:text-gold">
                 <i className={`fab fa-${s}`} />
               </a>
@@ -26,7 +26,7 @@ export default function Footer() {
         <div>
           <div className="text-[10px] font-bold uppercase tracking-[2.5px] text-gold mb-5">Хурдан холбоос</div>
           <ul className="list-none space-y-3">
-            {['Нүүр','Үйлчилгээ','Уран бүтээлчид','Бидний тухай','Холбоо барих'].map(l => (
+            {['Нүүр','Үйлчилгээ','Артистууд','Бидний тухай','Холбоо барих'].map(l => (
               <li key={l}>
                 <a href="#" className="text-white/40 no-underline text-[13px] transition-colors hover:text-gold tracking-wide">{l}</a>
               </li>
@@ -48,25 +48,18 @@ export default function Footer() {
         <div>
           <div className="text-[10px] font-bold uppercase tracking-[2.5px] text-gold mb-5">Холбоо барих</div>
           {[
-            ['fa-phone','(976) 9911-2233'],
-            ['fa-envelope','info@hatantsetseylash.mn'],
-            ['fa-map-marker-alt','Сүхбаатар дүүрэг, Улаанбаатар'],
-          ].map(([icon, text]) => (
-            <div key={text} className="flex items-center gap-3 text-white/40 text-[13px] mb-3 hover:text-white/60 transition-colors">
-              <i className={`fas ${icon} text-gold/70 w-4 text-center`} />{text}
-            </div>
+            ['fa-phone','85897070', 'tel:85897070'],
+            ['fa-envelope','bdolmoosuren@gmail.com', 'mailto:bdolmoosuren@gmail.com'],
+            ['fa-map-marker-alt','Darkhan, Mongolia, Дархан-AMU MALL -худалдааны төв 6н давхарт', 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent('AMU MALL Darkhan Mongolia')],
+          ].map(([icon, text, href]) => (
+            <a key={text} href={href}
+              target={icon === 'fa-map-marker-alt' ? '_blank' : undefined}
+              rel={icon === 'fa-map-marker-alt' ? 'noopener noreferrer' : undefined}
+              className="flex items-start gap-3 text-white/40 text-[13px] mb-3 no-underline hover:text-gold transition-colors">
+              <i className={`fas ${icon} text-gold/70 w-4 text-center mt-0.5 flex-shrink-0`} />
+              <span>{text}</span>
+            </a>
           ))}
-          <div className="mt-6">
-            <div className="text-[10px] font-bold uppercase tracking-[2.5px] text-gold mb-2.5">Мэдээллийн хуудас</div>
-            <p className="text-white/35 text-xs mb-3 leading-relaxed">Тусгай санал, шинэчлэлт авахын тулд бүртгүүлэх</p>
-            <div className="flex gap-2 max-[640px]:flex-col">
-              <input type="email" placeholder="Имэйл хаяг..."
-                className="flex-1 bg-white/6 border border-white/12 rounded-full px-4 py-2.5 text-white text-xs outline-none placeholder:text-white/25 focus:border-gold/40 transition-all" />
-              <button className="bg-gradient-to-r from-[#B8960C] to-[#C9A84C] text-dark border-none px-4 py-2.5 rounded-full text-xs font-bold cursor-pointer transition-all hover:shadow-[0_4px_16px_rgba(201,168,76,.40)] whitespace-nowrap">
-                Бүртгүүлэх
-              </button>
-            </div>
-          </div>
         </div>
       </div>
 

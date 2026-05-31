@@ -42,8 +42,11 @@ export default function Services() {
           <div key={s.id} onClick={openBooking}
             className="group bg-[#FEFCF8] rounded-2xl px-6 py-6 flex items-center gap-4 transition-all duration-300 cursor-pointer border border-gold/10 hover:border-gold/40 hover:bg-gradient-to-br hover:from-[#FFFDF5] hover:to-[#FFF8E8] hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(201,168,76,.15)] max-[640px]:px-4 max-[640px]:py-4 max-[640px]:gap-3.5"
             style={{ opacity: 1 }}>
-            <div className="w-14 h-14 rounded-xl flex items-center justify-center text-[26px] flex-shrink-0 bg-gradient-to-br from-gold-light to-[#EDD98A]/30 group-hover:from-gold-light group-hover:to-gold/20 transition-all max-[640px]:w-12 max-[640px]:h-12 max-[640px]:text-xl border border-gold/15">
-              {s.emoji}
+            <div className="w-14 h-14 rounded-xl flex items-center justify-center text-[26px] flex-shrink-0 bg-gradient-to-br from-gold-light to-[#EDD98A]/30 group-hover:from-gold-light group-hover:to-gold/20 transition-all max-[640px]:w-12 max-[640px]:h-12 max-[640px]:text-xl border border-gold/15 overflow-hidden">
+              {s.image_url
+                // eslint-disable-next-line @next/next/no-img-element
+                ? <img src={s.image_url} alt={s.name_mn} className="w-full h-full object-cover" />
+                : s.emoji}
             </div>
             <div className="flex-1 min-w-0">
               <div className="font-semibold text-[14px] text-dark mb-0.5 group-hover:text-dark truncate">{s.name_mn}</div>

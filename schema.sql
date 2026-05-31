@@ -11,9 +11,13 @@ CREATE TABLE IF NOT EXISTS public.services (
   price_from  INTEGER NOT NULL DEFAULT 0,
   duration_min INTEGER DEFAULT 60,
   emoji       TEXT DEFAULT '✂️',
+  image_url   TEXT DEFAULT '',
   active      BOOLEAN DEFAULT true,
   created_at  TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- SERVICES: add image_url column (run separately if table already exists)
+ALTER TABLE public.services ADD COLUMN IF NOT EXISTS image_url TEXT DEFAULT '';
 
 -- 2. ARTISTS TABLE
 CREATE TABLE IF NOT EXISTS public.artists (

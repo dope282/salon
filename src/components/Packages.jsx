@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { useUI }    from '@/contexts/UIContext';
 
 export default function PackagesSection() {
-  const { openBooking } = useUI();
+  const { openBookingForPackage } = useUI();
   const [packages, setPackages] = useState([]);
   const [loading,  setLoading]  = useState(true);
 
@@ -29,12 +29,12 @@ export default function PackagesSection() {
 
   return (
     <section className="packages-section" id="packages">
-      <div className="sec-header">
-        
-        <h2 className="sec-title">Манай <span>Багц Үйлчилгээ</span></h2>
-        <button className="btn-ghost" onClick={openBooking}>Захиалах →</button>
+      <div className="max-w-[1200px] mx-auto mb-12 max-[900px]:mb-8 max-[640px]:mb-7">
+        <p className="text-[11px] font-bold uppercase tracking-[3px] text-gold mb-2">Манай үйлчилгээ</p>
+        <h2 className="font-serif text-[36px] font-semibold tracking-tight text-dark max-[900px]:text-[28px] max-[640px]:text-2xl">
+          Гоо Сайхны <span className="bg-gradient-to-r from-[#B8960C] to-[#C9A84C] bg-clip-text text-transparent [-webkit-background-clip:text] [-webkit-text-fill-color:transparent]">Багц</span> Үйлчилгээ
+        </h2>
       </div>
-
       <div className="packages-grid">
         {packages.map(p => (
           <div key={p.id} className="pkg-card">
@@ -45,8 +45,13 @@ export default function PackagesSection() {
               </div>
             )}
 
-            {/* Icon */}
-            <div className="pkg-icon">{p.emoji}</div>
+            {/* Icon / image */}
+            <div className="pkg-icon">
+              {p.image_url
+                // eslint-disable-next-line @next/next/no-img-element
+                ? <img src={p.image_url} alt={p.name} style={{ width: 72, height: 72, borderRadius: 16, objectFit: 'cover' }} />
+                : p.emoji}
+            </div>
 
             {/* Name */}
             <div className="pkg-name">{p.name}</div>
@@ -78,7 +83,7 @@ export default function PackagesSection() {
               )}
             </div>
 
-            <button className="btn-book pkg-btn" onClick={openBooking}>
+            <button className="btn-book pkg-btn" onClick={() => openBookingForPackage(p)}>
               🎁 Багцаар захиалах
             </button>
           </div>

@@ -36,7 +36,7 @@ const INIT_BK = { mode:'service', svcs:[], pkg:null, art:null, date:null, time:n
 
 export default function BookingModal() {
   const { user } = useAuth();
-  const { bookingOpen, bookingArtist, closeBooking, showToast } = useUI();
+  const { bookingOpen, bookingArtist, bookingPackage, closeBooking, showToast } = useUI();
   const [step, setStep]     = useState(1);
   const [bk, setBk]         = useState(INIT_BK);
   const [calY, setCalY]     = useState(new Date().getFullYear());
@@ -51,8 +51,8 @@ export default function BookingModal() {
   const [pkgSvcs,         setPkgSvcs]         = useState({});
   const [artistSchedules, setArtistSchedules] = useState({});
   const [bookedSlots,     setBookedSlots]     = useState({}); // { 'artistName|YYYY-MM-DD': Set<time> }
-  const nameRef  = useRef();
   const phoneRef = useRef();
+  const notesRef = useRef();
 
   useEffect(() => {
     const todayStr = new Date().toISOString().split('T')[0];
@@ -73,7 +73,7 @@ export default function BookingModal() {
     ]).then(([{ data: aData }, { data: sData }, { data: asData }, { data: apData }, { data: pkgData }, { data: psData }, { data: schedData }, { data: bkData }]) => {
       if (aData?.length) setArtists(aData);
       if (sData?.length) {
-        setServices(sData.map(s => ({ id: s.id, name: s.name_mn, price: s.price_from, ico: s.emoji, duration: s.duration_min })));
+        setServices(sData.map(s => ({ id: s.id, name: s.name_mn, price: s.price_from, ico: s.emoji, img: s.image_url, duration: s.duration_min })));
         const nameToId = {};
         sData.forEach(s => { nameToId[s.name_mn] = s.id; });
         setSvcIdMap(nameToId);
@@ -118,15 +118,19 @@ export default function BookingModal() {
     });
   }, []);
 
-  const reset = () => { setStep(1); setBk(bookingArtist ? { ...INIT_BK, art: bookingArtist } : INIT_BK); setCalY(new Date().getFullYear()); setCalM(new Date().getMonth()); };
+  const reset = () => { setStep(1); setBk(INIT_BK); setCalY(new Date().getFullYear()); setCalM(new Date().getMonth()); };
 
-  // Modal нээгдэх бүрт артист урьдчилан тохируулна
+  // Modal нээгдэх бүрт артист/багц урьдчилан тохируулна
   useEffect(() => {
     if (bookingOpen) {
-      setBk(prev => ({ ...INIT_BK, art: bookingArtist || null }));
+      if (bookingPackage) {
+        setBk({ ...INIT_BK, mode: 'package', pkg: bookingPackage, art: null });
+      } else {
+        setBk({ ...INIT_BK, art: bookingArtist || null });
+      }
       setStep(1);
     }
-  }, [bookingOpen, bookingArtist]);
+  }, [bookingOpen, bookingArtist, bookingPackage]);
   const handleClose = () => { closeBooking(); reset(); };
 
   const next = async () => {
@@ -142,17 +146,17 @@ export default function BookingModal() {
 
   const confirm = async () => {
     if (loading) return;
-    const name  = nameRef.current?.value.trim();
     const phone = phoneRef.current?.value.trim();
-    if (!name)  { showToast('Нэрээ оруулна уу', 'err'); return; }
+    const notes = notesRef.current?.value.trim() || null;
     if (!phone) { showToast('Утасны дугаараа оруулна уу', 'err'); return; }
+    if (!/^[0-9]{8}$/.test(phone)) { showToast('Утасны дугаар 8 оронтой байх ёстой', 'err'); return; }
     setLoading(true);
     const dateStr = bk.date ? `${bk.date.getFullYear()}-${String(bk.date.getMonth()+1).padStart(2,'0')}-${String(bk.date.getDate()).padStart(2,'0')}` : null;
     const { error } = await supabase.from('bookings').insert([{
-      customer_name: name, customer_phone: phone, customer_email: user?.email || null,
+      customer_name: phone, customer_phone: phone, customer_email: user?.email || null,
       service_name: bk.mode === 'package' ? `🎁 ${bk.pkg.name}` : bk.svcs.map(s => s.name).join(', '),
       artist_name: bk.art, booking_date: dateStr,
-      booking_time: bk.time, payment_method: bk.pay,
+      booking_time: bk.time, payment_method: bk.pay, notes,
       total_price: bk.mode === 'package' ? (bk.pkg.price ?? 0) : bk.svcs.reduce((s, v) => s + (v.price ?? 0), 0),
       status: 'pending', user_id: user?.id || null,
     }]);
@@ -329,7 +333,12 @@ export default function BookingModal() {
                     {sel && (
                       <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-pink text-white text-[10px] font-bold flex items-center justify-center">✓</div>
                     )}
-                    <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-[22px] flex-shrink-0 transition-all max-[640px]:w-10 max-[640px]:h-10 max-[640px]:text-[18px] ${sel ? 'bg-pink' : 'bg-gray-100'}`}>{s.ico}</div>
+                    <div className={`w-12 h-12 rounded-lg flex items-center justify-center text-[22px] flex-shrink-0 transition-all overflow-hidden max-[640px]:w-10 max-[640px]:h-10 max-[640px]:text-[18px] ${sel ? 'bg-pink' : 'bg-gray-100'}`}>
+                      {s.img
+                        // eslint-disable-next-line @next/next/no-img-element
+                        ? <img src={s.img} alt={s.name} className="w-full h-full object-cover" />
+                        : s.ico}
+                    </div>
                     <div>
                       <div className="font-semibold text-sm max-[640px]:text-[13px]">{s.name}</div>
                       <div className="text-[13px] text-pink font-semibold max-[640px]:text-xs">₮{(s.price ?? 0).toLocaleString()}+</div>
@@ -376,7 +385,12 @@ export default function BookingModal() {
                           <div className="absolute top-3 right-3 bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full">-₮{saved.toLocaleString()}</div>
                         )}
                         <div className="flex items-start gap-3">
-                          <div className="text-3xl flex-shrink-0 max-[640px]:text-2xl">{p.emoji}</div>
+                          <div className="text-3xl flex-shrink-0 max-[640px]:text-2xl">
+                            {p.image_url
+                              // eslint-disable-next-line @next/next/no-img-element
+                              ? <img src={p.image_url} alt={p.name} className="w-12 h-12 rounded-xl object-cover max-[640px]:w-10 max-[640px]:h-10" />
+                              : p.emoji}
+                          </div>
                           <div className="flex-1 min-w-0">
                             <div className="font-bold text-sm mb-1 max-[640px]:text-[13px]">{p.name}</div>
                             {p.description && <div className="text-xs text-gray-500 mb-2 leading-relaxed">{p.description}</div>}
@@ -593,14 +607,14 @@ export default function BookingModal() {
                 <div className="mt-4 border-t border-gray-200 pt-3.5">
                   <div className="text-sm font-semibold text-dark mb-2.5">Холбоо барих мэдээлэл</div>
                   <div className="mb-2.5">
-                    <label className="block text-xs font-semibold mb-1">Таны нэр <span className="text-salon-red">*</span></label>
-                    <input ref={nameRef} type="text" placeholder="Овог Нэр" defaultValue={user?.user_metadata?.full_name || ''}
+                    <label className="block text-xs font-semibold mb-1">Утасны дугаар <span className="text-salon-red">*</span></label>
+                    <input ref={phoneRef} type="tel" placeholder="99xxxxxx" defaultValue={user?.user_metadata?.phone || ''}
                       className="w-full px-3 py-2 border-[1.5px] border-gray-200 rounded-xl text-sm font-sans outline-none focus:border-gold transition-all max-[640px]:text-base" />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold mb-1">Утасны дугаар <span className="text-salon-red">*</span></label>
-                    <input ref={phoneRef} type="tel" placeholder="99xxxxxx"
-                      className="w-full px-3 py-2 border-[1.5px] border-gray-200 rounded-xl text-sm font-sans outline-none focus:border-gold transition-all max-[640px]:text-base" />
+                    <label className="block text-xs font-semibold mb-1">Нэмэлт тэмдэглэл <span className="text-gray-400 font-normal">(заавал биш)</span></label>
+                    <textarea ref={notesRef} rows={2} placeholder="Жишээ: тодорхой загвар, харшил, тусгай хүсэлт..."
+                      className="w-full px-3 py-2 border-[1.5px] border-gray-200 rounded-xl text-sm font-sans outline-none focus:border-gold transition-all resize-none max-[640px]:text-base" />
                   </div>
                 </div>
               </div>

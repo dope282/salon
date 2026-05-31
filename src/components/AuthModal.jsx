@@ -17,6 +17,7 @@ export default function AuthModal() {
 
   const loginEmailRef = useRef();
   const loginPassRef  = useRef();
+  const regPhoneRef   = useRef();
   const regEmailRef   = useRef();
   const regPassRef    = useRef();
   const regPass2Ref   = useRef();
@@ -43,15 +44,17 @@ export default function AuthModal() {
   };
 
   const handleRegister = async () => {
+    const phone = regPhoneRef.current.value.trim();
     const email = regEmailRef.current.value.trim();
     const pass  = regPassRef.current.value;
     const pass2 = regPass2Ref.current.value;
-    if (!email || !pass || !pass2) { showMsg('Бүх талбарыг бөглөнө үү.'); return; }
+    if (!phone || !email || !pass || !pass2) { showMsg('Бүх талбарыг бөглөнө үү.'); return; }
+    if (!/^[0-9]{8}$/.test(phone)) { showMsg('Утасны дугаар 8 оронтой байх ёстой.'); return; }
     if (pass.length < 8) { showMsg('Нууц үг хамгийн багадаа 8 тэмдэгт байх ёстой.'); return; }
     if (pass !== pass2)  { showMsg('Нууц үгнүүд таарахгүй байна.'); return; }
     setLoading(true);
     try {
-      await signUp(email, pass);
+      await signUp(email, pass, { phone });
       showMsg('✓ Баталгаажуулах имэйл илгээлээ! Имэйлээ шалгана уу.', 'ok');
     } catch (e) {
       showMsg(e.message === 'User already registered' ? 'Энэ имэйл аль хэдийн бүртгэлтэй байна.' : e.message);
@@ -127,11 +130,12 @@ export default function AuthModal() {
             <h2 className="font-serif text-[24px] font-semibold text-center mb-1 text-dark">Шинэ бүртгэл</h2>
             <p className="text-xs text-dark/35 text-center mb-6 tracking-wide uppercase">Хурдан бүртгүүлж давуу эрх эдэлнэ үү</p>
             {[
-              { ref: regEmailRef, label: 'Имэйл хаяг', type: 'email', ph: 'name@example.com', ac: 'email' },
-              { ref: regPassRef,  label: 'Нууц үг', type: 'password', ph: '••••••••', ac: 'new-password', hint: '(8+ тэмдэгт)' },
-              { ref: regPass2Ref, label: 'Нууц үг давтах', type: 'password', ph: '••••••••', ac: 'new-password' },
+              { ref: regPhoneRef, label: 'Утасны дугаар',  type: 'tel',      ph: '99xxxxxx',           ac: 'tel' },
+              { ref: regEmailRef, label: 'Имэйл хаяг',     type: 'email',    ph: 'name@example.com',   ac: 'email' },
+              { ref: regPassRef,  label: 'Нууц үг',        type: 'password', ph: '••••••••',            ac: 'new-password', hint: '(8+ тэмдэгт)' },
+              { ref: regPass2Ref, label: 'Нууц үг давтах', type: 'password', ph: '••••••••',            ac: 'new-password' },
             ].map(({ ref, label, type, ph, ac, hint }) => (
-              <div key={label} className="mb-4">
+              <div key={label} className="mb-3">
                 <label className={lbl}>{label} {hint && <span className="text-dark/25 normal-case tracking-normal font-normal">{hint}</span>}</label>
                 <input ref={ref} type={type} placeholder={ph} autoComplete={ac} onKeyDown={handleKeyDown} className={inp} />
               </div>

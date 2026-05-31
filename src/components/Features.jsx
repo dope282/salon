@@ -14,7 +14,13 @@ export default function Features() {
           Яагаад <span className="bg-gradient-to-r from-[#D4AF37] to-[#F0C060] bg-clip-text text-transparent [-webkit-background-clip:text] [-webkit-text-fill-color:transparent]">Биднийг Сонгох</span> Вэ?
         </h2>
         <p className="text-[14px] text-white/40 mt-3 max-w-[420px] mx-auto tracking-wide">
-          Тансаглал, мэргэжил, итгэл — энэ гурвыг нэгтгэсэн салон
+          ✔️ Мэргэжлийн үйлчилгээ
+        </p>
+        <p className="text-[14px] text-white/40 mt-3 max-w-[420px] mx-auto tracking-wide">
+          ✔️ Цэвэр, аюулгүй орчин
+        </p>
+        <p className="text-[14px] text-white/40 mt-3 max-w-[420px] mx-auto tracking-wide">
+          ✔️ Танд тохирсон design
         </p>
       </div>
 

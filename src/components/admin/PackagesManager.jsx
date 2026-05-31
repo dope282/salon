@@ -14,6 +14,7 @@ export default function PackagesManager({ showToast }) {
   const [form,        setForm]        = useState(null);
   const [saving,      setSaving]      = useState(false);
   const [uploading,   setUploading]   = useState(false);
+  const [dragOver,    setDragOver]    = useState(false);
   const [delId,       setDelId]       = useState(null);
   const [allServices, setAllServices] = useState([]);
   const [allArtists,  setAllArtists]  = useState([]);
@@ -122,6 +123,7 @@ export default function PackagesManager({ showToast }) {
     setF('image_url', supabase.storage.from('hero-images').getPublicUrl(fname).data.publicUrl);
     setUploading(false); showToast('Зураг байршлаа ✓', 'ok');
   };
+  const handleDrop = (e) => { e.preventDefault(); setDragOver(false); handleFile(e.dataTransfer.files?.[0]); };
 
   const inp = { width: '100%', padding: '9px 13px', borderRadius: 10, border: '1.5px solid var(--gray-200)', fontSize: 13, fontFamily: 'Inter,sans-serif', outline: 'none', color: 'var(--dark)', background: '#fff' };
 
@@ -171,9 +173,12 @@ export default function PackagesManager({ showToast }) {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {packages.map(p => (
               <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', borderRadius: 14, border: '1.5px solid var(--gray-200)', background: p.active ? '#fff' : 'var(--gray-100)', opacity: p.active ? 1 : .7, transition: 'all .2s', flexWrap: 'wrap' }}>
-                {/* Emoji/icon */}
-                <div style={{ width: 52, height: 52, borderRadius: 14, background: 'linear-gradient(135deg,#FFF0E6,#FFD6B8)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, flexShrink: 0 }}>
-                  {p.emoji}
+                {/* Package image / emoji fallback */}
+                <div style={{ width: 52, height: 52, borderRadius: 14, background: 'linear-gradient(135deg,#FFF0E6,#FFD6B8)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, flexShrink: 0, overflow: 'hidden' }}>
+                  {p.image_url
+                    // eslint-disable-next-line @next/next/no-img-element
+                    ? <img src={p.image_url} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    : p.emoji}
                 </div>
                 {/* Info */}
                 <div style={{ flex: 1, minWidth: 160 }}>
@@ -258,9 +263,41 @@ export default function PackagesManager({ showToast }) {
             </div>
           </div>
 
-          {/* Emoji picker */}
+          {/* Image upload */}
           <div style={{ borderTop: '1.5px solid var(--gray-200)', paddingTop: 16, marginBottom: 16 }}>
-            <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-500)', display: 'block', marginBottom: 10, textTransform: 'uppercase', letterSpacing: .8 }}>Дүрс / Emoji</label>
+            <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-500)', display: 'block', marginBottom: 10, textTransform: 'uppercase', letterSpacing: .8 }}>🖼️ Зураг</label>
+            <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'flex-start' }}>
+
+              {/* Preview */}
+              <div style={{ width: 100, height: 100, borderRadius: 14, overflow: 'hidden', border: '2px solid var(--gray-200)', background: 'linear-gradient(135deg,#FFF0E6,#FFD6B8)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40, flexShrink: 0 }}>
+                {form.image_url
+                  // eslint-disable-next-line @next/next/no-img-element
+                  ? <img src={form.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  : form.emoji}
+              </div>
+
+              <div style={{ flex: 1, minWidth: 180 }}>
+                <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
+                  <input type="url" value={form.image_url} onChange={e => setF('image_url', e.target.value)} placeholder="https://..." style={{ ...inp, flex: 1 }} />
+                  {form.image_url && <button onClick={() => setF('image_url', '')} style={{ padding: '9px 10px', borderRadius: 10, border: '1.5px solid var(--gray-200)', background: '#fff', cursor: 'pointer', color: 'var(--gray-500)' }}>✕</button>}
+                </div>
+                <div
+                  onClick={() => !uploading && fileRef.current?.click()}
+                  onDragOver={e => { e.preventDefault(); setDragOver(true); }}
+                  onDragLeave={() => setDragOver(false)}
+                  onDrop={handleDrop}
+                  style={{ border: `2px dashed ${dragOver ? 'var(--pink)' : 'var(--gray-200)'}`, borderRadius: 10, padding: '14px', textAlign: 'center', cursor: uploading ? 'not-allowed' : 'pointer', background: dragOver ? 'var(--pink-light)' : '#fff', transition: 'all .2s' }}
+                >
+                  <span style={{ fontSize: 13, color: 'var(--gray-500)' }}>{uploading ? '⏳ Байршуулж байна...' : '📁 Зураг сонгох / чирж тавих'}</span>
+                  <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => { handleFile(e.target.files?.[0]); e.target.value = ''; }} />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Emoji fallback (зураг байхгүй үед) */}
+          <div style={{ borderTop: '1.5px solid var(--gray-200)', paddingTop: 16, marginBottom: 16 }}>
+            <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-500)', display: 'block', marginBottom: 10, textTransform: 'uppercase', letterSpacing: .8 }}>Emoji дүрс <span style={{ textTransform: 'none', fontWeight: 400, color: 'var(--gray-400)' }}>(зураг байхгүй үед харагдана)</span></label>
             <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
               {EMOJI_OPT.map(e => (
                 <button key={e} type="button" onClick={() => setF('emoji', e)}
@@ -311,20 +348,6 @@ export default function PackagesManager({ showToast }) {
               </div>
             </div>
           )}
-
-          {/* Image */}
-          <div style={{ borderTop: '1.5px solid var(--gray-200)', paddingTop: 16, marginBottom: 20 }}>
-            <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-500)', display: 'block', marginBottom: 10, textTransform: 'uppercase', letterSpacing: .8 }}>📷 Зураг (заавал биш)</label>
-            <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-              <input type="url" value={form.image_url} onChange={e => setF('image_url', e.target.value)} placeholder="https://..." style={{ ...inp, flex: 1 }} />
-              {form.image_url && <button onClick={() => setF('image_url', '')} style={{ padding: '9px 10px', borderRadius: 10, border: '1.5px solid var(--gray-200)', background: '#fff', cursor: 'pointer', color: 'var(--gray-500)' }}>✕</button>}
-            </div>
-            <div onClick={() => !uploading && fileRef.current?.click()}
-              style={{ border: '2px dashed var(--gray-200)', borderRadius: 10, padding: 14, textAlign: 'center', cursor: uploading ? 'not-allowed' : 'pointer', background: '#fff' }}>
-              <span style={{ fontSize: 13, color: 'var(--gray-500)' }}>{uploading ? '⏳ Байршуулж байна...' : '📁 Зураг сонгох / чирж тавих'}</span>
-              <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => { handleFile(e.target.files?.[0]); e.target.value = ''; }} />
-            </div>
-          </div>
 
           {/* Actions */}
           <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
