@@ -29,10 +29,10 @@ export default function PackagesSection() {
 
   return (
     <section className="packages-section" id="packages">
-      <div className="max-w-[1200px] mx-auto mb-12 max-[900px]:mb-8 max-[640px]:mb-7">
+      <div className="mb-12 max-[900px]:mb-8 max-[640px]:mb-7">
         <p className="text-[11px] font-bold uppercase tracking-[3px] text-gold mb-2">Манай үйлчилгээ</p>
         <h2 className="font-serif text-[36px] font-semibold tracking-tight text-dark max-[900px]:text-[28px] max-[640px]:text-2xl">
-          Гоо Сайхны <span className="bg-gradient-to-r from-[#B8960C] to-[#C9A84C] bg-clip-text text-transparent [-webkit-background-clip:text] [-webkit-text-fill-color:transparent]">Багц</span> Үйлчилгээ
+          Гоо Сайхны <span className="gold-shimmer">Багц</span> Үйлчилгээ
         </h2>
       </div>
       <div className="packages-grid">
@@ -49,7 +49,7 @@ export default function PackagesSection() {
             <div className="pkg-icon">
               {p.image_url
                 // eslint-disable-next-line @next/next/no-img-element
-                ? <img src={p.image_url} alt={p.name} style={{ width: 72, height: 72, borderRadius: 16, objectFit: 'cover' }} />
+                ? <img src={p.image_url} alt={p.name} style={{ width: 48, height: 48, borderRadius: 12, objectFit: 'cover' }} />
                 : p.emoji}
             </div>
 
@@ -64,7 +64,7 @@ export default function PackagesSection() {
               <div className="pkg-services">
                 {p.services.map((s, i) => (
                   <div key={i} className="pkg-svc-item">
-                    <span className="pkg-svc-ico">{s.emoji}</span> {s.name}
+                    <span className="pkg-svc-ico" style={{ color: 'var(--gold)' }}>✓</span> {s.name}
                   </div>
                 ))}
               </div>
@@ -83,7 +83,8 @@ export default function PackagesSection() {
               )}
             </div>
 
-            <button className="btn-book pkg-btn" onClick={() => openBookingForPackage(p)}>
+            <button onClick={() => openBookingForPackage(p)}
+              className="btn-shine w-full mt-1 bg-gradient-to-r from-[#B8960C] via-[#D4AF37] to-[#C9A84C] text-white border-none py-2.5 rounded-full text-[13px] font-bold cursor-pointer transition-all shadow-[0_4px_16px_rgba(201,168,76,.35)] hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(201,168,76,.55)] tracking-wide">
               🎁 Багцаар захиалах
             </button>
           </div>

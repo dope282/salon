@@ -86,7 +86,7 @@ export default function Hero() {
         <div className="absolute inset-0" style={{backgroundImage:'radial-gradient(ellipse at 1px 1px,rgba(201,168,76,.04) 1px,transparent 0)',backgroundSize:'28px 28px'}} />
       </div>
 
-      <div className="flex items-center gap-[72px] max-w-[1240px] w-full relative z-[2] max-[900px]:flex-col-reverse max-[900px]:text-center max-[900px]:gap-7">
+      <div className="flex items-center gap-[72px] max-w-[1240px] w-full relative z-[2] max-[900px]:flex-col max-[900px]:text-center max-[900px]:gap-9">
 
         {/* Content */}
         <div className="flex-none w-[min(520px,48%)] relative fade-up max-[900px]:w-full">
@@ -94,13 +94,13 @@ export default function Hero() {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 bg-gold-light border border-gold/30 text-gold-dark px-5 py-2 rounded-full text-[11px] font-bold tracking-[2.5px] uppercase mb-7 max-[640px]:mb-5">
             <span className="hero-badge-dot w-2 h-2 rounded-full bg-gold flex-shrink-0" />
-            LASH · BROW LAMI · NAIL · WAX
+            LASH · BROW LAMI · NAIL · WAX · PIERCING
           </div>
 
           <h1 className="font-serif text-[clamp(38px,4vw,64px)] font-semibold leading-[1.08] mb-5 tracking-tight text-dark max-[900px]:text-[clamp(32px,7vw,50px)] max-[640px]:text-[clamp(28px,8.5vw,42px)]">
             Таны{' '}
             <span className="relative inline-block">
-              <span className="bg-gradient-to-r from-[#B8960C] via-[#D4AF37] to-[#C9A84C] bg-clip-text text-transparent [-webkit-background-clip:text] [-webkit-text-fill-color:transparent]">Гоо Сайхны</span>
+              <span className="gold-shimmer">Гоо Сайхны</span>
               <span className="absolute -bottom-1 left-0 right-0 h-[1px] bg-gradient-to-r from-[#B8960C] via-[#D4AF37] to-transparent" />
             </span>{' '}
             Туршлагыг Дээшлүүлэе
@@ -110,13 +110,13 @@ export default function Hero() {
             Мэргэжлийн уран бүтээлчидтэйгээ цаг захиалж, зөвхөн танд зориулсан тансаг салоны үйлчилгээг мэдрээрэй.
           </p>
 
-          <div className="flex gap-4 mb-12 flex-wrap max-[900px]:justify-center max-[640px]:flex-col max-[640px]:items-center max-[640px]:gap-2.5 max-[640px]:mb-8">
+          <div className="flex gap-4 mb-12 flex-wrap max-[900px]:justify-center max-[640px]:flex-nowrap max-[640px]:gap-2.5 max-[640px]:mb-8">
             <button onClick={openBooking}
-              className="bg-gradient-to-r from-[#B8960C] via-[#D4AF37] to-[#C9A84C] text-white border-none px-8 py-3.5 rounded-full text-sm font-semibold cursor-pointer transition-all shadow-[0_6px_24px_rgba(201,168,76,.45)] hover:-translate-y-0.5 hover:shadow-[0_10px_36px_rgba(201,168,76,.60)] tracking-wide max-[640px]:w-full max-[640px]:max-w-[300px] max-[640px]:min-h-[50px]">
+              className="btn-shine bg-gradient-to-r from-[#B8960C] via-[#D4AF37] to-[#C9A84C] text-white border-none px-8 py-3.5 rounded-full text-sm font-semibold cursor-pointer transition-all shadow-[0_6px_24px_rgba(201,168,76,.45)] hover:-translate-y-0.5 hover:shadow-[0_10px_36px_rgba(201,168,76,.60)] tracking-wide whitespace-nowrap max-[640px]:flex-1 max-[640px]:px-4 max-[640px]:min-h-[50px]">
               Цаг захиалах →
             </button>
             <button onClick={() => document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' })}
-              className="bg-transparent text-dark border border-dark/20 px-7 py-3.5 rounded-full text-sm font-medium cursor-pointer transition-all hover:border-gold hover:text-gold-dark tracking-wide max-[640px]:w-full max-[640px]:max-w-[300px] max-[640px]:min-h-[50px]">
+              className="bg-transparent text-dark border border-dark/20 px-7 py-3.5 rounded-full text-sm font-medium cursor-pointer transition-all hover:border-gold hover:text-gold-dark tracking-wide whitespace-nowrap max-[640px]:flex-1 max-[640px]:px-4 max-[640px]:min-h-[50px]">
               Үйлчилгээ үзэх
             </button>
           </div>

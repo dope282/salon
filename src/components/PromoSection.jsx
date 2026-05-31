@@ -30,7 +30,7 @@ export default function PromoSection() {
       <section className="py-12 px-12 max-[900px]:px-5 max-[640px]:py-5 max-[640px]:px-4">
         <div className="rounded-[28px] overflow-hidden border border-gold/20 shadow-[0_8px_40px_rgba(201,168,76,.12)]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={promo.img} alt="Промо баннер" className="w-full max-h-[420px] object-cover block" />
+          <img src={promo.img} alt="Промо баннер" className="w-full aspect-[4/1] object-cover block" />
         </div>
       </section>
     );
@@ -60,7 +60,7 @@ export default function PromoSection() {
               {promo.all}
             </div>
             <button onClick={openBooking}
-              className="bg-gradient-to-r from-[#B8960C] via-[#D4AF37] to-[#C9A84C] text-dark border-none px-9 py-3.5 rounded-full text-[14px] font-bold cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_28px_rgba(201,168,76,.50)] tracking-wide max-[640px]:px-7 max-[640px]:text-sm">
+              className="btn-shine bg-gradient-to-r from-[#B8960C] via-[#D4AF37] to-[#C9A84C] text-dark border-none px-9 py-3.5 rounded-full text-[14px] font-bold cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_28px_rgba(201,168,76,.50)] tracking-wide max-[640px]:px-7 max-[640px]:text-sm">
               {promo.btn}
             </button>
           </div>

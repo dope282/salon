@@ -30,7 +30,7 @@ export default function Products() {
         <div>
           <p className="text-[11px] font-bold uppercase tracking-[3px] text-gold mb-2">Манай бүтээгдэхүүн</p>
           <h2 className="font-serif text-[36px] font-semibold tracking-tight text-dark max-[900px]:text-[28px] max-[640px]:text-2xl">
-            Онцгой <span className="bg-gradient-to-r from-[#B8960C] to-[#C9A84C] bg-clip-text text-transparent [-webkit-background-clip:text] [-webkit-text-fill-color:transparent]">Бүтээгдэхүүн</span>
+            Онцгой <span className="gold-shimmer">Бүтээгдэхүүн</span>
           </h2>
         </div>
         <button onClick={openBooking}
@@ -76,34 +76,34 @@ export default function Products() {
             </div>
           )}
 
-          <div className="grid grid-cols-4 gap-5 max-[1200px]:grid-cols-3 max-[900px]:grid-cols-2 max-[900px]:gap-4 max-[640px]:grid-cols-2 max-[640px]:gap-3 max-[480px]:gap-2.5">
+          <div className="grid grid-cols-5 gap-4 max-[1200px]:grid-cols-4 max-[900px]:grid-cols-3 max-[900px]:gap-3.5 max-[640px]:grid-cols-2 max-[640px]:gap-3 max-[480px]:gap-2.5">
             {visible.map((p) => (
-              <div key={p.id} className="group bg-[#FEFCF8] rounded-2xl overflow-hidden border border-gold/10 transition-all duration-300 flex flex-col hover:-translate-y-1 hover:border-gold/30 hover:shadow-[0_8px_32px_rgba(201,168,76,.12)]">
+              <div key={p.id} className="lux-card group bg-[#FEFCF8] rounded-2xl overflow-hidden transition-all duration-300 flex flex-col hover:-translate-y-1">
                 {p.image_url
                   // eslint-disable-next-line @next/next/no-img-element
-                  ? <img src={p.image_url} alt={p.name} className="w-full h-[200px] object-cover block max-[640px]:h-[150px]" />
-                  : <div className="w-full h-[200px] bg-gradient-to-br from-gold-light to-[#EDD98A]/20 flex items-center justify-center text-[52px] max-[640px]:h-[150px]">🛒</div>
+                  ? <img src={p.image_url} alt={p.name} className="w-full aspect-[4/3] object-cover block" />
+                  : <div className="w-full aspect-[4/3] bg-gradient-to-br from-gold-light to-[#EDD98A]/20 flex items-center justify-center text-[52px]">🛒</div>
                 }
-                <div className="px-4 py-4 flex-1 flex flex-col max-[640px]:px-3 max-[640px]:py-3">
+                <div className="px-3 py-3 flex-1 flex flex-col">
                   {p.category && (
-                    <span className="inline-block bg-gold/10 text-gold-dark border border-gold/15 px-2.5 py-0.5 rounded-full text-[9px] font-bold tracking-[.8px] uppercase mb-2 self-start">
+                    <span className="inline-block bg-gold/10 text-gold-dark border border-gold/15 px-2 py-0.5 rounded-full text-[8px] font-bold tracking-[.6px] uppercase mb-1.5 self-start">
                       {p.category}
                     </span>
                   )}
-                  <div className="text-[14px] font-semibold text-dark mb-1 leading-[1.3] max-[640px]:text-[13px]">{p.name}</div>
+                  <div className="text-[13px] font-semibold text-dark mb-1 leading-[1.3]">{p.name}</div>
                   {p.description && (
-                    <div className="text-xs text-gray-400 leading-[1.6] mb-3 flex-1 overflow-hidden" style={{display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical'}}>
+                    <div className="text-[11px] text-gray-400 leading-[1.5] mb-2.5 flex-1 overflow-hidden max-[640px]:hidden" style={{display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical'}}>
                       {p.description}
                     </div>
                   )}
                   <div className="flex items-center justify-between gap-2 mt-auto">
-                    <span className="font-display text-[16px] font-bold text-gold-dark max-[640px]:text-sm">{(p.price ?? 0).toLocaleString()}₮</span>
+                    <span className="font-display text-[15px] font-bold text-gold-dark max-[640px]:text-sm">{(p.price ?? 0).toLocaleString()}₮</span>
                     <div className="flex items-center gap-1.5">
                       {!p.in_stock && (
                         <span className="bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full text-[9px] font-bold border border-gray-200">Дууссан</span>
                       )}
                       <button disabled={!p.in_stock} onClick={() => handleBuy(p)}
-                        className="bg-gradient-to-r from-[#B8960C] to-[#C9A84C] text-white border-none px-4 py-2 rounded-full text-[11px] font-bold cursor-pointer transition-all hover:shadow-[0_4px_16px_rgba(201,168,76,.40)] hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:translate-y-0 max-[640px]:px-3 max-[640px]:text-[10px]">
+                        className="bg-gradient-to-r from-[#B8960C] to-[#C9A84C] text-white border-none px-3.5 py-1.5 rounded-full text-[11px] font-bold cursor-pointer transition-all hover:shadow-[0_4px_16px_rgba(201,168,76,.40)] hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:translate-y-0 max-[640px]:px-3 max-[640px]:text-[10px]">
                         {p.in_stock ? 'Авах' : 'Дууссан'}
                       </button>
                     </div>

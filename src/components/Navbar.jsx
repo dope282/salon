@@ -29,7 +29,7 @@ export default function Navbar() {
 
   const GoldBtn = ({ children, onClick, className = '' }) => (
     <button onClick={onClick}
-      className={`bg-gradient-to-r from-[#B8960C] via-[#D4AF37] to-[#C9A84C] text-white border-none px-6 py-2.5 rounded-full text-sm font-semibold cursor-pointer transition-all shadow-[0_4px_16px_rgba(201,168,76,.35)] hover:-translate-y-0.5 hover:shadow-[0_6px_24px_rgba(201,168,76,.55)] disabled:opacity-60 tracking-wide ${className}`}>
+      className={`btn-shine bg-gradient-to-r from-[#FF3399] via-[#FF3399] to-[#FF3399] text-white border-none px-6 py-2.5 rounded-full text-sm font-semibold cursor-pointer transition-all shadow-[0_4px_16px_rgba(201,168,76,.35)] hover:-translate-y-0.5 hover:shadow-[0_6px_24px_rgba(201,168,76,.55)] disabled:opacity-60 tracking-wide ${className}`}>
       {children}
     </button>
   );
@@ -93,11 +93,12 @@ export default function Navbar() {
       <div className={`mob-backdrop fixed inset-0 top-[84px] max-[640px]:top-[64px] bg-dark/30 z-[998] backdrop-blur-sm${mobOpen ? ' open' : ''}`} onClick={() => setMobOpen(false)} />
 
       <div className={`mob-menu fixed top-[84px] max-[640px]:top-[64px] left-0 right-0 bg-[#FFFAF5] px-5 pb-6 shadow-[0_16px_48px_rgba(0,0,0,.12)] z-[999] flex-col gap-0 border-t border-gold/15 max-h-[calc(100vh-64px)] overflow-y-auto${mobOpen ? ' open' : ''}`}>
-        {[['home','🏠','Нүүр'],['services','✂️','Үйлчилгээ'],['packages','🎁','Багц'],['products','🛍️','Бүтээгдэхүүн'],['artists','👩‍🎨','Уран бүтээлчид'],['about','💫','Бидний тухай'],['contact','📞','Холбоо барих']].map(([id,icon,label]) => (
+        {[['home','Нүүр'],['services','Үйлчилгээ'],['packages','Багц'],['products','Бүтээгдэхүүн'],['artists','Уран бүтээлчид'],['about','Бидний тухай'],['contact','Холбоо барих']].map(([id,label]) => (
           <a key={id} href={`#${id}`}
-            className="flex items-center gap-3 text-dark/80 text-[15px] font-medium py-3.5 px-2 border-b border-gold/10 last:border-0 no-underline hover:text-gold-dark transition-colors"
+            className="group flex items-center justify-between py-3.5 px-2 border-b border-gold/10 last:border-0 no-underline text-dark/75 text-[15px] font-medium tracking-wide hover:text-gold-dark transition-colors"
             onClick={e => { e.preventDefault(); scrollTo(id); }}>
-            <span className="text-base">{icon}</span>{label}
+            {label}
+            <span className="text-gold/35 text-lg leading-none group-hover:text-gold-dark group-hover:translate-x-0.5 transition-all">›</span>
           </a>
         ))}
         <div className="flex flex-col gap-2.5 mt-4 pt-4 border-t border-gold/15">
@@ -115,19 +116,19 @@ export default function Navbar() {
                 <button className="border-none bg-none text-salon-red text-xs font-semibold cursor-pointer" onClick={handleLogout}>Гарах</button>
               </div>
               <button onClick={() => { openMyBookings(); setMobOpen(false); }}
-                className="flex items-center gap-2 px-3 py-3 bg-white rounded-xl text-dark font-semibold text-sm border border-gray-200 cursor-pointer w-full text-left">
-                📅 Миний захиалгууд
+                className="px-3 py-3 bg-white rounded-xl text-dark font-semibold text-sm border border-gold/15 cursor-pointer w-full text-center tracking-wide hover:border-gold/40 transition-colors">
+                Миний захиалгууд
               </button>
               {isAdmin && (
-                <a href="/admin" className="flex items-center gap-2 px-3 py-3 bg-gold-light/80 rounded-xl text-gold-dark font-bold text-sm no-underline border border-gold/20" onClick={() => setMobOpen(false)}>
-                  ⚙️ Админ панель
+                <a href="/admin" className="px-3 py-3 bg-gold-light/80 rounded-xl text-gold-dark font-bold text-sm no-underline border border-gold/20 text-center tracking-wide" onClick={() => setMobOpen(false)}>
+                  Админ панель
                 </a>
               )}
             </>
           ) : (
             <OutlineBtn className="w-full min-h-[48px] !text-[15px]" onClick={() => { openAuth(); setMobOpen(false); }}>Нэвтрэх</OutlineBtn>
           )}
-          <GoldBtn className="w-full min-h-[50px] !text-[15px]" onClick={() => { openBooking(); setMobOpen(false); }}>📅 Цаг захиалах</GoldBtn>
+          <GoldBtn className="w-full min-h-[50px] !text-[15px]" onClick={() => { openBooking(); setMobOpen(false); }}>Цаг захиалах</GoldBtn>
         </div>
       </div>
     </>

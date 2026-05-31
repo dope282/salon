@@ -33,7 +33,7 @@ export default function Artists() {
         <div>
           <p className="text-[11px] font-bold uppercase tracking-[3px] text-gold mb-2">Манай баг</p>
           <h2 className="font-serif text-[36px] font-semibold tracking-tight text-dark max-[900px]:text-[28px] max-[640px]:text-2xl">
-            Манай <span className="bg-gradient-to-r from-[#B8960C] to-[#C9A84C] bg-clip-text text-transparent [-webkit-background-clip:text] [-webkit-text-fill-color:transparent]">Артистууд</span>
+            Манай <span className="gold-shimmer">Артистууд</span>
           </h2>
         </div>
         <button onClick={openBooking}
@@ -45,7 +45,7 @@ export default function Artists() {
       <div className="grid grid-cols-5 gap-5 max-[1200px]:grid-cols-3 max-[900px]:grid-cols-3 max-[900px]:gap-4 max-[640px]:grid-cols-2 max-[640px]:gap-3 max-[480px]:gap-2.5">
         {artists.map(a => (
           <div key={a.id}
-            className="group bg-white rounded-2xl px-5 py-7 text-center transition-all duration-300 cursor-pointer border border-gold/10 relative hover:-translate-y-2 hover:border-gold/35 hover:shadow-[0_12px_48px_rgba(201,168,76,.18)] max-[640px]:px-3 max-[640px]:py-5 max-[480px]:px-2.5 max-[480px]:py-4"
+            className="lux-card group bg-white rounded-2xl px-5 py-7 text-center transition-all duration-300 cursor-pointer relative hover:-translate-y-2 max-[640px]:px-3 max-[640px]:py-5 max-[480px]:px-2.5 max-[480px]:py-4"
             style={{ opacity: a.active ? 1 : 0.55 }}>
 
             {!a.active && (

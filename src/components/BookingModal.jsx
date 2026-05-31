@@ -398,7 +398,7 @@ export default function BookingModal() {
                               <div className="flex flex-wrap gap-1 mb-2">
                                 {(p.services || pkgSvcs[p.id] || []).map((s, i) => (
                                   <span key={i} className="text-[10px] bg-white border border-gray-200 px-2 py-0.5 rounded-full text-gray-600">
-                                    {s.emoji} {s.name}
+                                    {s.name}
                                   </span>
                                 ))}
                               </div>

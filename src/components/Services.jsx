@@ -28,7 +28,7 @@ export default function Services() {
         <div>
           <p className="text-[11px] font-bold uppercase tracking-[3px] text-gold mb-2">Манай үйлчилгээ</p>
           <h2 className="font-serif text-[36px] font-semibold tracking-tight text-dark max-[900px]:text-[28px] max-[640px]:text-2xl">
-            Тансаг <span className="bg-gradient-to-r from-[#B8960C] to-[#C9A84C] bg-clip-text text-transparent [-webkit-background-clip:text] [-webkit-text-fill-color:transparent]">Гоо Сайхны</span> Үйлчилгээ
+            Тансаг <span className="gold-shimmer">Гоо Сайхны</span> Үйлчилгээ
           </h2>
         </div>
         <button onClick={openBooking}
@@ -37,10 +37,10 @@ export default function Services() {
         </button>
       </div>
 
-      <div className="grid grid-cols-4 gap-5 max-[1200px]:grid-cols-2 max-[640px]:grid-cols-1 max-[640px]:gap-3 max-[380px]:grid-cols-1">
+      <div className="grid grid-cols-4 gap-5 max-[1200px]:grid-cols-2 max-[640px]:grid-cols-2 max-[640px]:gap-3">
         {services.map((s) => (
           <div key={s.id} onClick={openBooking}
-            className="group bg-[#FEFCF8] rounded-2xl px-6 py-6 flex items-center gap-4 transition-all duration-300 cursor-pointer border border-gold/10 hover:border-gold/40 hover:bg-gradient-to-br hover:from-[#FFFDF5] hover:to-[#FFF8E8] hover:-translate-y-1 hover:shadow-[0_8px_32px_rgba(201,168,76,.15)] max-[640px]:px-4 max-[640px]:py-4 max-[640px]:gap-3.5"
+            className="lux-card group bg-[#FEFCF8] rounded-2xl px-6 py-6 flex items-center gap-4 transition-all duration-300 cursor-pointer hover:bg-gradient-to-br hover:from-[#FFFDF5] hover:to-[#FFF8E8] hover:-translate-y-1 max-[640px]:flex-col max-[640px]:items-center max-[640px]:text-center max-[640px]:px-3 max-[640px]:py-4 max-[640px]:gap-2"
             style={{ opacity: 1 }}>
             <div className="w-14 h-14 rounded-xl flex items-center justify-center text-[26px] flex-shrink-0 bg-gradient-to-br from-gold-light to-[#EDD98A]/30 group-hover:from-gold-light group-hover:to-gold/20 transition-all max-[640px]:w-12 max-[640px]:h-12 max-[640px]:text-xl border border-gold/15 overflow-hidden">
               {s.image_url
@@ -48,10 +48,10 @@ export default function Services() {
                 ? <img src={s.image_url} alt={s.name_mn} className="w-full h-full object-cover" />
                 : s.emoji}
             </div>
-            <div className="flex-1 min-w-0">
-              <div className="font-semibold text-[14px] text-dark mb-0.5 group-hover:text-dark truncate">{s.name_mn}</div>
-              <div className="text-xs text-gray-400 mb-2 leading-[1.4] line-clamp-1">{s.description_mn}</div>
-              <div className="text-[13px] font-bold text-gold-dark">₮{s.price_from?.toLocaleString()}+</div>
+            <div className="flex-1 min-w-0 max-[640px]:w-full">
+              <div className="font-semibold text-[14px] text-dark mb-0.5 group-hover:text-dark truncate max-[640px]:whitespace-normal max-[640px]:text-[13px] max-[640px]:leading-tight">{s.name_mn}</div>
+              <div className="text-xs text-gray-400 mb-2 leading-[1.4] line-clamp-1 max-[640px]:hidden">{s.description_mn}</div>
+              <div className="text-[13px] font-bold text-gold-dark max-[640px]:mt-1">₮{s.price_from?.toLocaleString()}+</div>
             </div>
           </div>
         ))}

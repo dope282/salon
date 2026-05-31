@@ -40,8 +40,8 @@
 
 /* ── CSS variables (backward compat for inline styles) ── */
 :root {
-  --pink:#C9A84C; --pink-light:#F5E6C8; --pink-dark:#9A7B30;
-  --gold:#C9A84C; --gold-light:#F5E6C8; --gold-dark:#9A7B30;
+  --pink:#FF3399; --pink-light:#FF3399; --pink-dark:#FF3399;
+  --gold:#FF3399; --gold-light:#FF3399; --gold-dark:#FF3399;
   --cream:#FFFAF5; --dark:#1A1A2E;
   --green:#38A169; --yellow:#D69E2E; --red:#E53E3E;
   --gray-100:#F8F9FA; --gray-200:#E9ECEF; --gray-500:#6C757D; --gray-800:#343A40;
@@ -113,7 +113,7 @@ tr:hover td { background:#FAFAFA; }
     inset: 0;
     pointer-events: none;
     z-index: 0;
-    background-image: radial-gradient(ellipse at 1px 1px, rgba(201,168,76,.035) 1px, transparent 0);
+    background-image: radial-gradient(ellipse at 1px 1px, rgba(255, 0, 221, 0.035) 1px, transparent 0);
     background-size: 28px 28px;
   }
 }
@@ -144,6 +144,58 @@ tr:hover td { background:#FAFAFA; }
 @keyframes spin {
   from { transform: rotate(0); }
   to   { transform: rotate(360deg); }
+}
+
+/* ════════════════════════════════════
+   LUXURY — алтлаг гялалзах эффектүүд
+   ════════════════════════════════════ */
+
+/* Гарчгийн алтан shimmer */
+@keyframes goldTextShimmer { to { background-position: -200% center; } }
+.gold-shimmer {
+  background: linear-gradient(90deg,#FF3399,#FF3399 25%,#FF3399 45%,#ff7dbe 50%,#ffe4f1 55%,#fffbfd 75%,#fad5e7);
+  background-size: 200% auto;
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent;
+  animation: goldTextShimmer 6s linear infinite;
+}
+
+/* Товчны гэрлийн туяа (shine sweep) */
+@keyframes btnShine {
+  0%        { transform: translateX(-220%) skewX(-18deg); }
+  55%, 100% { transform: translateX(460%)  skewX(-18deg); }
+}
+.btn-shine { position: relative; overflow: hidden; }
+.btn-shine::after {
+  content: ''; position: absolute; top: 0; bottom: 0; left: 0; width: 32%;
+  background: linear-gradient(110deg, transparent, rgba(255,255,255,.55), transparent);
+  transform: translateX(-220%) skewX(-18deg);
+  animation: btnShine 5.5s ease-in-out infinite;
+  pointer-events: none; z-index: 1;
+}
+
+/* Картын алтан хүрээ + зөөлөн гэрэлтэлт */
+.lux-card {
+  border: 1px solid rgba(201,168,76,.18) !important;
+  transition: border-color .35s ease, box-shadow .35s ease, transform .35s ease;
+}
+.lux-card:hover {
+  border-color: rgba(201,168,76,.45) !important;
+  box-shadow: 0 14px 48px rgba(201,168,76,.16), 0 0 0 1px rgba(201,168,76,.10) inset !important;
+}
+
+/* Тансаг алтан зураас (хуваагч) */
+.lux-divider {
+  height: 1px; border: none;
+  background: linear-gradient(90deg, transparent, rgba(201,168,76,.5), transparent);
+}
+
+/* Хөдөлгөөн багасгах горим */
+@media (prefers-reduced-motion: reduce) {
+  .gold-shimmer, .btn-shine::after, .float-card-1, .float-card-2,
+  .hero-blob, .promo-badge-spin, .hero-badge-dot {
+    animation: none !important;
+  }
 }
 
 /* ── Utility: fade-up (JS toggles .vis) ── */
@@ -241,25 +293,25 @@ tr:hover td { background:#FAFAFA; }
 }
 
 /* ── Packages section ── */
-.packages-section { padding: 80px 48px; background: linear-gradient(135deg,#FFF8F0 0%,#FFFAF5 100%); }
-.packages-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 24px; max-width: 1200px; margin: 0 auto; }
-.pkg-card { background: #fff; border-radius: 24px; padding: 28px; box-shadow: var(--shadow-sm); border: 2px solid transparent; transition: all .3s; position: relative; display: flex; flex-direction: column; gap: 12px; }
-.pkg-card:hover { border-color: var(--gold-light); box-shadow: var(--shadow-md); transform: translateY(-4px); }
-.pkg-badge { position: absolute; top: -10px; right: 20px; background: linear-gradient(135deg,var(--green),#276749); color: #fff; font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 50px; }
-.pkg-icon { font-size: 44px; line-height: 1; }
-.pkg-name { font-family: 'Playfair Display',serif; font-size: 20px; font-weight: 700; color: var(--dark); }
-.pkg-desc { font-size: 13px; color: var(--gray-500); line-height: 1.6; }
-.pkg-services { display: flex; flex-direction: column; gap: 6px; padding: 12px; background: var(--gray-100); border-radius: 12px; }
-.pkg-svc-item { font-size: 13px; color: var(--dark); display: flex; align-items: center; gap: 6px; }
-.pkg-svc-ico { font-size: 15px; }
-.pkg-footer { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 8px; }
-.pkg-price-wrap { display: flex; align-items: baseline; gap: 8px; }
-.pkg-orig-price { font-size: 13px; color: var(--gray-500); text-decoration: line-through; }
-.pkg-price { font-size: 22px; font-weight: 800; color: var(--gold-dark); font-family: 'Playfair Display',serif; }
-.pkg-duration { font-size: 12px; color: var(--gray-500); }
-.pkg-btn { width: 100%; margin-top: 4px; }
-@media(max-width:900px){ .packages-section{padding:60px 24px} .packages-grid{grid-template-columns:1fr 1fr;gap:16px} }
-@media(max-width:640px){ .packages-section{padding:48px 16px} .packages-grid{grid-template-columns:1fr;gap:14px} .pkg-card{padding:20px} }
+.packages-section { padding: 70px 48px; background: linear-gradient(135deg,#FFF8F0 0%,#FFFAF5 100%); }
+.packages-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
+.pkg-card { background: #fff; border-radius: 18px; padding: 18px; box-shadow: var(--shadow-sm); border: 1px solid rgba(201,168,76,.18); transition: border-color .35s ease, box-shadow .35s ease, transform .35s ease; position: relative; display: flex; flex-direction: column; gap: 9px; }
+.pkg-card:hover { border-color: rgba(201,168,76,.45); box-shadow: 0 14px 48px rgba(201,168,76,.16), 0 0 0 1px rgba(201,168,76,.10) inset; transform: translateY(-4px); }
+.pkg-badge { position: absolute; top: -9px; right: 16px; background: linear-gradient(135deg,var(--green),#276749); color: #fff; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 50px; }
+.pkg-icon { font-size: 30px; line-height: 1; }
+.pkg-name { font-family: 'Playfair Display',serif; font-size: 16px; font-weight: 700; color: var(--dark); }
+.pkg-desc { font-size: 12px; color: var(--gray-500); line-height: 1.55; }
+.pkg-services { display: flex; flex-direction: column; gap: 4px; padding: 10px; background: var(--gray-100); border-radius: 10px; }
+.pkg-svc-item { font-size: 12px; color: var(--dark); display: flex; align-items: center; gap: 6px; }
+.pkg-svc-ico { font-size: 12px; }
+.pkg-footer { display: flex; align-items: center; justify-content: space-between; margin-top: auto; padding-top: 6px; }
+.pkg-price-wrap { display: flex; align-items: baseline; gap: 7px; }
+.pkg-orig-price { font-size: 12px; color: var(--gray-500); text-decoration: line-through; }
+.pkg-price { font-size: 18px; font-weight: 800; color: var(--gold-dark); font-family: 'Playfair Display',serif; }
+.pkg-duration { font-size: 11px; color: var(--gray-500); }
+.pkg-btn { width: 100%; margin-top: 2px; font-size: 13px !important; padding: 9px 0 !important; }
+@media(max-width:900px){ .packages-section{padding:48px 20px} .packages-grid{grid-template-columns:1fr 1fr;gap:16px} }
+@media(max-width:640px){ .packages-section{padding:36px 16px} .packages-grid{grid-template-columns:1fr;gap:14px} .pkg-card{padding:20px} }
 
 /* ── Toast show/hide ── */
 .toast { transform: translateY(80px); opacity: 0; pointer-events: none; transition: all .4s ease; }

@@ -11,7 +11,7 @@ export default function Features() {
       <div className="text-center mb-14 max-[640px]:mb-9">
         <p className="text-[11px] font-bold uppercase tracking-[3px] text-gold mb-3">Яагаад бидэн</p>
         <h2 className="font-serif text-[36px] font-semibold text-white tracking-tight fade-up max-[900px]:text-[28px] max-[640px]:text-2xl">
-          Яагаад <span className="bg-gradient-to-r from-[#D4AF37] to-[#F0C060] bg-clip-text text-transparent [-webkit-background-clip:text] [-webkit-text-fill-color:transparent]">Биднийг Сонгох</span> Вэ?
+          Яагаад <span className="gold-shimmer">Биднийг Сонгох</span> Вэ?
         </h2>
         <p className="text-[14px] text-white/40 mt-3 max-w-[420px] mx-auto tracking-wide">
           ✔️ Мэргэжлийн үйлчилгээ

@@ -190,11 +190,11 @@ export default function PackagesManager({ showToast }) {
                   <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
                     {(pkgSvcMap[p.id] || []).map(sid => {
                       const s = allServices.find(sv => sv.id === sid);
-                      return s ? <span key={sid} style={{ fontSize: 10, color: 'var(--pink-dark)', background: 'var(--pink-light)', padding: '2px 7px', borderRadius: 50, fontWeight: 600 }}>{s.emoji} {s.name_mn}</span> : null;
+                      return s ? <span key={sid} style={{ fontSize: 10, color: 'var(--pink-dark)', background: 'var(--pink-light)', padding: '2px 7px', borderRadius: 50, fontWeight: 600 }}>{s.name_mn}</span> : null;
                     })}
                     {(pkgArtMap[p.id] || []).map(aid => {
                       const a = allArtists.find(ar => ar.id === aid);
-                      return a ? <span key={aid} style={{ fontSize: 10, color: '#6366f1', background: '#eef2ff', padding: '2px 7px', borderRadius: 50, fontWeight: 600 }}>👤 {a.name}</span> : null;
+                      return a ? <span key={aid} style={{ fontSize: 10, color: '#6366f1', background: '#eef2ff', padding: '2px 7px', borderRadius: 50, fontWeight: 600 }}>{a.name}</span> : null;
                     })}
                   </div>
                 </div>
@@ -319,7 +319,7 @@ export default function PackagesManager({ showToast }) {
                 {allServices.map(s => (
                   <TagBtn key={s.id} selected={selServices.includes(s.id)}
                     onClick={() => setSelServices(prev => prev.includes(s.id) ? prev.filter(id => id !== s.id) : [...prev, s.id])}>
-                    {s.emoji} {s.name_mn}
+                    {s.name_mn}
                   </TagBtn>
                 ))}
               </div>
@@ -339,7 +339,7 @@ export default function PackagesManager({ showToast }) {
                 {allArtists.map(a => (
                   <TagBtn key={a.id} selected={selArtists.includes(a.id)}
                     onClick={() => setSelArtists(prev => prev.includes(a.id) ? prev.filter(id => id !== a.id) : [...prev, a.id])}>
-                    {a.avatar_emoji || '👩'} {a.name}
+                    {a.name}
                   </TagBtn>
                 ))}
               </div>

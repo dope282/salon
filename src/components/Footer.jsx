@@ -6,8 +6,8 @@ export default function Footer() {
       {/* Top divider */}
       <div className="w-full h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent mb-12 max-[640px]:mb-8" />
 
-      <div className="grid grid-cols-[2fr_1fr_1fr_1.4fr] gap-14 mb-14 max-[1200px]:grid-cols-[1fr_1fr_1fr] max-[1200px]:gap-8 max-[900px]:grid-cols-2 max-[900px]:gap-8 max-[640px]:grid-cols-1 max-[640px]:gap-7">
-        <div>
+      <div className="grid grid-cols-[2fr_1fr_1fr_1.4fr] gap-14 mb-14 max-[1200px]:grid-cols-[1fr_1fr_1fr] max-[1200px]:gap-8 max-[900px]:grid-cols-2 max-[900px]:gap-8 max-[640px]:grid-cols-2 max-[640px]:gap-x-6 max-[640px]:gap-y-8 max-[640px]:mb-10">
+        <div className="max-[640px]:col-span-2">
           <Image src="/logo.png" alt="Hatantsetsey lash" width={140} height={56}
             className="h-14 w-auto bg-white rounded-xl px-4 py-2 mb-5" />
           <p className="text-white/45 text-[13px] leading-[1.85] mb-6 max-w-[280px]">
@@ -45,8 +45,8 @@ export default function Footer() {
           </ul>
         </div>
 
-        <div>
-          <div className="text-[10px] font-bold uppercase tracking-[2.5px] text-gold mb-5">Холбоо барих</div>
+        <div className="max-[640px]:col-span-2">
+          <div className="text-[10px] font-bold uppercase tracking-[2.5px] text-gold mb-5 max-[640px]:mb-3">Холбоо барих</div>
           {[
             ['fa-phone','85897070', 'tel:85897070'],
             ['fa-envelope','bdolmoosuren@gmail.com', 'mailto:bdolmoosuren@gmail.com'],
