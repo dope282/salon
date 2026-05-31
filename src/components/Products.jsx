@@ -11,17 +11,10 @@ export default function Products() {
   const [filter,   setFilter]   = useState('');
 
   useEffect(() => {
-    supabase
-      .from('products')
-      .select('*')
-      .eq('active', true)
-      .order('sort_order')
-      .order('created_at', { ascending: false })
+    supabase.from('products').select('*').eq('active', true)
+      .order('sort_order').order('created_at', { ascending: false })
       .then(({ data, error }) => {
-        if (error) {
-          console.error('[Products]', error);
-          setDbError(error.message);
-        }
+        if (error) { console.error('[Products]', error); setDbError(error.message); }
         setProducts(data || []);
         setLoading(false);
       });
@@ -29,83 +22,88 @@ export default function Products() {
 
   const cats    = ['Бүгд', ...Array.from(new Set(products.map(p => p.category).filter(Boolean)))];
   const visible = filter && filter !== 'Бүгд' ? products.filter(p => p.category === filter) : products;
-
-  const handleBuy = (p) => {
-    if (!p.in_stock) return;
-    showToast(`"${p.name}" захиалахын тулд биднийтэй холбогтно уу 📞`, 'ok');
-  };
+  const handleBuy = (p) => { if (!p.in_stock) return; showToast(`"${p.name}" захиалахын тулд биднийтэй холбогтно уу 📞`, 'ok'); };
 
   return (
-    <section className="products-section" id="products">
-      <div className="sec-header">
-        <h2 className="sec-title">Манай <span>Бүтээгдэхүүн</span></h2>
-        <button className="btn-ghost" onClick={openBooking}>Захиалах →</button>
+    <section id="products" className="py-[70px] px-12 bg-white max-[900px]:px-5 max-[900px]:py-12 max-[640px]:px-4 max-[640px]:py-9">
+      <div className="flex justify-between items-end mb-12 max-[900px]:mb-8 max-[640px]:mb-7">
+        <div>
+          <p className="text-[11px] font-bold uppercase tracking-[3px] text-gold mb-2">Манай бүтээгдэхүүн</p>
+          <h2 className="font-serif text-[36px] font-semibold tracking-tight text-dark max-[900px]:text-[28px] max-[640px]:text-2xl">
+            Онцгой <span className="bg-gradient-to-r from-[#B8960C] to-[#C9A84C] bg-clip-text text-transparent [-webkit-background-clip:text] [-webkit-text-fill-color:transparent]">Бүтээгдэхүүн</span>
+          </h2>
+        </div>
+        <button onClick={openBooking}
+          className="hidden md:block bg-gold-light text-gold-dark border border-gold/30 px-6 py-2.5 rounded-full text-[13px] font-semibold cursor-pointer transition-all hover:bg-gradient-to-r hover:from-[#B8960C] hover:to-[#C9A84C] hover:text-white hover:border-transparent whitespace-nowrap">
+          Захиалах →
+        </button>
       </div>
 
-      {/* ── Loading ── */}
       {loading && (
-        <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--gray-500)' }}>
-          <div style={{ fontSize: 32, marginBottom: 12 }}>⏳</div>
-          <div style={{ fontSize: 14 }}>Ачааллаж байна...</div>
+        <div className="text-center py-16 text-gray-400">
+          <div className="text-[36px] mb-3">✨</div>
+          <div className="text-sm tracking-wide">Ачааллаж байна...</div>
         </div>
       )}
 
-      {/* ── DB error ── */}
       {!loading && dbError && (
-        <div style={{ background: '#fff5f5', border: '1.5px solid #fecaca', borderRadius: 14, padding: '24px 28px', color: 'var(--red)', fontSize: 13 }}>
+        <div className="bg-[#fff5f5] border border-[#fecaca] rounded-2xl px-7 py-5 text-salon-red text-sm">
           <strong>Алдаа:</strong> {dbError}
-          <div style={{ marginTop: 8, fontSize: 12, color: 'var(--gray-500)' }}>
-            Supabase SQL Editor дээр products хүснэгт болон GRANT SQL-ийг ажиллуулсан эсэхийг шалгана уу.
-          </div>
         </div>
       )}
 
-      {/* ── Empty ── */}
       {!loading && !dbError && products.length === 0 && (
-        <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--gray-500)' }}>
-          <div style={{ fontSize: 40, marginBottom: 12 }}>📦</div>
-          <div style={{ fontSize: 15, fontWeight: 600, marginBottom: 6 }}>Бүтээгдэхүүн байхгүй байна</div>
-          <div style={{ fontSize: 13 }}>Admin панелиас бүтээгдэхүүн нэмнэ үү</div>
+        <div className="text-center py-16 text-gray-400">
+          <div className="text-[44px] mb-3">📦</div>
+          <div className="font-semibold mb-1">Бүтээгдэхүүн байхгүй байна</div>
+          <div className="text-sm">Admin панелиас бүтээгдэхүүн нэмнэ үү</div>
         </div>
       )}
 
-      {/* ── Products grid ── */}
       {!loading && !dbError && products.length > 0 && (
         <>
           {cats.length > 2 && (
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 28 }}>
-              {cats.map(c => (
-                <button key={c} onClick={() => setFilter(c === 'Бүгд' ? '' : c)}
-                  style={{
-                    padding: '7px 18px', borderRadius: 50, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '2px solid',
-                    borderColor: (filter === c || (!filter && c === 'Бүгд')) ? 'var(--pink)' : 'var(--gray-200)',
-                    background:  (filter === c || (!filter && c === 'Бүгд')) ? 'var(--pink-light)' : '#fff',
-                    color:       (filter === c || (!filter && c === 'Бүгд')) ? 'var(--pink-dark)' : 'var(--gray-500)',
-                    transition: 'all .2s',
-                  }}>
-                  {c}
-                </button>
-              ))}
+            <div className="flex gap-2 flex-wrap mb-8">
+              {cats.map(c => {
+                const active = filter === c || (!filter && c === 'Бүгд');
+                return (
+                  <button key={c} onClick={() => setFilter(c === 'Бүгд' ? '' : c)}
+                    className={`px-4 py-1.5 rounded-full text-xs font-semibold cursor-pointer border transition-all tracking-wide ${active ? 'border-gold bg-gold-light text-gold-dark' : 'border-gold/15 bg-white text-gray-400 hover:border-gold/30 hover:text-gold-dark'}`}>
+                    {c}
+                  </button>
+                );
+              })}
             </div>
           )}
 
-          <div className="products-grid">
-            {visible.map((p, i) => (
-              <div key={p.id} className="prod-card">
+          <div className="grid grid-cols-4 gap-5 max-[1200px]:grid-cols-3 max-[900px]:grid-cols-2 max-[900px]:gap-4 max-[640px]:grid-cols-2 max-[640px]:gap-3 max-[480px]:gap-2.5">
+            {visible.map((p) => (
+              <div key={p.id} className="group bg-[#FEFCF8] rounded-2xl overflow-hidden border border-gold/10 transition-all duration-300 flex flex-col hover:-translate-y-1 hover:border-gold/30 hover:shadow-[0_8px_32px_rgba(201,168,76,.12)]">
                 {p.image_url
                   // eslint-disable-next-line @next/next/no-img-element
-                  ? <img src={p.image_url} alt={p.name} className="prod-img" />
-                  : <div className="prod-img-ph">🛒</div>
+                  ? <img src={p.image_url} alt={p.name} className="w-full h-[200px] object-cover block max-[640px]:h-[150px]" />
+                  : <div className="w-full h-[200px] bg-gradient-to-br from-gold-light to-[#EDD98A]/20 flex items-center justify-center text-[52px] max-[640px]:h-[150px]">🛒</div>
                 }
-                <div className="prod-body">
-                  {p.category && <span className="prod-cat">{p.category}</span>}
-                  <div className="prod-name">{p.name}</div>
-                  {p.description && <div className="prod-desc">{p.description}</div>}
-                  <div className="prod-footer">
-                    <span className="prod-price">{p.price.toLocaleString()}₮</span>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      {!p.in_stock && <span className="prod-out">Дууссан</span>}
-                      <button className="btn-buy" disabled={!p.in_stock} onClick={() => handleBuy(p)}>
+                <div className="px-4 py-4 flex-1 flex flex-col max-[640px]:px-3 max-[640px]:py-3">
+                  {p.category && (
+                    <span className="inline-block bg-gold/10 text-gold-dark border border-gold/15 px-2.5 py-0.5 rounded-full text-[9px] font-bold tracking-[.8px] uppercase mb-2 self-start">
+                      {p.category}
+                    </span>
+                  )}
+                  <div className="text-[14px] font-semibold text-dark mb-1 leading-[1.3] max-[640px]:text-[13px]">{p.name}</div>
+                  {p.description && (
+                    <div className="text-xs text-gray-400 leading-[1.6] mb-3 flex-1 overflow-hidden" style={{display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical'}}>
+                      {p.description}
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between gap-2 mt-auto">
+                    <span className="font-display text-[16px] font-bold text-gold-dark max-[640px]:text-sm">{(p.price ?? 0).toLocaleString()}₮</span>
+                    <div className="flex items-center gap-1.5">
+                      {!p.in_stock && (
+                        <span className="bg-gray-100 text-gray-400 px-2 py-0.5 rounded-full text-[9px] font-bold border border-gray-200">Дууссан</span>
+                      )}
+                      <button disabled={!p.in_stock} onClick={() => handleBuy(p)}
+                        className="bg-gradient-to-r from-[#B8960C] to-[#C9A84C] text-white border-none px-4 py-2 rounded-full text-[11px] font-bold cursor-pointer transition-all hover:shadow-[0_4px_16px_rgba(201,168,76,.40)] hover:-translate-y-0.5 disabled:opacity-40 disabled:cursor-not-allowed disabled:translate-y-0 max-[640px]:px-3 max-[640px]:text-[10px]">
                         {p.in_stock ? 'Авах' : 'Дууссан'}
                       </button>
                     </div>

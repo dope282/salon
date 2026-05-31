@@ -21,85 +21,100 @@ export default function Navbar() {
 
   const scrollTo = (id) => {
     setMobOpen(false);
-    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+    const el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+    else window.location.href = `/#${id}`;
   };
+  const handleLogout = async () => { await signOut(); setMobOpen(false); };
 
-  const handleLogout = async () => {
-    await signOut();
-    setMobOpen(false);
-  };
+  const GoldBtn = ({ children, onClick, className = '' }) => (
+    <button onClick={onClick}
+      className={`bg-gradient-to-r from-[#B8960C] via-[#D4AF37] to-[#C9A84C] text-white border-none px-6 py-2.5 rounded-full text-sm font-semibold cursor-pointer transition-all shadow-[0_4px_16px_rgba(201,168,76,.35)] hover:-translate-y-0.5 hover:shadow-[0_6px_24px_rgba(201,168,76,.55)] disabled:opacity-60 tracking-wide ${className}`}>
+      {children}
+    </button>
+  );
+
+  const OutlineBtn = ({ children, onClick, className = '' }) => (
+    <button onClick={onClick}
+      className={`bg-transparent text-dark border border-dark/20 px-5 py-2.5 rounded-full text-sm font-medium cursor-pointer transition-all hover:border-gold hover:text-gold-dark tracking-wide ${className}`}>
+      {children}
+    </button>
+  );
 
   return (
     <>
-      <nav className={`navbar${scrolled ? ' scrolled' : ''}`}>
-        <div className="logo">
-          <Image src="/logo.jpg" alt="Hatantsetsey lash Beauty Salon" className="logo-img" width={120} height={48} style={{ height: 48, width: 'auto' }} priority />
+      <nav className={`fixed top-0 left-0 right-0 z-[1000] px-12 py-4 flex items-center justify-between transition-all duration-300 max-[900px]:px-5 max-[640px]:px-4 ${scrolled ? 'bg-[rgba(255,250,245,.98)] backdrop-blur-2xl shadow-[0_2px_20px_rgba(201,168,76,.12)] border-b border-gold/10' : 'bg-[rgba(255,250,245,.92)] backdrop-blur-xl'}`}>
+
+        <div className="flex-shrink-0">
+          <Image src="/logo.png" alt="Hatantsetsey lash Beauty Salon" width={130} height={52} style={{ height: 52, width: 'auto' }} priority />
         </div>
-        <ul className="nav-links">
-          {['home','services','products','artists','about','contact'].map((id, i) => (
-            <li key={id}><a href={`#${id}`} onClick={e => { e.preventDefault(); scrollTo(id); }}>
-              {['Нүүр','Үйлчилгээ','Бүтээгдэхүүн','Уран бүтээлчид','Бидний тухай','Холбоо барих'][i]}
-            </a></li>
+
+        {/* Desktop links */}
+        <ul className="hidden md:flex list-none gap-9">
+          {[['home','Нүүр'],['services','Үйлчилгээ'],['products','Бүтээгдэхүүн'],['artists','Уран бүтээлчид'],['about','Бидний тухай'],['contact','Холбоо барих']].map(([id,label]) => (
+            <li key={id}>
+              <a href={`#${id}`} className="nav-link text-[13px] font-medium text-dark/70 hover:text-gold-dark tracking-wide"
+                onClick={e => { e.preventDefault(); scrollTo(id); }}>
+                {label}
+              </a>
+            </li>
           ))}
         </ul>
-        <div className="nav-actions">
+
+        {/* Actions */}
+        <div className="flex items-center gap-3">
           {user ? (
-            <div className="nav-user-chip">
-              <div className="nav-user-av">{user.email[0].toUpperCase()}</div>
-              <span className="nav-user-email">{user.email}</span>
-              {isAdmin && (
-                <a href="/admin" style={{ fontSize: 11, color: 'var(--gold)', fontWeight: 700, textDecoration: 'none', marginRight: 4 }}>Админ</a>
-              )}
-              <button className="nav-logout-btn" onClick={handleLogout}>Гарах</button>
+            <div className="hidden md:flex items-center gap-2 bg-gold-light/60 border border-gold/25 rounded-full py-1.5 pl-2 pr-4">
+              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#B8960C] to-[#D4AF37] text-white text-xs font-bold flex items-center justify-center shadow-sm">
+                {user.email[0].toUpperCase()}
+              </div>
+              <span className="text-xs font-medium text-dark max-w-[110px] truncate">{user.email}</span>
+              {isAdmin && <a href="/admin" className="text-[10px] text-gold-dark font-bold no-underline uppercase tracking-wider">Admin</a>}
+              <button className="border-none bg-none text-gray-400 text-[11px] cursor-pointer hover:text-salon-red transition-colors ml-0.5" onClick={handleLogout}>✕</button>
             </div>
           ) : (
-            <button className="btn-outline" onClick={openAuth}>Нэвтрэх</button>
+            <OutlineBtn className="hidden md:block" onClick={openAuth}>Нэвтрэх</OutlineBtn>
           )}
-          <button className="btn-primary" onClick={openBooking}>Цаг захиалах</button>
-          <button className={`hamburger${mobOpen ? ' open' : ''}`} onClick={() => setMobOpen(o => !o)} aria-label="Menu">
+          <GoldBtn onClick={openBooking}>Цаг захиалах</GoldBtn>
+
+          <button
+            className={`hamburger md:hidden flex flex-col gap-[5px] cursor-pointer p-1.5 bg-none border-none min-w-[44px] min-h-[44px] items-center justify-center${mobOpen ? ' open' : ''}`}
+            onClick={() => setMobOpen(o => !o)} aria-label="Menu">
             <span /><span /><span />
           </button>
         </div>
       </nav>
 
-      {/* Mobile backdrop */}
-      <div className={`mob-backdrop${mobOpen ? ' open' : ''}`} onClick={() => setMobOpen(false)} />
+      <div className={`mob-backdrop fixed inset-0 top-[60px] bg-dark/30 z-[998] backdrop-blur-sm${mobOpen ? ' open' : ''}`} onClick={() => setMobOpen(false)} />
 
-      {/* Mobile menu */}
-      <div className={`mob-menu${mobOpen ? ' open' : ''}`}>
-        {[
-          ['home','🏠','Нүүр'],['services','✂️','Үйлчилгээ'],['products','🛍️','Бүтээгдэхүүн'],
-          ['artists','👩‍🎨','Уран бүтээлчид'],['about','💫','Бидний тухай'],['contact','📞','Холбоо барих'],
-        ].map(([id, icon, label]) => (
-          <a key={id} href={`#${id}`} onClick={e => { e.preventDefault(); scrollTo(id); }}>
-            <span>{icon}</span>{label}
+      <div className={`mob-menu fixed top-[60px] left-0 right-0 bg-[#FFFAF5] px-5 pb-6 shadow-[0_16px_48px_rgba(0,0,0,.12)] z-[999] flex-col gap-0 border-t border-gold/15${mobOpen ? ' open' : ''}`}>
+        {[['home','🏠','Нүүр'],['services','✂️','Үйлчилгээ'],['products','🛍️','Бүтээгдэхүүн'],['artists','👩‍🎨','Уран бүтээлчид'],['about','💫','Бидний тухай'],['contact','📞','Холбоо барих']].map(([id,icon,label]) => (
+          <a key={id} href={`#${id}`}
+            className="flex items-center gap-3 text-dark/80 text-[15px] font-medium py-3.5 px-2 border-b border-gold/10 last:border-0 no-underline hover:text-gold-dark transition-colors"
+            onClick={e => { e.preventDefault(); scrollTo(id); }}>
+            <span className="text-base">{icon}</span>{label}
           </a>
         ))}
-
-        <div style={{ display:'flex', flexDirection:'column', gap:10, marginTop:16, paddingTop:16, borderTop:'1px solid var(--gray-100)' }}>
+        <div className="flex flex-col gap-2.5 mt-4 pt-4 border-t border-gold/15">
           {user ? (
             <>
-              <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', padding:'10px 12px', background:'var(--gold-light)', borderRadius:12, border:'1px solid var(--gold)' }}>
-                <div style={{ display:'flex', alignItems:'center', gap:8 }}>
-                  <div className="nav-user-av">{user.email[0].toUpperCase()}</div>
-                  <span style={{ fontSize:13, fontWeight:500, color:'var(--dark)', overflow:'hidden', textOverflow:'ellipsis', whiteSpace:'nowrap', maxWidth:160 }}>{user.email}</span>
+              <div className="flex items-center justify-between px-3 py-2.5 bg-gold-light/60 rounded-xl border border-gold/20">
+                <div className="flex items-center gap-2">
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#B8960C] to-[#D4AF37] text-white text-xs font-bold flex items-center justify-center">{user.email[0].toUpperCase()}</div>
+                  <span className="text-sm font-medium text-dark truncate max-w-[160px]">{user.email}</span>
                 </div>
-                <button style={{ background:'none', border:'none', color:'var(--red)', fontSize:12, cursor:'pointer', fontWeight:600, padding:'4px 8px' }} onClick={handleLogout}>Гарах</button>
+                <button className="border-none bg-none text-salon-red text-xs font-semibold cursor-pointer" onClick={handleLogout}>Гарах</button>
               </div>
               {isAdmin && (
-                <a href="/admin" style={{ display:'flex', alignItems:'center', gap:8, padding:'12px 12px', background:'var(--pink-light)', borderRadius:12, color:'var(--pink-dark)', fontWeight:700, fontSize:14, textDecoration:'none', border:'none' }} onClick={() => setMobOpen(false)}>
+                <a href="/admin" className="flex items-center gap-2 px-3 py-3 bg-gold-light/80 rounded-xl text-gold-dark font-bold text-sm no-underline border border-gold/20" onClick={() => setMobOpen(false)}>
                   ⚙️ Админ панель
                 </a>
               )}
             </>
           ) : (
-            <button className="btn-outline" style={{ width:'100%', minHeight:48, fontSize:15 }} onClick={() => { openAuth(); setMobOpen(false); }}>
-              Нэвтрэх
-            </button>
+            <OutlineBtn className="w-full min-h-[48px] !text-[15px]" onClick={() => { openAuth(); setMobOpen(false); }}>Нэвтрэх</OutlineBtn>
           )}
-          <button className="btn-primary" style={{ width:'100%', minHeight:50, fontSize:15 }} onClick={() => { openBooking(); setMobOpen(false); }}>
-            📅 Цаг захиалах
-          </button>
+          <GoldBtn className="w-full min-h-[50px] !text-[15px]" onClick={() => { openBooking(); setMobOpen(false); }}>📅 Цаг захиалах</GoldBtn>
         </div>
       </div>
     </>

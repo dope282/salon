@@ -1,5 +1,5 @@
 'use client';
-import { createContext, useContext, useState, useCallback, useRef } from 'react';
+import { createContext, useContext, useState, useCallback, useRef, useEffect } from 'react';
 
 const UIContext = createContext(null);
 
@@ -19,6 +19,11 @@ export function UIProvider({ children }) {
   const closeBooking = () => { setBookingOpen(false); document.body.style.overflow = ''; };
   const openAuth    = () => { setAuthOpen(true);     document.body.style.overflow = 'hidden'; };
   const closeAuth   = () => { setAuthOpen(false);    document.body.style.overflow = ''; };
+
+  // Navigate хийхэд overflow:hidden арилгана
+  useEffect(() => {
+    return () => { document.body.style.overflow = ''; };
+  }, []);
 
   return (
     <UIContext.Provider value={{ bookingOpen, authOpen, toast, showToast, openBooking, closeBooking, openAuth, closeAuth }}>

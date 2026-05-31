@@ -14,7 +14,7 @@ export default function Dashboard({ bookings, onSwitchView }) {
   const todayBks  = bookings.filter(b => b.booking_date === today);
   const pendingBks= bookings.filter(b => b.status === 'pending');
   const totalRev  = bookings.filter(b => b.status !== 'cancelled').reduce((s,b) => s+(b.total_price||0), 0);
-  const recent    = bookings.slice(0, 5);
+  const recent    = [...bookings].sort((a, b) => new Date(b.created_at) - new Date(a.created_at)).slice(0, 5);
 
   const stats = [
     { lbl:'Нийт захиалга',        val:bookings.length,   chg:`${pendingBks.length} хүлээгдэж байна`, ico:'📅', cls:'pink' },
