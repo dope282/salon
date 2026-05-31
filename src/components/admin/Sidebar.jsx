@@ -1,11 +1,12 @@
 'use client';
 export default function Sidebar({ view, onSwitch, adminEmail, onLogout, isOpen, onClose }) {
   const nav = [
-    { id:'dashboard',     icon:'fas fa-th-large',       label:'Хяналтын самбар' },
-    { id:'appointments',  icon:'fas fa-calendar-check', label:'Захиалгууд' },
-    { id:'products',      icon:'fas fa-box-open',       label:'Бүтээгдэхүүн' },
-    { id:'customers',     icon:'fas fa-users',          label:'Үйлчлүүлэгчид' },
-    { id:'artists',       icon:'fas fa-cut',            label:'Уран бүтээлчид' },
+    { id:'dashboard',    icon:'fas fa-th-large',       label:'Хяналтын самбар' },
+    { id:'appointments', icon:'fas fa-calendar-check',  label:'Захиалгууд' },
+    { id:'products',     icon:'fas fa-box-open',        label:'Бүтээгдэхүүн' },
+    { id:'customers',    icon:'fas fa-users',           label:'Үйлчлүүлэгчид' },
+    { id:'artists',      icon:'fas fa-cut',             label:'Артистууд' },
+    { id:'packages',     icon:'fas fa-gift',            label:'Багц үйлчилгээ' },
   ];
   const mgmt = [
     { id:'services',  icon:'fas fa-star',       label:'Үйлчилгээнүүд' },
@@ -15,45 +16,61 @@ export default function Sidebar({ view, onSwitch, adminEmail, onLogout, isOpen, 
   ];
 
   const Item = ({ item }) => (
-    <li>
-      <button className={view === item.id ? 'active' : ''} onClick={() => onSwitch(item.id)}>
-        <i className={item.icon} /> {item.label}
+    <li className="mb-0.5">
+      <button
+        onClick={() => onSwitch(item.id)}
+        className={`flex items-center gap-[11px] px-3.5 py-[11px] rounded-2xl w-full text-sm font-medium transition-all cursor-pointer border-none text-left ${view === item.id ? 'bg-gold-light text-gold-dark border border-gold/20' : 'bg-none text-gray-400 hover:bg-gold-light/60 hover:text-gold-dark border border-transparent'}`}>
+        <i className={`${item.icon} w-[18px] text-center text-[15px]`} /> {item.label}
       </button>
     </li>
   );
 
   return (
-    <aside className={`sidebar${isOpen ? ' open' : ''}`} id="adminSidebar">
-      <div className="sb-logo">
-        <div className="sb-logo-icon">💇‍♀️</div>
-        <div>
-          <div className="sb-logo-text">Hatantsetsey lash</div>
-          <div className="sb-logo-sub">Админ панель</div>
+    <aside className={`admin-sidebar flex flex-col bg-white border-r border-gray-200 flex-shrink-0 overflow-y-auto${isOpen ? ' open' : ''}`} id="adminSidebar">
+      {/* Logo */}
+      <div className="px-5 py-6 border-b border-gray-200 flex items-center gap-3">
+        <div className="w-[42px] h-[42px] rounded-lg bg-gradient-to-br from-pink to-pink-dark flex items-center justify-center text-xl text-white flex-shrink-0">
+          💇‍♀️
         </div>
-        <button className="sb-close-btn" onClick={onClose}>✕</button>
+        <div className="flex-1">
+          <div className="font-display text-base font-bold text-gold leading-[1.1]">Hatantsetsey lash</div>
+          <div className="text-[9px] tracking-[2px] text-gray-500 uppercase">Админ панель</div>
+        </div>
+        <button onClick={onClose}
+          className="hidden ml-auto w-8 h-8 flex-shrink-0 rounded-full border-none bg-gray-100 cursor-pointer text-sm text-gray-500 items-center justify-center transition-all hover:bg-pink-light hover:text-pink max-[900px]:flex">
+          ✕
+        </button>
       </div>
 
-      <div className="sb-section">Үндсэн цэс</div>
-      <ul className="sb-nav">{nav.map(item => <Item key={item.id} item={item} />)}</ul>
+      <div className="text-[10px] font-bold uppercase tracking-[1.5px] text-gray-300 px-2.5 py-3 pt-3">Үндсэн цэс</div>
+      <ul className="list-none px-2.5">{nav.map(item => <Item key={item.id} item={item} />)}</ul>
 
-      <div className="sb-section">Удирдлага</div>
-      <ul className="sb-nav">{mgmt.map(item => <Item key={item.id} item={item} />)}</ul>
+      <div className="text-[10px] font-bold uppercase tracking-[1.5px] text-gray-300 px-2.5 py-3">Удирдлага</div>
+      <ul className="list-none px-2.5">{mgmt.map(item => <Item key={item.id} item={item} />)}</ul>
 
-      <div className="sb-section">Систем</div>
-      <ul className="sb-nav">
-        <li><a href="/" style={{ display:'flex', alignItems:'center', gap:11, padding:'11px 14px', borderRadius:14, textDecoration:'none', color:'var(--gray-500)', fontSize:14, fontWeight:500 }}>
-          <i className="fas fa-home" /> Гол хуудас
-        </a></li>
-        <li className="sb-logout">
-          <button onClick={onLogout}><i className="fas fa-sign-out-alt" /> Гарах</button>
+      <div className="text-[10px] font-bold uppercase tracking-[1.5px] text-gray-300 px-2.5 py-3">Систем</div>
+      <ul className="list-none px-2.5">
+        <li className="mb-0.5">
+          <a href="/" className="flex items-center gap-[11px] px-3.5 py-[11px] rounded-2xl no-underline text-gray-500 text-sm font-medium hover:bg-pink-light hover:text-pink transition-all">
+            <i className="fas fa-home w-[18px] text-center text-[15px]" /> Гол хуудас
+          </a>
+        </li>
+        <li className="mb-0.5">
+          <button onClick={onLogout}
+            className="flex items-center gap-[11px] px-3.5 py-[11px] rounded-2xl w-full border-none bg-none text-salon-red text-sm font-medium cursor-pointer transition-all hover:bg-[#FFF5F5] hover:text-[#C53030]">
+            <i className="fas fa-sign-out-alt w-[18px] text-center text-[15px]" /> Гарах
+          </button>
         </li>
       </ul>
 
-      <div className="sb-user">
-        <div className="sb-avatar">{adminEmail?.[0]?.toUpperCase() || 'А'}</div>
+      {/* User */}
+      <div className="px-5 py-4 border-t border-gray-200 flex items-center gap-3 mt-auto">
+        <div className="w-[38px] h-[38px] rounded-full bg-gradient-to-br from-pink to-pink-dark flex items-center justify-center text-white text-[15px] font-bold flex-shrink-0">
+          {adminEmail?.[0]?.toUpperCase() || 'А'}
+        </div>
         <div>
-          <div className="sb-user-name">{adminEmail?.split('@')[0] || 'Админ'}</div>
-          <div className="sb-user-role">Системийн зохицуулагч</div>
+          <div className="text-sm font-semibold leading-[1.2]">{adminEmail?.split('@')[0] || 'Админ'}</div>
+          <div className="text-[11px] text-gray-500">Системийн зохицуулагч</div>
         </div>
       </div>
     </aside>

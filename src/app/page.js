@@ -8,8 +8,10 @@ import Features      from '@/components/Features';
 import Footer        from '@/components/Footer';
 import PromoSection  from '@/components/PromoSection';
 import Products      from '@/components/Products';
+import PackagesSection from '@/components/Packages';
 import BookingModal  from '@/components/BookingModal';
 import AuthModal     from '@/components/AuthModal';
+import MyBookings    from '@/components/MyBookings';
 import Toast         from '@/components/Toast';
 
 export default function HomePage() {
@@ -32,6 +34,7 @@ export default function HomePage() {
       <PromoSection />
 
       <Services />
+      <PackagesSection />
       <Products />
       <Artists />
       <Features />
@@ -40,6 +43,7 @@ export default function HomePage() {
       {/* Modals */}
       <BookingModal />
       <AuthModal />
+      <MyBookings />
       <Toast />
     </>
   );

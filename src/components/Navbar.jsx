@@ -6,7 +6,7 @@ import { useUI }   from '@/contexts/UIContext';
 
 export default function Navbar() {
   const { user, signOut, isAdmin } = useAuth();
-  const { openBooking, openAuth }  = useUI();
+  const { openBooking, openAuth, openMyBookings }  = useUI();
   const [scrolled, setScrolled] = useState(false);
   const [mobOpen, setMobOpen]   = useState(false);
 
@@ -51,7 +51,7 @@ export default function Navbar() {
 
         {/* Desktop links */}
         <ul className="hidden md:flex list-none gap-9">
-          {[['home','Нүүр'],['services','Үйлчилгээ'],['products','Бүтээгдэхүүн'],['artists','Уран бүтээлчид'],['about','Бидний тухай'],['contact','Холбоо барих']].map(([id,label]) => (
+          {[['home','Нүүр'],['services','Үйлчилгээ'],['packages','Багц'],['products','Бүтээгдэхүүн'],['artists','Уран бүтээлчид'],['about','Бидний тухай'],['contact','Холбоо барих']].map(([id,label]) => (
             <li key={id}>
               <a href={`#${id}`} className="nav-link text-[13px] font-medium text-dark/70 hover:text-gold-dark tracking-wide"
                 onClick={e => { e.preventDefault(); scrollTo(id); }}>
@@ -64,13 +64,16 @@ export default function Navbar() {
         {/* Actions */}
         <div className="flex items-center gap-3">
           {user ? (
-            <div className="hidden md:flex items-center gap-2 bg-gold-light/60 border border-gold/25 rounded-full py-1.5 pl-2 pr-4">
-              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#B8960C] to-[#D4AF37] text-white text-xs font-bold flex items-center justify-center shadow-sm">
-                {user.email[0].toUpperCase()}
+            <div className="hidden md:flex items-center gap-2">
+              <OutlineBtn onClick={openMyBookings}>📅 Захиалгууд</OutlineBtn>
+              <div className="flex items-center gap-2 bg-gold-light/60 border border-gold/25 rounded-full py-1.5 pl-2 pr-3">
+                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#B8960C] to-[#D4AF37] text-white text-xs font-bold flex items-center justify-center shadow-sm">
+                  {user.email[0].toUpperCase()}
+                </div>
+                <span className="text-xs font-medium text-dark max-w-[110px] truncate">{user.email}</span>
+                {isAdmin && <a href="/admin" className="text-[10px] text-gold-dark font-bold no-underline uppercase tracking-wider">Admin</a>}
+                <button className="border-none bg-none text-gray-400 text-[11px] cursor-pointer hover:text-salon-red transition-colors ml-0.5" onClick={handleLogout}>✕</button>
               </div>
-              <span className="text-xs font-medium text-dark max-w-[110px] truncate">{user.email}</span>
-              {isAdmin && <a href="/admin" className="text-[10px] text-gold-dark font-bold no-underline uppercase tracking-wider">Admin</a>}
-              <button className="border-none bg-none text-gray-400 text-[11px] cursor-pointer hover:text-salon-red transition-colors ml-0.5" onClick={handleLogout}>✕</button>
             </div>
           ) : (
             <OutlineBtn className="hidden md:block" onClick={openAuth}>Нэвтрэх</OutlineBtn>
@@ -88,7 +91,7 @@ export default function Navbar() {
       <div className={`mob-backdrop fixed inset-0 top-[60px] bg-dark/30 z-[998] backdrop-blur-sm${mobOpen ? ' open' : ''}`} onClick={() => setMobOpen(false)} />
 
       <div className={`mob-menu fixed top-[60px] left-0 right-0 bg-[#FFFAF5] px-5 pb-6 shadow-[0_16px_48px_rgba(0,0,0,.12)] z-[999] flex-col gap-0 border-t border-gold/15${mobOpen ? ' open' : ''}`}>
-        {[['home','🏠','Нүүр'],['services','✂️','Үйлчилгээ'],['products','🛍️','Бүтээгдэхүүн'],['artists','👩‍🎨','Уран бүтээлчид'],['about','💫','Бидний тухай'],['contact','📞','Холбоо барих']].map(([id,icon,label]) => (
+        {[['home','🏠','Нүүр'],['services','✂️','Үйлчилгээ'],['packages','🎁','Багц'],['products','🛍️','Бүтээгдэхүүн'],['artists','👩‍🎨','Уран бүтээлчид'],['about','💫','Бидний тухай'],['contact','📞','Холбоо барих']].map(([id,icon,label]) => (
           <a key={id} href={`#${id}`}
             className="flex items-center gap-3 text-dark/80 text-[15px] font-medium py-3.5 px-2 border-b border-gold/10 last:border-0 no-underline hover:text-gold-dark transition-colors"
             onClick={e => { e.preventDefault(); scrollTo(id); }}>
@@ -105,6 +108,10 @@ export default function Navbar() {
                 </div>
                 <button className="border-none bg-none text-salon-red text-xs font-semibold cursor-pointer" onClick={handleLogout}>Гарах</button>
               </div>
+              <button onClick={() => { openMyBookings(); setMobOpen(false); }}
+                className="flex items-center gap-2 px-3 py-3 bg-white rounded-xl text-dark font-semibold text-sm border border-gray-200 cursor-pointer w-full text-left">
+                📅 Миний захиалгууд
+              </button>
               {isAdmin && (
                 <a href="/admin" className="flex items-center gap-2 px-3 py-3 bg-gold-light/80 rounded-xl text-gold-dark font-bold text-sm no-underline border border-gold/20" onClick={() => setMobOpen(false)}>
                   ⚙️ Админ панель

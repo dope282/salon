@@ -57,6 +57,11 @@ ALTER TABLE public.bookings  ENABLE ROW LEVEL SECURITY;
 -- SERVICES: anyone can read
 CREATE POLICY "services_public_read"  ON public.services  FOR SELECT USING (true);
 
+-- SERVICES: admin can write
+CREATE POLICY "services_admin_write" ON public.services FOR ALL
+  USING (auth.email() = 'jaamaaj26@gmail.com')
+  WITH CHECK (auth.email() = 'jaamaaj26@gmail.com');
+
 -- ARTISTS: anyone can read
 CREATE POLICY "artists_public_read" ON public.artists FOR SELECT USING (true);
 
@@ -145,6 +150,10 @@ CREATE POLICY "products_admin_all" ON public.products
   FOR ALL USING (auth.email() = 'jaamaaj26@gmail.com')
   WITH CHECK (auth.email() = 'jaamaaj26@gmail.com');
 
+-- GRANT
+GRANT SELECT ON public.products TO anon;
+GRANT ALL    ON public.products TO authenticated;
+
 -- ================================================================
 -- 5. SITE SETTINGS TABLE (hero image, etc.)
 -- ================================================================
@@ -167,6 +176,14 @@ CREATE POLICY "settings_admin_write" ON public.site_settings FOR INSERT
 CREATE POLICY "settings_admin_update" ON public.site_settings FOR UPDATE
   USING (auth.email() = 'jaamaaj26@gmail.com');
 
+-- GRANT
+GRANT SELECT ON public.site_settings TO anon;
+GRANT ALL    ON public.site_settings TO authenticated;
+GRANT SELECT ON public.services      TO anon;
+GRANT ALL    ON public.services      TO authenticated;
+GRANT ALL    ON public.bookings      TO anon;
+GRANT ALL    ON public.bookings      TO authenticated;
+
 -- Default hero image
 INSERT INTO public.site_settings (key, value) VALUES
   ('hero_image_url', 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=700&q=85&auto=format&fit=crop')
@@ -176,6 +193,102 @@ ON CONFLICT DO NOTHING;
 INSERT INTO public.site_settings (key, value) VALUES
   ('promo_config', '{"active":true,"tag":"⚡ ОНЦГОЙ САНАЛ","title":"Анхны захиалгадаа","pct":"20%","all":"Бүх үйлчилгээнд","btn":"Одоо захиалах →","badge":"ОНЦГОЙ · САНАЛ · ЗӨВХӨН · ТАНД","emoji":"💇‍♀️"}')
 ON CONFLICT DO NOTHING;
+
+-- ================================================================
+-- 6. PACKAGES — Багц үйлчилгээ
+-- ================================================================
+
+CREATE TABLE IF NOT EXISTS public.packages (
+  id            SERIAL PRIMARY KEY,
+  name          TEXT NOT NULL,
+  description   TEXT DEFAULT '',
+  price         INTEGER NOT NULL DEFAULT 0,
+  original_price INTEGER DEFAULT 0,
+  emoji         TEXT DEFAULT '🎁',
+  image_url     TEXT DEFAULT '',
+  duration_min  INTEGER DEFAULT 120,
+  active        BOOLEAN DEFAULT true,
+  sort_order    INTEGER DEFAULT 0,
+  created_at    TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE public.packages ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "packages_public_read" ON public.packages FOR SELECT USING (active = true);
+CREATE POLICY "packages_admin_all"   ON public.packages FOR ALL
+  USING (auth.email() = 'jaamaaj26@gmail.com')
+  WITH CHECK (auth.email() = 'jaamaaj26@gmail.com');
+GRANT SELECT ON public.packages TO anon;
+GRANT ALL    ON public.packages TO authenticated;
+
+-- Багцад багтах үйлчилгээнүүд
+CREATE TABLE IF NOT EXISTS public.package_services (
+  package_id INTEGER REFERENCES public.packages(id)  ON DELETE CASCADE,
+  service_id INTEGER REFERENCES public.services(id)  ON DELETE CASCADE,
+  PRIMARY KEY (package_id, service_id)
+);
+ALTER TABLE public.package_services ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "pkg_svc_public_read" ON public.package_services FOR SELECT USING (true);
+CREATE POLICY "pkg_svc_admin_all"   ON public.package_services FOR ALL
+  USING (auth.email() = 'jaamaaj26@gmail.com')
+  WITH CHECK (auth.email() = 'jaamaaj26@gmail.com');
+GRANT SELECT ON public.package_services TO anon;
+GRANT ALL    ON public.package_services TO authenticated;
+
+-- Багцыг хэн хийж чадах вэ
+CREATE TABLE IF NOT EXISTS public.artist_packages (
+  artist_id  INTEGER REFERENCES public.artists(id)   ON DELETE CASCADE,
+  package_id INTEGER REFERENCES public.packages(id)  ON DELETE CASCADE,
+  PRIMARY KEY (artist_id, package_id)
+);
+ALTER TABLE public.artist_packages ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "art_pkg_public_read" ON public.artist_packages FOR SELECT USING (true);
+CREATE POLICY "art_pkg_admin_all"   ON public.artist_packages FOR ALL
+  USING (auth.email() = 'jaamaaj26@gmail.com')
+  WITH CHECK (auth.email() = 'jaamaaj26@gmail.com');
+GRANT SELECT ON public.artist_packages TO anon;
+GRANT ALL    ON public.artist_packages TO authenticated;
+
+-- ================================================================
+-- 7. ARTIST SCHEDULE — Артист болгоны долоо хоногийн ажиллах цаг
+-- ================================================================
+
+CREATE TABLE IF NOT EXISTS public.artist_schedules (
+  id          SERIAL PRIMARY KEY,
+  artist_id   INTEGER REFERENCES public.artists(id) ON DELETE CASCADE,
+  day_of_week SMALLINT NOT NULL CHECK (day_of_week BETWEEN 0 AND 6),
+  start_time  TEXT NOT NULL DEFAULT '09:00',
+  end_time    TEXT NOT NULL DEFAULT '18:00',
+  is_active   BOOLEAN DEFAULT true,
+  UNIQUE (artist_id, day_of_week)
+);
+ALTER TABLE public.artist_schedules ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "schedules_public_read" ON public.artist_schedules FOR SELECT USING (true);
+CREATE POLICY "schedules_admin_all"   ON public.artist_schedules FOR ALL
+  USING (auth.email() = 'jaamaaj26@gmail.com')
+  WITH CHECK (auth.email() = 'jaamaaj26@gmail.com');
+GRANT SELECT ON public.artist_schedules TO anon;
+GRANT ALL    ON public.artist_schedules TO authenticated;
+
+-- ================================================================
+-- 8. ARTIST ↔ SERVICE холбоо (many-to-many)
+-- ================================================================
+
+CREATE TABLE IF NOT EXISTS public.artist_services (
+  artist_id  INTEGER REFERENCES public.artists(id)  ON DELETE CASCADE,
+  service_id INTEGER REFERENCES public.services(id) ON DELETE CASCADE,
+  PRIMARY KEY (artist_id, service_id)
+);
+
+ALTER TABLE public.artist_services ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "artist_services_public_read" ON public.artist_services
+  FOR SELECT USING (true);
+
+CREATE POLICY "artist_services_admin_all" ON public.artist_services
+  FOR ALL USING (auth.email() = 'jaamaaj26@gmail.com')
+  WITH CHECK (auth.email() = 'jaamaaj26@gmail.com');
+
+GRANT SELECT ON public.artist_services TO anon;
+GRANT ALL    ON public.artist_services TO authenticated;
 
 -- ================================================================
 -- 5. SUPABASE STORAGE — hero-images bucket policies

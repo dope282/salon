@@ -202,35 +202,6 @@ export default function HeroSettings({ showToast }) {
           />
         </div>
 
-        {/* Bucket setup guide — always visible or highlighted on error */}
-        <div style={{
-          background: bucketMissing ? '#FFF5F5' : 'var(--gold-light)',
-          border: `1.5px solid ${bucketMissing ? 'var(--red)' : 'var(--gold)'}`,
-          borderRadius: 12, padding: '16px 18px', fontSize: 13, color: 'var(--dark)', lineHeight: 1.8,
-        }}>
-          {bucketMissing && (
-            <div style={{ fontWeight: 700, color: 'var(--red)', marginBottom: 8, fontSize: 14 }}>
-              ⚠️ "hero-images" bucket олдсонгүй — доорх алхмуудыг дагана уу:
-            </div>
-          )}
-          {!bucketMissing && (
-            <div style={{ fontWeight: 700, marginBottom: 8 }}>💡 Зураг байршуулахын өмнө нэг удаа хийх тохиргоо:</div>
-          )}
-          <ol style={{ paddingLeft: 20, margin: 0, display: 'flex', flexDirection: 'column', gap: 4 }}>
-            <li>
-              <a href="https://supabase.com/dashboard" target="_blank" rel="noreferrer"
-                style={{ color: 'var(--pink-dark)', fontWeight: 600 }}>
-                supabase.com/dashboard
-              </a>{' '}
-              → өөрийн проект
-            </li>
-            <li>Зүүн цэснээс <strong>Storage</strong> дарна</li>
-            <li><strong>New bucket</strong> товчийг дарна</li>
-            <li>Name: <code style={{ background: '#fff', padding: '1px 6px', borderRadius: 4 }}>hero-images</code></li>
-            <li><strong>Public bucket</strong> checkbox-ийг тэмдэглэнэ ✅</li>
-            <li><strong>Save</strong> дарна → дууслаа!</li>
-          </ol>
-        </div>
       </div>
 
       {/* Reset to default */}

@@ -2,52 +2,80 @@ import Image from 'next/image';
 
 export default function Footer() {
   return (
-    <footer className="footer" id="contact">
-      <div className="footer-grid">
+    <footer id="contact" className="bg-dark text-white pt-20 px-12 pb-8 max-[900px]:px-5 max-[900px]:pt-12 max-[640px]:px-4 max-[640px]:pt-9 max-[640px]:pb-6">
+      {/* Top divider */}
+      <div className="w-full h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent mb-12 max-[640px]:mb-8" />
+
+      <div className="grid grid-cols-[2fr_1fr_1fr_1.4fr] gap-14 mb-14 max-[1200px]:grid-cols-[1fr_1fr_1fr] max-[1200px]:gap-8 max-[900px]:grid-cols-2 max-[900px]:gap-8 max-[640px]:grid-cols-1 max-[640px]:gap-7">
         <div>
-          <Image src="/logo.jpg" alt="Hatantsetsey lash" className="logo-img-footer" width={120} height={44} style={{ height:44, width:'auto' }} />
-          <p className="footer-desc">
-            Hatantsetsey lash Beauty Salon — тансаглал, мэргэжил, итгэлийн нэгдэл.
-            Та бидэнтэй хамт гоо сайхныхаа шинэ хуудсыг нээнэ үү.
+          <Image src="/logo.png" alt="Hatantsetsey lash" width={140} height={56}
+            className="h-14 w-auto bg-white rounded-xl px-4 py-2 mb-5" />
+          <p className="text-white/45 text-[13px] leading-[1.85] mb-6 max-w-[280px]">
+            Hatantsetsey lash Beauty Salon — тансаглал, мэргэжил, итгэлийн нэгдэл. Та бидэнтэй хамт гоо сайхныхаа шинэ хуудсыг нээнэ үү.
           </p>
-          <div className="socials">
+          <div className="flex gap-3">
             {['instagram','facebook','tiktok','youtube'].map(s => (
-              <a key={s} href="#" className="soc-a"><i className={`fab fa-${s}`} /></a>
+              <a key={s} href="#"
+                className="w-9 h-9 rounded-full bg-white/6 border border-white/10 flex items-center justify-center text-white/50 no-underline text-sm transition-all hover:bg-gold/20 hover:border-gold/30 hover:text-gold">
+                <i className={`fab fa-${s}`} />
+              </a>
             ))}
           </div>
         </div>
+
         <div>
-          <div className="f-heading">Хурдан холбоос</div>
-          <ul className="f-links">
+          <div className="text-[10px] font-bold uppercase tracking-[2.5px] text-gold mb-5">Хурдан холбоос</div>
+          <ul className="list-none space-y-3">
             {['Нүүр','Үйлчилгээ','Уран бүтээлчид','Бидний тухай','Холбоо барих'].map(l => (
-              <li key={l}><a href="#">{l}</a></li>
+              <li key={l}>
+                <a href="#" className="text-white/40 no-underline text-[13px] transition-colors hover:text-gold tracking-wide">{l}</a>
+              </li>
             ))}
           </ul>
         </div>
+
         <div>
-          <div className="f-heading">Дэмжлэг</div>
-          <ul className="f-links">
+          <div className="text-[10px] font-bold uppercase tracking-[2.5px] text-gold mb-5">Дэмжлэг</div>
+          <ul className="list-none space-y-3">
             {['Түгээмэл асуулт','Захиалгын дүрэм','Цуцлалт','Нууцлалын бодлого','Үйлчилгээний нөхцөл'].map(l => (
-              <li key={l}><a href="#">{l}</a></li>
+              <li key={l}>
+                <a href="#" className="text-white/40 no-underline text-[13px] transition-colors hover:text-gold tracking-wide">{l}</a>
+              </li>
             ))}
           </ul>
         </div>
+
         <div>
-          <div className="f-heading">Холбоо барих</div>
-          <div className="f-contact-row"><i className="fas fa-phone" style={{ color:'var(--pink)', width:16 }} />(976) 9911-2233</div>
-          <div className="f-contact-row"><i className="fas fa-envelope" style={{ color:'var(--pink)', width:16 }} />info@hatantsetseylash.mn</div>
-          <div className="f-contact-row"><i className="fas fa-map-marker-alt" style={{ color:'var(--pink)', width:16 }} />Сүхбаатар дүүрэг, Улаанбаатар</div>
-          <div style={{ marginTop:20 }}>
-            <div className="f-heading">Мэдээллийн хуудас</div>
-            <p style={{ color:'rgba(255,255,255,.5)', fontSize:13 }}>Тусгай санал, шинэчлэлт авахын тулд бүртгүүлэх</p>
-            <div className="nl-row">
-              <input className="nl-input" type="email" placeholder="Имэйл хаягаа оруулна уу" />
-              <button className="btn-primary" style={{ padding:'10px 18px', fontSize:13 }}>Бүртгүүлэх</button>
+          <div className="text-[10px] font-bold uppercase tracking-[2.5px] text-gold mb-5">Холбоо барих</div>
+          {[
+            ['fa-phone','(976) 9911-2233'],
+            ['fa-envelope','info@hatantsetseylash.mn'],
+            ['fa-map-marker-alt','Сүхбаатар дүүрэг, Улаанбаатар'],
+          ].map(([icon, text]) => (
+            <div key={text} className="flex items-center gap-3 text-white/40 text-[13px] mb-3 hover:text-white/60 transition-colors">
+              <i className={`fas ${icon} text-gold/70 w-4 text-center`} />{text}
+            </div>
+          ))}
+          <div className="mt-6">
+            <div className="text-[10px] font-bold uppercase tracking-[2.5px] text-gold mb-2.5">Мэдээллийн хуудас</div>
+            <p className="text-white/35 text-xs mb-3 leading-relaxed">Тусгай санал, шинэчлэлт авахын тулд бүртгүүлэх</p>
+            <div className="flex gap-2 max-[640px]:flex-col">
+              <input type="email" placeholder="Имэйл хаяг..."
+                className="flex-1 bg-white/6 border border-white/12 rounded-full px-4 py-2.5 text-white text-xs outline-none placeholder:text-white/25 focus:border-gold/40 transition-all" />
+              <button className="bg-gradient-to-r from-[#B8960C] to-[#C9A84C] text-dark border-none px-4 py-2.5 rounded-full text-xs font-bold cursor-pointer transition-all hover:shadow-[0_4px_16px_rgba(201,168,76,.40)] whitespace-nowrap">
+                Бүртгүүлэх
+              </button>
             </div>
           </div>
         </div>
       </div>
-      <div className="footer-bottom">© 2024 Hatantsetsey lash Beauty Salon. Бүх эрх хуулиар хамгаалагдсан. ❤️-р бүтээсэн</div>
+
+      {/* Bottom */}
+      <div className="w-full h-px bg-white/8 mb-6" />
+      <div className="flex items-center justify-between gap-4 flex-wrap max-[640px]:flex-col max-[640px]:text-center">
+        <div className="text-white/25 text-[12px] tracking-wide">© 2024 Hatantsetsey lash Beauty Salon. Бүх эрх хамгаалагдсан.</div>
+        <div className="text-white/20 text-[11px] tracking-wider uppercase">LASH · BROW LAMI · NAIL · WAX</div>
+      </div>
     </footer>
   );
 }

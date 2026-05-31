@@ -31,8 +31,12 @@ export default function ProductsManager({ showToast }) {
 
   /* ── helpers ── */
   const setF = (k, v) => setForm(f => ({ ...f, [k]: v }));
-  const openAdd  = () => { setForm({ ...EMPTY }); window.scrollTo({ top: 99999, behavior: 'smooth' }); };
-  const openEdit = (p) => { setForm({ ...p, price: String(p.price) }); window.scrollTo({ top: 99999, behavior: 'smooth' }); };
+  const scrollToForm = () => setTimeout(() => {
+    const el = document.getElementById('adminMain');
+    (el || window).scrollTo({ top: 99999, behavior: 'smooth' });
+  }, 50);
+  const openAdd  = () => { setForm({ ...EMPTY }); scrollToForm(); };
+  const openEdit = (p) => { setForm({ ...p, price: String(p.price) }); scrollToForm(); };
 
   /* ── save (insert / update) ── */
   const save = async () => {

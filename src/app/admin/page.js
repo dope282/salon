@@ -11,11 +11,12 @@ import PromoSettings   from '@/components/admin/PromoSettings';
 import ProductsManager from '@/components/admin/ProductsManager';
 import ArtistsManager  from '@/components/admin/ArtistsManager';
 import ServicesManager  from '@/components/admin/ServicesManager';
+import PackagesManager from '@/components/admin/PackagesManager';
 import CustomersManager from '@/components/admin/CustomersManager';
 
 const VIEW_TITLES = {
   dashboard:'Хяналтын самбар', appointments:'Захиалгууд', products:'Бүтээгдэхүүн',
-  customers:'Үйлчлүүлэгчид',  artists:'Уран бүтээлчид', services:'Үйлчилгээнүүд',
+  customers:'Үйлчлүүлэгчид',  artists:'Артистууд', services:'Үйлчилгээнүүд', packages:'Багц үйлчилгээ',
   payments:'Төлбөрүүд',        reports:'Тайлан',          settings:'Тохиргоо',
 };
 
@@ -62,7 +63,7 @@ export default function AdminPage() {
   return (
     <div className="flex h-screen overflow-hidden bg-[#FAFAFA] font-sans text-dark">
       {/* Overlay */}
-      <div className={`sb-overlay fixed inset-0 z-[899]${sbOpen ? ' active' : ''}`} onClick={() => setSbOpen(false)} />
+      {sbOpen && <div className="fixed inset-0 z-[899] bg-black/40 backdrop-blur-sm" onClick={() => setSbOpen(false)} />}
 
       <Sidebar
         view={view}
@@ -73,7 +74,7 @@ export default function AdminPage() {
         onClose={() => setSbOpen(false)}
       />
 
-      <main className="flex-1 overflow-y-auto px-8 py-7 max-[900px]:px-3.5 max-[640px]:px-3">
+      <main id="adminMain" className="flex-1 overflow-y-auto px-8 py-7 max-[900px]:px-3.5 max-[640px]:px-3">
         {/* Topbar */}
         <div className="flex justify-between items-center mb-7 max-[900px]:mb-4">
           <div className="flex items-center gap-3">
@@ -84,7 +85,7 @@ export default function AdminPage() {
             <div>
               <h2 className="font-display text-2xl font-bold max-[900px]:text-lg max-[640px]:text-base">{VIEW_TITLES[view] || view}</h2>
               <div className="text-xs text-gray-500 mt-0.5 max-[640px]:hidden">
-                Hatantsetsey lash › <span className="text-pink">{VIEW_TITLES[view] || view}</span>
+                Hatantsetseg lash › <span className="text-pink">{VIEW_TITLES[view] || view}</span>
               </div>
             </div>
           </div>
@@ -107,6 +108,7 @@ export default function AdminPage() {
         {view === 'products'     && <ProductsManager showToast={showToast} />}
         {view === 'artists'      && <ArtistsManager showToast={showToast} />}
         {view === 'services'     && <ServicesManager showToast={showToast} />}
+        {view === 'packages'     && <PackagesManager showToast={showToast} />}
         {view === 'customers'    && <CustomersManager showToast={showToast} />}
 
         {view === 'settings' && (
@@ -124,7 +126,7 @@ export default function AdminPage() {
           </div>
         )}
 
-        {!['dashboard','appointments','products','artists','services','customers','settings'].includes(view) && (
+        {!['dashboard','appointments','products','artists','services','packages','customers','settings'].includes(view) && (
           <div className="bg-white rounded-[24px] p-6 shadow-sm flex flex-col items-center justify-center min-h-[300px] gap-4 text-gray-500">
             <div className="text-5xl">🚧</div>
             <div className="text-base font-semibold">{VIEW_TITLES[view]} — Удахгүй нэмэгдэнэ</div>
