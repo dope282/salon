@@ -40,8 +40,8 @@
 
 /* ── CSS variables (backward compat for inline styles) ── */
 :root {
-  --pink:#FF3399; --pink-light:#FF3399; --pink-dark:#FF3399;
-  --gold:#FF3399; --gold-light:#FF3399; --gold-dark:#FF3399;
+  --pink:#C9A84C; --pink-light:#F5E6C8; --pink-dark:#9A7B30;
+  --gold:#C9A84C; --gold-light:#F5E6C8; --gold-dark:#9A7B30;
   --cream:#FFFAF5; --dark:#1A1A2E;
   --green:#38A169; --yellow:#D69E2E; --red:#E53E3E;
   --gray-100:#F8F9FA; --gray-200:#E9ECEF; --gray-500:#6C757D; --gray-800:#343A40;
@@ -113,7 +113,7 @@ tr:hover td { background:#FAFAFA; }
     inset: 0;
     pointer-events: none;
     z-index: 0;
-    background-image: radial-gradient(ellipse at 1px 1px, rgba(255, 0, 221, 0.035) 1px, transparent 0);
+    background-image: radial-gradient(ellipse at 1px 1px, rgba(201,168,76,.035) 1px, transparent 0);
     background-size: 28px 28px;
   }
 }
@@ -153,7 +153,7 @@ tr:hover td { background:#FAFAFA; }
 /* Гарчгийн алтан shimmer */
 @keyframes goldTextShimmer { to { background-position: -200% center; } }
 .gold-shimmer {
-  background: linear-gradient(90deg,#FF3399,#FF3399 25%,#FF3399 45%,#ff7dbe 50%,#ffe4f1 55%,#fffbfd 75%,#fad5e7);
+  background: linear-gradient(90deg,#FF3399,#FF3399 25%,#FF3399 45%,#FF3399 50%,#FF3399 55%,#fffbfd 75%,#fad5e7);
   background-size: 200% auto;
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent; color: transparent;
