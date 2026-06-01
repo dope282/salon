@@ -29,21 +29,21 @@ export default function Navbar() {
 
   const GoldBtn = ({ children, onClick, className = '' }) => (
     <button onClick={onClick}
-      className={`btn-shine bg-gradient-to-r from-[#FF3399] via-[#FF3399] to-[#FF3399] text-white border-none px-6 py-2.5 rounded-full text-sm font-semibold cursor-pointer transition-all shadow-[0_4px_16px_rgba(201,168,76,.35)] hover:-translate-y-0.5 hover:shadow-[0_6px_24px_rgba(201,168,76,.55)] disabled:opacity-60 tracking-wide ${className}`}>
+      className={`btn-shine bg-gradient-to-r from-[#FF3399] via-[#FF3399] to-[#FF3399] text-pink-50 border-none px-6 py-2.5 rounded-full text-sm font-semibold cursor-pointer transition-all shadow-[0_4px_16px_rgba(255,51,153,.35)] hover:-translate-y-0.5 hover:shadow-[0_6px_24px_rgba(255,51,153,.55)] disabled:opacity-60 tracking-wide ${className}`}>
       {children}
     </button>
   );
 
   const OutlineBtn = ({ children, onClick, className = '' }) => (
     <button onClick={onClick}
-      className={`bg-transparent text-dark border border-dark/20 px-5 py-2.5 rounded-full text-sm font-medium cursor-pointer transition-all hover:border-gold hover:text-gold-dark tracking-wide ${className}`}>
+      className={`bg-transparent text-pink-100 border border-pink-200 px-5 py-2.5 rounded-full text-sm font-medium cursor-pointer transition-all hover:border-gold hover:text-[#FF3399] tracking-wide ${className}`}>
       {children}
     </button>
   );
 
   return (
     <>
-      <nav className={`fixed top-0 left-0 right-0 z-[1000] px-12 py-4 flex items-center justify-between transition-all duration-300 max-[900px]:px-5 max-[640px]:px-4 max-[640px]:py-3 ${scrolled ? 'bg-[rgba(255,250,245,.98)] backdrop-blur-2xl shadow-[0_2px_20px_rgba(201,168,76,.12)] border-b border-gold/10' : 'bg-[rgba(255,250,245,.92)] backdrop-blur-xl'}`}>
+      <nav className={`fixed top-0 left-0 right-0 z-[1000] px-12 py-4 flex items-center justify-between transition-all duration-300 max-[900px]:px-5 max-[640px]:px-4 max-[640px]:py-3 ${scrolled ? 'bg-pink-300 backdrop-blur-2xl shadow-[0_2px_20px_rgba(255,51,153,.18)] border-b border-gold/15' : 'bg-pink-300 backdrop-blur-xl'}`}>
 
         <div className="flex-shrink-0">
           <Image src="/logo.png" alt="Hatantsetsey lash Beauty Salon" width={130} height={52} className="h-[52px] w-auto max-[640px]:h-10" priority />
@@ -51,9 +51,9 @@ export default function Navbar() {
 
         {/* Desktop links */}
         <ul className="hidden lg:flex list-none gap-9 max-[1100px]:gap-6">
-          {[['home','Нүүр'],['services','Үйлчилгээ'],['packages','Багц'],['products','Бүтээгдэхүүн'],['artists','Артистууд'],['trainings','Сургалт'],['about','Бидний тухай'],['contact','Холбоо барих']].map(([id,label]) => (
+          {[['home','НҮҮР'],['services','Үйлчилгээ'],['packages','Багц'],['products','Бүтээгдэхүүн'],['artists','Артистууд'],['trainings','Сургалт'],['about','Бидний тухай'],['contact','Холбоо барих']].map(([id,label]) => (
             <li key={id}>
-              <a href={`#${id}`} className="nav-link text-[13px] font-medium text-dark/70 hover:text-gold-dark tracking-wide"
+              <a href={`#${id}`} className="nav-link text-[13px] font-medium text-pink-200 hover:text-[#FF3399] tracking-wide"
                 onClick={e => { e.preventDefault(); scrollTo(id); }}>
                 {label}
               </a>
@@ -67,14 +67,14 @@ export default function Navbar() {
             <div className="hidden lg:flex items-center gap-2">
               <OutlineBtn onClick={openMyBookings}>📅 Захиалгууд</OutlineBtn>
               <div className="flex items-center gap-2 bg-gold-light/60 border border-gold/25 rounded-full py-1.5 pl-2 pr-3">
-                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#B8960C] to-[#D4AF37] text-white text-xs font-bold flex items-center justify-center shadow-sm">
+                <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#FF3399] to-[#FF66B2] text-white text-xs font-bold flex items-center justify-center shadow-sm">
                   {(user.user_metadata?.full_name || user.email)[0].toUpperCase()}
                 </div>
-                <span className="text-xs font-medium text-dark max-w-[110px] truncate">
+                <span className="text-xs font-medium text-pink-700 max-w-[110px] truncate">
                   {user.user_metadata?.full_name || user.email}
                 </span>
-                {isAdmin && <a href="/admin" className="text-[10px] text-gold-dark font-bold no-underline uppercase tracking-wider">Admin</a>}
-                <button className="border-none bg-none text-gray-400 text-[11px] cursor-pointer hover:text-salon-red transition-colors ml-0.5" onClick={handleLogout}>✕</button>
+                {isAdmin && <a href="/admin" className="text-[10px] text-[#FF3399] font-bold no-underline uppercase tracking-wider">Admin</a>}
+                <button className="border-none bg-none text-pink-400 text-[11px] cursor-pointer hover:text-salon-red transition-colors ml-0.5" onClick={handleLogout}>✕</button>
               </div>
             </div>
           ) : (
@@ -90,15 +90,15 @@ export default function Navbar() {
         </div>
       </nav>
 
-      <div className={`mob-backdrop fixed inset-0 top-[84px] max-[640px]:top-[64px] bg-dark/30 z-[998] backdrop-blur-sm${mobOpen ? ' open' : ''}`} onClick={() => setMobOpen(false)} />
+      <div className={`mob-backdrop fixed inset-0 top-[84px] max-[640px]:top-[64px] bg-[#606060]/30 z-[998] backdrop-blur-sm${mobOpen ? ' open' : ''}`} onClick={() => setMobOpen(false)} />
 
-      <div className={`mob-menu fixed top-[84px] max-[640px]:top-[64px] left-0 right-0 bg-[#FFFAF5] px-5 pb-6 shadow-[0_16px_48px_rgba(0,0,0,.12)] z-[999] flex-col gap-0 border-t border-gold/15 max-h-[calc(100vh-64px)] overflow-y-auto${mobOpen ? ' open' : ''}`}>
+      <div className={`mob-menu fixed top-[84px] max-[640px]:top-[64px] left-0 right-0 bg-[#606060] px-5 pb-6 shadow-[0_16px_48px_rgba(0,0,0,.12)] z-[999] flex-col gap-0 border-t border-pink-100 max-h-[calc(100vh-64px)] overflow-y-auto${mobOpen ? ' open' : ''}`}>
         {[['home','Нүүр'],['services','Үйлчилгээ'],['packages','Багц'],['products','Бүтээгдэхүүн'],['artists','Уран бүтээлчид'],['trainings','Сургалт'],['about','Бидний тухай'],['contact','Холбоо барих']].map(([id,label]) => (
           <a key={id} href={`#${id}`}
-            className="group flex items-center justify-between py-3.5 px-2 border-b border-gold/10 last:border-0 no-underline text-dark/75 text-[15px] font-medium tracking-wide hover:text-gold-dark transition-colors"
+            className="group flex items-center justify-between py-3.5 px-2 border-b border-pink-100 last:border-0 no-underline text-pink-100 text-[15px] font-medium tracking-wide hover:text-[#FF3399] transition-colors"
             onClick={e => { e.preventDefault(); scrollTo(id); }}>
             {label}
-            <span className="text-gold/35 text-lg leading-none group-hover:text-gold-dark group-hover:translate-x-0.5 transition-all">›</span>
+            <span className="text-gold/35 text-lg leading-none group-hover:text-[#FF3399] group-hover:translate-x-0.5 transition-all">›</span>
           </a>
         ))}
         <div className="flex flex-col gap-2.5 mt-4 pt-4 border-t border-gold/15">
@@ -106,21 +106,21 @@ export default function Navbar() {
             <>
               <div className="flex items-center justify-between px-3 py-2.5 bg-gold-light/60 rounded-xl border border-gold/20">
                 <div className="flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#B8960C] to-[#D4AF37] text-white text-xs font-bold flex items-center justify-center">
+                  <div className="w-7 h-7 rounded-full bg-gradient-to-br from-[#FF3399] to-[#FF66B2] text-white text-xs font-bold flex items-center justify-center">
                     {(user.user_metadata?.full_name || user.email)[0].toUpperCase()}
                   </div>
-                  <span className="text-sm font-medium text-dark truncate max-w-[160px]">
+                  <span className="text-sm font-medium text-pink-200 truncate max-w-[160px]">
                     {user.user_metadata?.full_name || user.email}
                   </span>
                 </div>
                 <button className="border-none bg-none text-salon-red text-xs font-semibold cursor-pointer" onClick={handleLogout}>Гарах</button>
               </div>
               <button onClick={() => { openMyBookings(); setMobOpen(false); }}
-                className="px-3 py-3 bg-white rounded-xl text-dark font-semibold text-sm border border-gold/15 cursor-pointer w-full text-center tracking-wide hover:border-gold/40 transition-colors">
+                className="px-3 py-3 bg-pink-400 rounded-xl text-white font-semibold text-sm border border-gold/15 cursor-pointer w-full text-center tracking-wide hover:border-gold/40 transition-colors">
                 Миний захиалгууд
               </button>
               {isAdmin && (
-                <a href="/admin" className="px-3 py-3 bg-gold-light/80 rounded-xl text-gold-dark font-bold text-sm no-underline border border-gold/20 text-center tracking-wide" onClick={() => setMobOpen(false)}>
+                <a href="/admin" className="px-3 py-3 bg-gold-light/80 rounded-xl text-[#FF3399] font-bold text-sm no-underline border border-gold/20 text-center tracking-wide" onClick={() => setMobOpen(false)}>
                   Админ панель
                 </a>
               )}

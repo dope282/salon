@@ -4,16 +4,16 @@
 
 /* ── Tailwind custom tokens ── */
 @theme {
-  --color-pink:       #C9A84C;
-  --color-pink-light: #F5E6C8;
-  --color-pink-dark:  #9A7B30;
-  --color-gold:       #C9A84C;
-  --color-gold-light: #F5E6C8;
-  --color-gold-dark:  #9A7B30;
-  --color-gold-deep:  #B8960C;
+  --color-pink:       #FF3399;
+  --color-pink-light: #FFE0EF;
+  --color-pink-dark:  #C2186F;
+  --color-gold:       #FF3399;
+  --color-gold-light: #FFE0EF;
+  --color-gold-dark:  #C2186F;
+  --color-gold-deep:  #FF3399;
   --color-rose:       #F4A8C7;
   --color-rose-light: #FDE8F0;
-  --color-cream:      #FFFAF5;
+  --color-cream:      #606060;
   --color-dark:       #1A1A2E;
   --color-salon-green:#38A169;
   --color-salon-red:  #E53E3E;
@@ -30,7 +30,7 @@
   --shadow-sm: 0 2px 8px rgba(0,0,0,.07);
   --shadow-md: 0 4px 20px rgba(0,0,0,.10);
   --shadow-lg: 0 8px 40px rgba(0,0,0,.14);
-  --shadow-gold: 0 0 28px rgba(201,168,76,.35);
+  --shadow-gold: 0 0 28px rgba(255,51,153,.35);
 
   --radius-sm: 8px;
   --radius-md: 16px;
@@ -40,9 +40,9 @@
 
 /* ── CSS variables (backward compat for inline styles) ── */
 :root {
-  --pink:#C9A84C; --pink-light:#F5E6C8; --pink-dark:#9A7B30;
-  --gold:#C9A84C; --gold-light:#F5E6C8; --gold-dark:#9A7B30;
-  --cream:#FFFAF5; --dark:#1A1A2E;
+  --pink:#FF3399; --pink-light:#FFE0EF; --pink-dark:#C2186F;
+  --gold:#FF3399; --gold-light:#FFE0EF; --gold-dark:#C2186F;
+  --cream:#606060; --dark:#1A1A2E;
   --green:#38A169; --yellow:#D69E2E; --red:#E53E3E;
   --gray-100:#F8F9FA; --gray-200:#E9ECEF; --gray-500:#6C757D; --gray-800:#343A40;
   --shadow-sm:0 2px 8px rgba(0,0,0,.07);
@@ -53,8 +53,8 @@
 
 /* ── Admin shared classes (used by admin components) ── */
 .card { background:#fff; border-radius:var(--r-lg); padding:22px; box-shadow:var(--shadow-sm); }
-.btn-primary { background:linear-gradient(135deg,#B8960C 0%,#D4AF37 35%,#E8C87A 60%,#F4B8D0 100%); color:#fff; border:none; padding:12px 28px; border-radius:50px; font-size:14px; font-weight:600; cursor:pointer; transition:all .3s; box-shadow:0 4px 18px rgba(201,168,76,.40); }
-.btn-primary:hover { transform:translateY(-2px); box-shadow:0 0 32px rgba(201,168,76,.55); }
+.btn-primary { background:linear-gradient(135deg,#FF3399 0%,#FF66B2 35%,#FFADD2 60%,#F4B8D0 100%); color:#fff; border:none; padding:12px 28px; border-radius:50px; font-size:14px; font-weight:600; cursor:pointer; transition:all .3s; box-shadow:0 4px 18px rgba(255,51,153,.40); }
+.btn-primary:hover { transform:translateY(-2px); box-shadow:0 0 32px rgba(255,51,153,.55); }
 .btn-primary:disabled { opacity:.6; cursor:not-allowed; transform:none; }
 .btn-outline { background:transparent; color:var(--pink); border:2px solid var(--pink); padding:10px 22px; border-radius:50px; font-size:14px; font-weight:600; cursor:pointer; transition:all .3s; }
 .btn-outline:hover { background:var(--pink); color:#fff; }
@@ -113,7 +113,7 @@ tr:hover td { background:#FAFAFA; }
     inset: 0;
     pointer-events: none;
     z-index: 0;
-    background-image: radial-gradient(ellipse at 1px 1px, rgba(201,168,76,.035) 1px, transparent 0);
+    background-image: radial-gradient(ellipse at 1px 1px, rgba(255,51,153,.035) 1px, transparent 0);
     background-size: 28px 28px;
   }
 }
@@ -153,7 +153,7 @@ tr:hover td { background:#FAFAFA; }
 /* Гарчгийн алтан shimmer */
 @keyframes goldTextShimmer { to { background-position: -200% center; } }
 .gold-shimmer {
-  background: linear-gradient(90deg,#FF3399,#FF3399 25%,#FF3399 45%,#FF3399 50%,#f56cb1 55%,#ffdbed 75%,#ff3596);
+  background: linear-gradient(90deg,#FF99CC,#FF99CC 25%,#FF99CC 45%,#FF99CC 50%,#FF99CC 55%,#FF99CC 75%,#FF99CC);
   background-size: 200% auto;
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent; color: transparent;
@@ -176,18 +176,18 @@ tr:hover td { background:#FAFAFA; }
 
 /* Картын алтан хүрээ + зөөлөн гэрэлтэлт */
 .lux-card {
-  border: 1px solid rgba(201,168,76,.18) !important;
+  border: 1px solid rgba(255,51,153,.18) !important;
   transition: border-color .35s ease, box-shadow .35s ease, transform .35s ease;
 }
 .lux-card:hover {
-  border-color: rgba(201,168,76,.45) !important;
-  box-shadow: 0 14px 48px rgba(201,168,76,.16), 0 0 0 1px rgba(201,168,76,.10) inset !important;
+  border-color: rgba(255,51,153,.45) !important;
+  box-shadow: 0 14px 48px rgba(255,51,153,.16), 0 0 0 1px rgba(255,51,153,.10) inset !important;
 }
 
 /* Тансаг алтан зураас (хуваагч) */
 .lux-divider {
   height: 1px; border: none;
-  background: linear-gradient(90deg, transparent, rgba(201,168,76,.5), transparent);
+  background: linear-gradient(90deg, transparent, rgba(255,51,153,.5), transparent);
 }
 
 /* Хөдөлгөөн багасгах горим */
@@ -208,12 +208,12 @@ tr:hover td { background:#FAFAFA; }
 }
 .hero-blob:nth-child(1) {
   width: 680px; height: 680px; top: -200px; right: -80px;
-  background: linear-gradient(135deg, rgba(255,107,157,.13), rgba(201,168,76,.07));
+  background: linear-gradient(135deg, rgba(255,107,157,.13), rgba(255,51,153,.07));
   animation: blob 9s ease-in-out infinite;
 }
 .hero-blob:nth-child(2) {
   width: 300px; height: 300px; bottom: -80px; left: 140px;
-  background: linear-gradient(135deg, rgba(201,168,76,.1), rgba(255,107,157,.07));
+  background: linear-gradient(135deg, rgba(255,51,153,.1), rgba(255,107,157,.07));
   animation: blob 11s ease-in-out infinite reverse;
 }
 
@@ -239,7 +239,7 @@ tr:hover td { background:#FAFAFA; }
 .nav-link {
   position: relative;
   text-decoration: none;
-  color: var(--color-gray-800);
+  color: var(--color-white);
   font-size: 14px;
   font-weight: 500;
   transition: color .3s;
@@ -256,7 +256,7 @@ tr:hover td { background:#FAFAFA; }
 .nav-link:hover { color: var(--color-pink); }
 
 /* ── Hamburger ── */
-.hamburger span { display: block; width: 22px; height: 2px; background: var(--color-dark); border-radius: 2px; transition: all .28s ease; }
+.hamburger span { display: block; width: 22px; height: 2px; background: var(--color-white); border-radius: 2px; transition: all .28s ease; }
 .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
 .hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
 .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
@@ -293,10 +293,10 @@ tr:hover td { background:#FAFAFA; }
 }
 
 /* ── Packages section ── */
-.packages-section { padding: 70px 48px; background: linear-gradient(135deg,#FFF8F0 0%,#FFFAF5 100%); }
+.packages-section { padding: 70px 48px; background: #606060; }
 .packages-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px; }
-.pkg-card { background: #fff; border-radius: 18px; padding: 18px; box-shadow: var(--shadow-sm); border: 1px solid rgba(201,168,76,.18); transition: border-color .35s ease, box-shadow .35s ease, transform .35s ease; position: relative; display: flex; flex-direction: column; gap: 9px; }
-.pkg-card:hover { border-color: rgba(201,168,76,.45); box-shadow: 0 14px 48px rgba(201,168,76,.16), 0 0 0 1px rgba(201,168,76,.10) inset; transform: translateY(-4px); }
+.pkg-card { background: #fff; border-radius: 18px; padding: 18px; box-shadow: var(--shadow-sm); border: 1px solid rgba(255,51,153,.18); transition: border-color .35s ease, box-shadow .35s ease, transform .35s ease; position: relative; display: flex; flex-direction: column; gap: 9px; }
+.pkg-card:hover { border-color: rgba(255,51,153,.45); box-shadow: 0 14px 48px rgba(255,51,153,.16), 0 0 0 1px rgba(255,51,153,.10) inset; transform: translateY(-4px); }
 .pkg-badge { position: absolute; top: -9px; right: 16px; background: linear-gradient(135deg,var(--green),#276749); color: #fff; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 50px; }
 .pkg-icon { font-size: 30px; line-height: 1; }
 .pkg-name { font-family: 'Playfair Display',serif; font-size: 16px; font-weight: 700; color: var(--dark); }

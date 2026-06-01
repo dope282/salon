@@ -158,7 +158,7 @@ export default function PromoSettings({ showToast }) {
               <div style={{ fontFamily: "'Playfair Display',serif", fontSize: 13, color: 'rgba(255,255,255,.9)', fontStyle: 'italic', marginBottom: 12 }}>{form.all || 'Бүх үйлчилгээнд'}</div>
               <div style={{ display: 'inline-block', background: '#fff', color: '#C9789E', borderRadius: 50, padding: '6px 18px', fontSize: 12, fontWeight: 700 }}>{form.btn || 'Одоо захиалах →'}</div>
             </div>
-            <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(201,168,76,.9)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8, fontWeight: 800, textAlign: 'center', lineHeight: 1.3, zIndex: 2, flexShrink: 0, padding: 3 }}>
+            <div style={{ width: 64, height: 64, borderRadius: '50%', background: 'rgba(255,51,153,.9)', color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 8, fontWeight: 800, textAlign: 'center', lineHeight: 1.3, zIndex: 2, flexShrink: 0, padding: 3 }}>
               {(form.badge || '').split('·').join('\n·\n')}
             </div>
             <div style={{ width: 80, height: 72, borderRadius: 12, background: 'rgba(255,255,255,.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 38, zIndex: 2, flexShrink: 0 }}>

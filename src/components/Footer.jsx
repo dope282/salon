@@ -2,21 +2,21 @@ import Image from 'next/image';
 
 export default function Footer() {
   return (
-    <footer id="contact" className="bg-dark text-white pt-20 px-12 pb-8 max-[900px]:px-5 max-[900px]:pt-12 max-[640px]:px-4 max-[640px]:pt-9 max-[640px]:pb-6">
+    <footer id="contact" className="bg-[#404040] text-white pt-20 px-12 pb-8 max-[900px]:px-5 max-[900px]:pt-12 max-[640px]:px-4 max-[640px]:pt-9 max-[640px]:pb-6">
       {/* Top divider */}
       <div className="w-full h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent mb-12 max-[640px]:mb-8" />
 
       <div className="grid grid-cols-[2fr_1fr_1fr_1.4fr] gap-14 mb-14 max-[1200px]:grid-cols-[1fr_1fr_1fr] max-[1200px]:gap-8 max-[900px]:grid-cols-2 max-[900px]:gap-8 max-[640px]:grid-cols-2 max-[640px]:gap-x-6 max-[640px]:gap-y-8 max-[640px]:mb-10">
         <div className="max-[640px]:col-span-2">
           <Image src="/logo.png" alt="Hatantsetsey lash" width={140} height={56}
-            className="h-14 w-auto bg-white rounded-xl px-4 py-2 mb-5" />
+            className="h-14 w-auto bg-[#606060] rounded-xl px-4 py-2 mb-5" />
           <p className="text-white/45 text-[13px] leading-[1.85] mb-6 max-w-[280px]">
             Hatantsetsey lash Beauty Salon — тансаглал, мэргэжил, итгэлийн нэгдэл. Та бидэнтэй хамт гоо сайхныхаа шинэ хуудсыг нээнэ үү.
           </p>
           <div className="flex gap-3">
             {['facebook'].map(s => (
               <a key={s} href="https://www.facebook.com/Hatantsetsegsalon"
-                className="w-9 h-9 rounded-full bg-white/6 border border-white/10 flex items-center justify-center text-white/50 no-underline text-sm transition-all hover:bg-gold/20 hover:border-gold/30 hover:text-gold">
+                className="w-9 h-9 rounded-full bg-[#606060]/6 border border-white/10 flex items-center justify-center text-white/50 no-underline text-sm transition-all hover:bg-gold/20 hover:border-gold/30 hover:text-gold">
                 <i className={`fab fa-${s}`} />
               </a>
             ))}
@@ -64,7 +64,7 @@ export default function Footer() {
       </div>
 
       {/* Bottom */}
-      <div className="w-full h-px bg-white/8 mb-6" />
+      <div className="w-full h-px bg-[#606060]/8 mb-6" />
       <div className="flex items-center justify-between gap-4 flex-wrap max-[640px]:flex-col max-[640px]:text-center">
         <div className="text-white/25 text-[12px] tracking-wide">© 2024 Hatantsetsey lash Beauty Salon. Бүх эрх хамгаалагдсан.</div>
         <div className="text-white/20 text-[11px] tracking-wider uppercase">LASH · BROW LAMI · NAIL · WAX</div>

@@ -241,7 +241,7 @@ export default function BookingModal() {
       cells.push(
         <button key={d} onClick={() => !disabled && pickDay(d)} disabled={disabled}
           title={isOff ? 'Артист амарна' : beyond ? '14 хоногоос хэтэрсэн' : ''}
-          className={`cal-d aspect-square rounded-full border-none text-xs flex items-center justify-center transition-all ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'} ${isSel ? 'cal-sel' : isT && !disabled ? 'cal-today' : isOff ? 'bg-red-50 !text-red-300' : beyond || past ? '!text-gray-200' : 'bg-transparent text-dark'}`}>
+          className={`cal-d aspect-square rounded-full border-none text-xs flex items-center justify-center transition-all ${disabled ? 'cursor-not-allowed' : 'cursor-pointer'} ${isSel ? 'cal-sel' : isT && !disabled ? 'cal-today' : isOff ? 'bg-red-50 !text-red-300' : beyond || past ? '!text-pink-200' : 'bg-transparent text-pink-200'}`}>
           {d}
         </button>
       );
@@ -252,14 +252,14 @@ export default function BookingModal() {
   const fmtDate = (d) => d ? d.toLocaleDateString('mn-MN', { year:'numeric', month:'long', day:'numeric' }) : '—';
   if (!bookingOpen) return null;
 
-  const H3 = ({ children }) => <h3 className="font-serif text-[22px] font-semibold text-dark mb-6 max-[640px]:text-lg max-[640px]:mb-4">{children}</h3>;
+  const H3 = ({ children }) => <h3 className="font-serif text-[22px] font-semibold text-pink-200 mb-6 max-[640px]:text-lg max-[640px]:mb-4">{children}</h3>;
 
   return (
     <div className="overlay active" onClick={e => { if (e.target === e.currentTarget) handleClose(); }}>
-      <div className="modal modal-sheet bg-[#FFFAF5] backdrop-blur-xl rounded-[28px] w-full max-w-[800px] max-h-[90vh] overflow-y-auto p-11 relative border border-gold/15 shadow-[0_32px_80px_rgba(0,0,0,.18)] max-[640px]:p-4" onClick={e => e.stopPropagation()}>
-        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#B8960C] via-[#D4AF37] to-[#C9A84C] rounded-t-[28px]" />
+      <div className="modal modal-sheet bg-[#606060] backdrop-blur-xl rounded-[28px] w-full max-w-[800px] max-h-[90vh] overflow-y-auto p-11 relative border border-gold/15 shadow-[0_32px_80px_rgba(0,0,0,.18)] max-[640px]:p-4" onClick={e => e.stopPropagation()}>
+        <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#FF3399] via-[#FF66B2] to-[#FF3399] rounded-t-[28px]" />
         <button onClick={handleClose}
-          className="absolute top-5 right-5 w-9 h-9 rounded-full border border-gold/20 bg-gold/8 cursor-pointer text-base text-dark/40 flex items-center justify-center transition-all hover:bg-gold/20 hover:text-dark z-10">
+          className="absolute top-5 right-5 w-9 h-9 rounded-full border border-gold/20 bg-gold/8 cursor-pointer text-base text-pink-200 flex items-center justify-center transition-all hover:bg-gold/20 hover:text-pink-200 z-10">
           ✕
         </button>
 
@@ -269,10 +269,10 @@ export default function BookingModal() {
             const s = i+1;
             return (
               <div key={n} className={`step-item flex flex-col items-center gap-2 flex-1${s<step?' done':s===step?' cur':''}`}>
-                <div className={`step-circle w-10 h-10 rounded-full border-2 flex items-center justify-center text-sm font-bold transition-all relative z-[1] max-[640px]:w-8 max-[640px]:h-8 max-[640px]:text-xs ${s<=step ? 'border-gold bg-gradient-to-br from-[#B8960C] to-[#C9A84C] text-white shadow-[0_2px_8px_rgba(201,168,76,.40)]' : 'border-gold/20 bg-white text-dark/30'}`}>
+                <div className={`step-circle w-10 h-10 rounded-full border-2 flex items-center justify-center text-sm font-bold transition-all relative z-[1] max-[640px]:w-8 max-[640px]:h-8 max-[640px]:text-xs ${s<=step ? 'border-gold bg-gradient-to-br from-[#FF3399] to-[#FF3399] text-white shadow-[0_2px_8px_rgba(255,51,153,.40)]' : 'border-gold/20 bg-[#606060] text-pink-200'}`}>
                   {s<step ? '✓' : n}
                 </div>
-                <div className={`text-xs font-medium text-center max-[640px]:text-[10px] ${s===step ? 'text-pink font-bold' : 'text-gray-500'}`}>{lbl}</div>
+                <div className={`text-xs font-medium text-center max-[640px]:text-[10px] ${s===step ? 'text-pink font-bold' : 'text-pink-200'}`}>{lbl}</div>
               </div>
             );
           })}
@@ -295,16 +295,16 @@ export default function BookingModal() {
             {bookingArtist && (
               <div className="flex items-center gap-2 mb-4 px-3 py-2 bg-gold-light/60 border border-gold/25 rounded-xl text-sm">
                 <span>👩</span>
-                <span className="font-semibold text-dark">{bookingArtist}</span>
-                <span className="text-gray-400 text-xs">— артистын үйлчилгээнүүд харагдаж байна</span>
+                <span className="font-semibold text-pink-200">{bookingArtist}</span>
+                <span className="text-pink-400 text-xs">— артистын үйлчилгээнүүд харагдаж байна</span>
               </div>
             )}
 
             {/* Mode tabs */}
-            <div className="flex gap-1.5 p-1 bg-gray-100 rounded-2xl mb-6 max-[640px]:mb-4">
+            <div className="flex gap-1.5 p-1 bg-[#606060] rounded-2xl mb-6 max-[640px]:mb-4">
               {[['service','✂️','Үйлчилгээ'],['package','🎁','Багц']].map(([m, ico, lbl]) => (
                 <button key={m} onClick={() => setBk(b => ({ ...b, mode:m, svcs:[], pkg:null }))}
-                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all border-none cursor-pointer ${bk.mode===m ? 'bg-white text-dark shadow-sm' : 'bg-transparent text-gray-500 hover:text-dark'}`}>
+                  className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold transition-all border-none cursor-pointer ${bk.mode===m ? 'bg-[#606060] text-pink-200 shadow-sm' : 'bg-transparent text-pink-200 hover:text-shadow-pink-400'}`}>
                   {ico} {lbl}
                 </button>
               ))}
@@ -313,7 +313,7 @@ export default function BookingModal() {
             {/* Service mode — multi-select */}
             {bk.mode === 'service' && (<>
             <div className="flex items-center justify-between mb-4">
-              <span className="text-sm text-gray-500">Нэг ба түүнээс дээш сонгоно уу</span>
+              <span className="text-sm text-pink-200">Нэг ба түүнээс дээш сонгоно уу</span>
               {bk.svcs.length > 0 && (
                 <span className="bg-pink text-white text-xs font-bold px-3 py-1 rounded-full flex-shrink-0">
                   {bk.svcs.length} сонгогдлоо
@@ -328,7 +328,7 @@ export default function BookingModal() {
                     ...b,
                     svcs: sel ? b.svcs.filter(v => v.name !== s.name) : [...b.svcs, s],
                   }))}
-                    className={`border-2 rounded-2xl p-4 cursor-pointer transition-all flex items-center gap-3 relative max-[640px]:p-3 max-[640px]:gap-2.5 ${sel ? 'border-pink bg-pink-light' : 'border-gray-200 hover:border-pink-light hover:bg-pink-light'}`}>
+                    className={`border-2 rounded-2xl p-4 cursor-pointer transition-all flex items-center gap-3 relative max-[640px]:p-3 max-[640px]:gap-2.5 ${sel ? 'border-pink bg-[#606060]' : 'border-gray-200 hover:border-pink-light hover:bg-[#606060]'}`}>
                     {sel && (
                       <div className="absolute top-2 right-2 w-5 h-5 rounded-full bg-pink text-white text-[10px] font-bold flex items-center justify-center">✓</div>
                     )}
@@ -339,9 +339,9 @@ export default function BookingModal() {
                         : s.ico}
                     </div>
                     <div>
-                      <div className="font-semibold text-sm max-[640px]:text-[13px]">{s.name}</div>
+                      <div className="font-semibold text-sm max-[640px]:text-[13px] text-pink-200">{s.name}</div>
                       <div className="text-[13px] text-pink font-semibold max-[640px]:text-xs">₮{(s.price ?? 0).toLocaleString()}+</div>
-                      {s.duration > 0 && <div className="text-[11px] text-gray-400 mt-0.5">⏱ {s.duration} мин</div>}
+                      {s.duration > 0 && <div className="text-[11px] text-pink-400 mt-0.5">⏱ {s.duration} мин</div>}
                     </div>
                   </div>
                 );
@@ -350,13 +350,13 @@ export default function BookingModal() {
 
             {/* Selected services summary bar */}
             {bk.svcs.length > 0 && (
-              <div className="mt-5 flex items-center justify-between gap-3 px-4 py-3.5 bg-pink-light rounded-2xl border border-pink/30 flex-wrap">
-                <div className="text-sm font-medium text-dark">
+              <div className="mt-5 flex items-center justify-between gap-3 px-4 py-3.5 bg-[#606060] rounded-2xl border border-pink/30 flex-wrap">
+                <div className="text-sm font-medium text-pink-200">
                   {bk.svcs.map(s => s.ico).join(' ')} {bk.svcs.map(s => s.name).join(' + ')}
                 </div>
                 <div className="flex items-center gap-3 flex-shrink-0">
                   {bk.svcs.some(s => s.duration > 0) && (
-                    <span className="text-xs text-gray-500">⏱ {bk.svcs.reduce((sum, s) => sum + (s.duration ?? 0), 0)} мин</span>
+                    <span className="text-xs text-pink-200">⏱ {bk.svcs.reduce((sum, s) => sum + (s.duration ?? 0), 0)} мин</span>
                   )}
                   <span className="font-bold text-base text-pink-dark">₮{bk.svcs.reduce((sum, s) => sum + (s.price ?? 0), 0).toLocaleString()}+</span>
                 </div>
@@ -367,7 +367,7 @@ export default function BookingModal() {
             {/* Package mode */}
             {bk.mode === 'package' && (
               filteredPackages.length === 0 ? (
-                <div className="text-center py-12 text-gray-400">
+                <div className="text-center py-12 text-pink-400">
                   <div className="text-4xl mb-3">🎁</div>
                   <div className="text-sm">Идэвхтэй багц байхгүй байна</div>
                 </div>
@@ -378,7 +378,7 @@ export default function BookingModal() {
                     const saved = p.original_price > p.price ? p.original_price - p.price : 0;
                     return (
                       <div key={p.id} onClick={() => setBk(b => ({ ...b, pkg: sel ? null : p }))}
-                        className={`border-2 rounded-2xl p-4 cursor-pointer transition-all relative max-[640px]:p-3 ${sel ? 'border-pink bg-pink-light' : 'border-gray-200 hover:border-pink-light hover:bg-pink-light'}`}>
+                        className={`border-2 rounded-2xl p-4 cursor-pointer transition-all relative max-[640px]:p-3 ${sel ? 'border-pink bg-[#606060]' : 'border-gray-200 hover:border-pink-light hover:bg-pink-light'}`}>
                         {sel && <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-pink text-white text-xs font-bold flex items-center justify-center">✓</div>}
                         {saved > 0 && !sel && (
                           <div className="absolute top-3 right-3 bg-green-100 text-green-700 text-[10px] font-bold px-2 py-0.5 rounded-full">-₮{saved.toLocaleString()}</div>
@@ -392,11 +392,11 @@ export default function BookingModal() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="font-bold text-sm mb-1 max-[640px]:text-[13px]">{p.name}</div>
-                            {p.description && <div className="text-xs text-gray-500 mb-2 leading-relaxed">{p.description}</div>}
+                            {p.description && <div className="text-xs text-pink-400 mb-2 leading-relaxed">{p.description}</div>}
                             {(p.services || pkgSvcs[p.id] || []).length > 0 && (
                               <div className="flex flex-wrap gap-1 mb-2">
                                 {(p.services || pkgSvcs[p.id] || []).map((s, i) => (
-                                  <span key={i} className="text-[10px] bg-white border border-gray-200 px-2 py-0.5 rounded-full text-gray-600">
+                                  <span key={i} className="text-[10px] bg-[#606060] border border-gray-200 px-2 py-0.5 rounded-full text-pink-300">
                                     {s.name}
                                   </span>
                                 ))}
@@ -404,10 +404,10 @@ export default function BookingModal() {
                             )}
                             <div className="flex items-center gap-2 flex-wrap">
                               {p.original_price > p.price && (
-                                <span className="text-xs text-gray-400 line-through">₮{p.original_price.toLocaleString()}</span>
+                                <span className="text-xs text-pink-400 line-through">₮{p.original_price.toLocaleString()}</span>
                               )}
                               <span className="font-bold text-base text-pink-dark">₮{p.price.toLocaleString()}</span>
-                              {p.duration_min > 0 && <span className="text-[11px] text-gray-400">⏱ {p.duration_min} мин</span>}
+                              {p.duration_min > 0 && <span className="text-[11px] text-pink-400">⏱ {p.duration_min} мин</span>}
                             </div>
                           </div>
                         </div>
@@ -441,7 +441,7 @@ export default function BookingModal() {
             <div className="sc active">
               <H3>Артист сонгох</H3>
               {visible.length === 0 ? (
-                <div className="text-center py-12 text-gray-400">
+                <div className="text-center py-12 text-pink-400">
                   <div className="text-4xl mb-3">😔</div>
                   <div className="text-sm font-medium">Энэ үйлчилгээг үзүүлэх артист байхгүй байна</div>
                 </div>
@@ -451,7 +451,7 @@ export default function BookingModal() {
                     const inactive = a.active === false;
                     return (
                       <div key={a.id ?? a.name} onClick={() => !inactive && setBk(b => ({ ...b, art:a.name }))}
-                        className={`border-2 rounded-2xl p-4 text-center transition-all relative max-[640px]:p-3 ${inactive ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${bk.art===a.name ? 'border-pink bg-pink-light' : 'border-gray-200 hover:border-pink-light'}`}>
+                        className={`border-2 rounded-2xl p-4 text-center transition-all relative max-[640px]:p-3 ${inactive ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'} ${bk.art===a.name ? 'border-pink bg-[#606060]' : 'border-gray-200 hover:border-pink-light'}`}>
                         {inactive && (
                           <div className="absolute top-1.5 right-1.5 bg-[#fee2e2] text-[#dc2626] text-[9px] font-bold px-1.5 py-0.5 rounded-full">Ажиллахгүй</div>
                         )}
@@ -461,8 +461,8 @@ export default function BookingModal() {
                             ? <img src={a.image_url} alt={a.name} style={{ width:'100%', height:'100%', objectFit:'cover' }} />
                             : (a.avatar_emoji || a.emoji || '👩')}
                         </div>
-                        <div className="font-bold text-sm max-[640px]:text-xs">{a.name}</div>
-                        <div className="text-[11px] text-gray-500 mt-0.5">{a.specialty_mn || a.role}</div>
+                        <div className="font-bold text-sm max-[640px]:text-xs text-pink-200">{a.name}</div>
+                        <div className="text-[11px] text-pink-200 mt-0.5">{a.specialty_mn || a.role}</div>
                       </div>
                     );
                   })}
@@ -479,17 +479,17 @@ export default function BookingModal() {
             <div className="grid grid-cols-2 gap-7 max-[900px]:grid-cols-1">
               {/* Calendar */}
               <div>
-                <div className="text-xs font-bold text-gray-500 uppercase tracking-[1px] mb-3.5">Огноо сонгох</div>
+                <div className="text-xs font-bold text-pink-400 uppercase tracking-[1px] mb-3.5">Огноо сонгох</div>
                 <div className="border border-gray-200 rounded-2xl overflow-hidden">
-                  <div className="flex items-center justify-between px-4 py-3.5 bg-gray-100">
-                    <button onClick={() => chgMonth(-1)} className="w-[30px] h-[30px] rounded-full border-none bg-white cursor-pointer flex items-center justify-center text-gray-500 text-base transition-all hover:bg-pink hover:text-white">‹</button>
-                    <span className="font-bold text-sm">{MONTHS[calM]} {calY}</span>
-                    <button onClick={() => chgMonth(1)} className="w-[30px] h-[30px] rounded-full border-none bg-white cursor-pointer flex items-center justify-center text-gray-500 text-base transition-all hover:bg-pink hover:text-white">›</button>
+                  <div className="flex items-center justify-between px-4 py-3.5 bg-[#606060]">
+                    <button onClick={() => chgMonth(-1)} className="w-[30px] h-[30px] rounded-full border-none bg-[#606060] cursor-pointer flex items-center justify-center text-pink-200 text-base transition-all hover:bg-pink hover:text-white">‹</button>
+                    <span className="font-bold text-sm text-pink-200">{MONTHS[calM]} {calY}</span>
+                    <button onClick={() => chgMonth(1)} className="w-[30px] h-[30px] rounded-full border-none bg-[#606060] cursor-pointer flex items-center justify-center text-pink-200 text-base transition-all hover:bg-pink hover:text-white">›</button>
                   </div>
                   <div className="p-3.5">
                     <div className="grid grid-cols-7 text-center mb-1.5">
                       {'Ня Да Мя Лх Пү Ба Бя'.split(' ').map(d => (
-                        <span key={d} className="text-[11px] font-bold text-gray-500 py-1">{d}</span>
+                        <span key={d} className="text-[11px] font-bold text-pink-200 py-1">{d}</span>
                       ))}
                     </div>
                     <div className="grid grid-cols-7 gap-0.5">{renderCal()}</div>
@@ -498,7 +498,7 @@ export default function BookingModal() {
               </div>
               {/* Time */}
               <div>
-                <div className="text-xs font-bold text-gray-500 uppercase tracking-[1px] mb-3.5">
+                <div className="text-xs font-bold text-pink-400 uppercase tracking-[1px] mb-3.5">
                   Цаг сонгох
                   {bk.date && (() => {
                     const ds = getArtistDaySched(bk.date.getDay());
@@ -511,7 +511,7 @@ export default function BookingModal() {
                 {(() => {
                   const { available, booked } = getTimeSlots();
                   if (available.length === 0 && booked.length === 0) return (
-                    <div className="text-center py-8 text-gray-400">
+                    <div className="text-center py-8 text-pink-400">
                       <div className="text-3xl mb-2">😔</div>
                       <div className="text-sm font-medium">
                         {!bk.date ? 'Эхлээд огноо сонгоно уу' : 'Энэ өдөр захиалах боломжтой цаг байхгүй байна'}
@@ -524,7 +524,7 @@ export default function BookingModal() {
                       {/* Захиалах боломжтой цагууд */}
                       {available.map(t => (
                         <button key={t} onClick={() => setBk(b => ({ ...b, time:t }))}
-                          className={`border-2 rounded-lg py-2.5 text-center text-[13px] font-medium cursor-pointer transition-all min-h-[44px] max-[640px]:text-xs ${bk.time===t ? 'bg-pink border-pink text-white font-bold' : 'border-gray-200 bg-white hover:border-pink hover:text-pink'}`}>
+                          className={`border-2 rounded-lg py-2.5 text-center text-[13px] font-medium cursor-pointer transition-all min-h-[44px] max-[640px]:text-xs ${bk.time===t ? 'bg-pink border-pink text-white font-bold' : 'border-gray-200 text-pink-200 bg-[#606060] hover:border-pink hover:text-pink'}`}>
                           {t}
                         </button>
                       ))}
@@ -532,8 +532,8 @@ export default function BookingModal() {
                       {booked.map(t => (
                         <button key={t} disabled
                           className="border-2 border-gray-100 rounded-lg py-2.5 text-center bg-gray-50 cursor-not-allowed min-h-[44px] flex flex-col items-center justify-center gap-0.5 max-[640px]:text-xs">
-                          <span className="text-[12px] text-gray-300 line-through">{t}</span>
-                          <span className="text-[9px] text-gray-300 font-semibold">Захиалагдсан</span>
+                          <span className="text-[12px] text-pink-400 line-through">{t}</span>
+                          <span className="text-[9px] text-pink-400 font-semibold">Захиалагдсан</span>
                         </button>
                       ))}
                     </div>
@@ -550,7 +550,7 @@ export default function BookingModal() {
             <H3>Хянах & Баталгаажуулах</H3>
             <div className="grid grid-cols-2 gap-7 max-[900px]:grid-cols-1">
               <div>
-                <h4 className="text-base font-bold mb-4 pb-3 border-b border-gray-200">Захиалгын хураангуй</h4>
+                <h4 className="text-base font-bold mb-4 pb-3 border-b border-gray-200 text-pink-200">Захиалгын хураангуй</h4>
                 {/* Service/Package summary */}
                 <div className="flex items-start gap-3 mb-3.5">
                   <div className="w-11 h-11 rounded-full bg-pink-light flex items-center justify-center text-[18px] flex-shrink-0">
@@ -559,16 +559,16 @@ export default function BookingModal() {
                   <div className="flex-1">
                     {bk.mode === 'package' ? (
                       <>
-                        <div className="text-[11px] text-gray-500 uppercase tracking-[.5px] mb-1">Багц үйлчилгээ</div>
+                        <div className="text-[11px] text-pink-400 uppercase tracking-[.5px] mb-1">Багц үйлчилгээ</div>
                         <div className="text-sm font-bold">{bk.pkg?.emoji} {bk.pkg?.name}</div>
-                        {bk.pkg?.description && <div className="text-xs text-gray-400 mt-0.5">{bk.pkg.description}</div>}
+                        {bk.pkg?.description && <div className="text-xs text-pink-400 mt-0.5">{bk.pkg.description}</div>}
                       </>
                     ) : (
                       <>
-                        <div className="text-[11px] text-gray-500 uppercase tracking-[.5px] mb-1">Үйлчилгээ ({bk.svcs.length})</div>
+                        <div className="text-[11px] text-pink-400 uppercase tracking-[.5px] mb-1">Үйлчилгээ ({bk.svcs.length})</div>
                         <div className="flex flex-col gap-1">
                           {bk.svcs.map(s => (
-                            <div key={s.name} className="flex justify-between text-sm">
+                            <div key={s.name} className="flex justify-between text-sm text-pink-200">
                               <span className="font-medium">{s.ico} {s.name}</span>
                               <span className="text-pink font-semibold">₮{(s.price ?? 0).toLocaleString()}+</span>
                             </div>
@@ -579,7 +579,7 @@ export default function BookingModal() {
                   </div>
                 </div>
                 {[
-                  { ico: '👩‍🦱', lbl:'Артист', val: bk.art },
+                  { ico: '👩', lbl:'Артист', val: bk.art },
                   { ico: '📅',  lbl:'Огноо & Цаг',  val: `${fmtDate(bk.date)} · ${bk.time}` },
                   ...(bk.mode === 'service' && bk.svcs.some(s => s.duration > 0)
                     ? [{ ico: '⏱', lbl:'Нийт хугацаа', val: `${bk.svcs.reduce((sum, s) => sum + (s.duration ?? 0), 0)} минут` }]
@@ -590,13 +590,13 @@ export default function BookingModal() {
                   <div key={lbl} className="flex items-center gap-3 mb-3.5">
                     <div className="w-11 h-11 rounded-full bg-pink-light flex items-center justify-center text-[18px] flex-shrink-0">{ico}</div>
                     <div className="flex-1">
-                      <div className="text-[11px] text-gray-500 uppercase tracking-[.5px]">{lbl}</div>
-                      <div className="text-sm font-semibold">{val}</div>
+                      <div className="text-[11px] text-pink-400 uppercase tracking-[.5px]">{lbl}</div>
+                      <div className="text-sm font-semibold text-pink-200">{val}</div>
                     </div>
                   </div>
                 ))}
                 <div className="flex justify-between py-3.5 border-t-2 border-gray-200 mt-1.5">
-                  <span className="text-[15px] font-bold">Нийт үнэ</span>
+                  <span className="text-[15px] font-bold text-pink-200">Нийт үнэ</span>
                   <span className="text-xl font-bold text-pink">
                     ₮{bk.mode === 'package'
                       ? (bk.pkg?.price ?? 0).toLocaleString()
@@ -604,24 +604,24 @@ export default function BookingModal() {
                   </span>
                 </div>
                 <div className="mt-4 border-t border-gray-200 pt-3.5">
-                  <div className="text-sm font-semibold text-dark mb-2.5">Холбоо барих мэдээлэл</div>
+                  <div className="text-sm font-semibold text-pink-200 mb-2.5">Холбоо барих мэдээлэл</div>
                   <div className="mb-2.5">
-                    <label className="block text-xs font-semibold mb-1">Утасны дугаар <span className="text-salon-red">*</span></label>
+                    <label className="block text-xs font-semibold mb-1 text-pink-200">Утасны дугаар <span className="text-salon-red">*</span></label>
                     <input ref={phoneRef} type="tel" placeholder="99xxxxxx" defaultValue={user?.user_metadata?.phone || ''}
-                      className="w-full px-3 py-2 border-[1.5px] border-gray-200 rounded-xl text-sm font-sans outline-none focus:border-gold transition-all max-[640px]:text-base" />
+                      className="w-full text-pink-200 px-3 py-2 border-[1.5px] border-gray-200 rounded-xl text-sm font-sans outline-none focus:border-gold transition-all max-[640px]:text-base" />
                   </div>
                   <div>
-                    <label className="block text-xs font-semibold mb-1">Нэмэлт тэмдэглэл <span className="text-gray-400 font-normal">(заавал биш)</span></label>
+                    <label className="block text-xs font-semibold mb-1 text-pink-200">Нэмэлт тэмдэглэл <span className="text-pink-400 font-normal">(заавал биш)</span></label>
                     <textarea ref={notesRef} rows={2} placeholder="Жишээ: тодорхой загвар, харшил, тусгай хүсэлт..."
-                      className="w-full px-3 py-2 border-[1.5px] border-gray-200 rounded-xl text-sm font-sans outline-none focus:border-gold transition-all resize-none max-[640px]:text-base" />
+                      className="w-full text-pink-200 px-3 py-2 border-[1.5px] border-gray-200 rounded-xl text-sm font-sans outline-none focus:border-gold transition-all resize-none max-[640px]:text-base" />
                   </div>
                 </div>
               </div>
               <div>
-                <h4 className="text-base font-bold mb-4 pb-3 border-b border-gray-200">Төлбөрийн арга</h4>
-                {[{method:'card',ico:'💳',lbl:'Кредит / Дебит карт'},{method:'qpay',ico:'📱',lbl:'QPay'},{method:'cash',ico:'💵',lbl:'Ирэхэд бэлнээр'}].map(p => (
+                <h4 className="text-base font-bold mb-4 pb-3 border-b border-gray-200 text-pink-200">Төлбөрийн арга</h4>
+                {[{method:'card',ico:'💳',lbl:'Кредит / Дебит карт'},{method:'qpay',ico:'📱',lbl:'QPay'}].map(p => (
                   <div key={p.method} onClick={() => setBk(b => ({ ...b, pay:p.method }))}
-                    className={`flex items-center gap-3 px-4 py-3 border-2 rounded-2xl cursor-pointer mb-2.5 transition-all hover:border-pink-light ${bk.pay===p.method ? 'border-pink bg-pink-light' : 'border-gray-200'}`}>
+                    className={`flex text-pink-200 items-center gap-3 px-4 py-3 border-2 rounded-2xl cursor-pointer mb-2.5 transition-all hover:border-pink-light ${bk.pay===p.method ? 'border-pink bg-gray-800' : 'border-gray-200'}`}>
                     <input type="radio" name="pay" readOnly checked={bk.pay===p.method} className="accent-pink" />
                     <span className="text-xl">{p.ico}</span>
                     <span className="text-sm font-medium">{p.lbl}</span>
@@ -635,11 +635,11 @@ export default function BookingModal() {
         {/* Footer */}
         <div className="flex justify-between mt-7 pt-5 border-t border-gray-200 max-[640px]:pt-3 max-[640px]:mt-3 max-[380px]:flex-col-reverse max-[380px]:gap-2">
           <button onClick={() => setStep(s => bookingArtist && s === 3 ? 1 : s - 1)} disabled={step <= 1}
-            className={`bg-gray-100 text-gray-800 border-none px-7 py-3 rounded-full text-sm font-semibold cursor-pointer transition-all hover:bg-gray-200 max-[380px]:w-full max-[380px]:min-h-[50px] ${step <= 1 ? 'invisible pointer-events-none' : ''}`}>
+            className={`bg-[#606060] text-pink-200 border-none px-7 py-3 rounded-full text-sm font-semibold cursor-pointer transition-all hover:bg-gray-200 max-[380px]:w-full max-[380px]:min-h-[50px] ${step <= 1 ? 'invisible pointer-events-none' : ''}`}>
             ← Буцах
           </button>
           <button disabled={loading} onClick={next}
-            className="bg-gradient-to-r from-[#B8960C] via-[#D4AF37] to-[#C9A84C] text-dark border-none px-7 py-3 rounded-full text-sm font-bold cursor-pointer transition-all shadow-[0_4px_18px_rgba(201,168,76,.40)] hover:-translate-y-0.5 hover:shadow-[0_8px_28px_rgba(201,168,76,.55)] disabled:opacity-60 disabled:cursor-not-allowed disabled:translate-y-0 tracking-wide max-[380px]:w-full max-[380px]:min-h-[50px]">
+            className="bg-gradient-to-r from-[#FF3399] via-[#FF66B2] to-[#FF3399] text-pink-200 border-none px-7 py-3 rounded-full text-sm font-bold cursor-pointer transition-all shadow-[0_4px_18px_rgba(255,51,153,.40)] hover:-translate-y-0.5 hover:shadow-[0_8px_28px_rgba(255,51,153,.55)] disabled:opacity-60 disabled:cursor-not-allowed disabled:translate-y-0 tracking-wide max-[380px]:w-full max-[380px]:min-h-[50px]">
             {loading ? 'Хадгалж байна...' : step === 4 ? '✓ Захиалга баталгаажуулах' : 'Дараах →'}
           </button>
         </div>

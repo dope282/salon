@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
+import TimeSelect from '@/components/admin/TimeSelect';
 
 const EMPTY = {
   name: '', specialty_mn: '', rating: '5.0',
@@ -370,13 +371,13 @@ export default function ArtistsManager({ showToast }) {
                   {/* Time inputs */}
                   {d.active && (
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                      <input type="time" value={d.start}
-                        onChange={e => setSchedule(prev => prev.map((s, j) => j === i ? { ...s, start: e.target.value } : s))}
-                        style={{ padding: '6px 10px', borderRadius: 8, border: '1.5px solid var(--gray-200)', fontSize: 13, outline: 'none', fontFamily: 'Inter,sans-serif', background: '#fff', color: 'var(--dark)' }} />
+                      <TimeSelect value={d.start}
+                        onChange={v => setSchedule(prev => prev.map((s, j) => j === i ? { ...s, start: v } : s))}
+                        style={{ padding: '6px 10px', borderRadius: 8, border: '1.5px solid var(--gray-200)', fontSize: 13, outline: 'none', fontFamily: 'Inter,sans-serif', background: '#fff', color: 'var(--dark)', cursor: 'pointer' }} />
                       <span style={{ color: 'var(--gray-500)', fontSize: 13, fontWeight: 600 }}>—</span>
-                      <input type="time" value={d.end}
-                        onChange={e => setSchedule(prev => prev.map((s, j) => j === i ? { ...s, end: e.target.value } : s))}
-                        style={{ padding: '6px 10px', borderRadius: 8, border: '1.5px solid var(--gray-200)', fontSize: 13, outline: 'none', fontFamily: 'Inter,sans-serif', background: '#fff', color: 'var(--dark)' }} />
+                      <TimeSelect value={d.end}
+                        onChange={v => setSchedule(prev => prev.map((s, j) => j === i ? { ...s, end: v } : s))}
+                        style={{ padding: '6px 10px', borderRadius: 8, border: '1.5px solid var(--gray-200)', fontSize: 13, outline: 'none', fontFamily: 'Inter,sans-serif', background: '#fff', color: 'var(--dark)', cursor: 'pointer' }} />
                     </div>
                   )}
                 </div>

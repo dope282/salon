@@ -30,9 +30,6 @@ export default function Sidebar({ view, onSwitch, adminEmail, onLogout, isOpen, 
     <aside className={`admin-sidebar flex flex-col bg-white border-r border-gray-200 flex-shrink-0 overflow-y-auto${isOpen ? ' open' : ''}`} id="adminSidebar">
       {/* Logo */}
       <div className="px-5 py-6 border-b border-gray-200 flex items-center gap-3">
-        <div className="w-[42px] h-[42px] rounded-lg bg-gradient-to-br from-pink to-pink-dark flex items-center justify-center text-xl text-white flex-shrink-0">
-          💇‍♀️
-        </div>
         <div className="flex-1">
           <div className="font-display text-base font-bold text-gold leading-[1.1]">Hatantsetsey lash</div>
           <div className="text-[9px] tracking-[2px] text-gray-500 uppercase">Админ панель</div>

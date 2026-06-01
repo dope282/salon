@@ -97,7 +97,7 @@ export default function TrainingsManager({ showToast }) {
             {list.map(t => (
               <div key={t.id} style={{ display:'flex', alignItems:'center', gap:14, padding:'12px 14px', borderRadius:14, border:'1.5px solid var(--gray-200)', background: t.active ? '#fff' : 'var(--gray-100)', opacity: t.active ? 1 : .7, transition:'all .2s', flexWrap:'wrap' }}>
                 {/* Зураг */}
-                <div style={{ width:60, height:60, borderRadius:12, overflow:'hidden', background:'linear-gradient(135deg,#F5E6C8,#FDE8F0)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:28, flexShrink:0 }}>
+                <div style={{ width:60, height:60, borderRadius:12, overflow:'hidden', background:'linear-gradient(135deg,#FFE0EF,#FDE8F0)', display:'flex', alignItems:'center', justifyContent:'center', fontSize:28, flexShrink:0 }}>
                   {(t.images?.[0] || t.image_url)
                     // eslint-disable-next-line @next/next/no-img-element
                     ? <img src={t.images?.[0] || t.image_url} alt={t.title} style={{ width:'100%', height:'100%', objectFit:'cover' }} />

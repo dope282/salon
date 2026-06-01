@@ -30,7 +30,7 @@ export default function PromoSection() {
     if (!imgs.length) return null;
     return (
       <section className="py-12 px-12 max-[900px]:px-5 max-[640px]:py-5 max-[640px]:px-4">
-        <div className="rounded-[28px] overflow-hidden border border-gold/20 shadow-[0_8px_40px_rgba(201,168,76,.12)]">
+        <div className="rounded-[28px] overflow-hidden border border-gold/20 shadow-[0_8px_40px_rgba(255,51,153,.12)]">
           <RotatingImage images={imgs} alt="Промо баннер" className="w-full aspect-[4/1]" interval={4500} dots />
         </div>
       </section>
@@ -39,11 +39,11 @@ export default function PromoSection() {
 
   return (
     <section className="py-12 px-12 max-[900px]:py-8 max-[900px]:px-5 max-[640px]:py-5 max-[640px]:px-4">
-      <div className="relative overflow-hidden rounded-[28px] bg-dark border border-gold/15 shadow-[0_16px_64px_rgba(0,0,0,.25)]">
+      <div className="relative overflow-hidden rounded-[28px] bg-[#606060] border border-gold/15 shadow-[0_16px_64px_rgba(0,0,0,.25)]">
         {/* Gold shimmer overlay */}
-        <div className="absolute inset-0 pointer-events-none" style={{background:'radial-gradient(ellipse at 20% 50%,rgba(201,168,76,.12),transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(212,175,55,.08),transparent 50%)'}} />
+        <div className="absolute inset-0 pointer-events-none" style={{background:'radial-gradient(ellipse at 20% 50%,rgba(255,51,153,.12),transparent 60%),radial-gradient(ellipse at 80% 20%,rgba(255,102,178,.08),transparent 50%)'}} />
         {/* Subtle grid */}
-        <div className="absolute inset-0 pointer-events-none opacity-20" style={{backgroundImage:'radial-gradient(ellipse at 1px 1px,rgba(201,168,76,.15) 1px,transparent 0)',backgroundSize:'24px 24px'}} />
+        <div className="absolute inset-0 pointer-events-none opacity-20" style={{backgroundImage:'radial-gradient(ellipse at 1px 1px,rgba(255,51,153,.15) 1px,transparent 0)',backgroundSize:'24px 24px'}} />
 
         <div className="relative z-[2] flex items-center justify-between gap-8 px-16 py-14 max-[900px]:px-8 max-[900px]:py-10 max-[640px]:flex-col max-[640px]:px-6 max-[640px]:py-8 max-[640px]:text-center max-[640px]:gap-5">
           <div className="flex-1">
@@ -54,14 +54,14 @@ export default function PromoSection() {
               {promo.title}
             </div>
             <div className="font-display text-[80px] font-black leading-none mb-2 max-[900px]:text-[64px] max-[640px]:text-[52px]"
-              style={{background:'linear-gradient(135deg,#D4AF37,#F0C060,#D4AF37)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',backgroundClip:'text'}}>
+              style={{background:'linear-gradient(135deg,#FF66B2,#FF8FC4,#FF66B2)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent',backgroundClip:'text'}}>
               {promo.pct}
             </div>
             <div className="font-display text-[22px] text-white/60 italic mb-8 max-[900px]:text-[18px] max-[640px]:text-base max-[640px]:mb-6">
               {promo.all}
             </div>
             <button onClick={openBooking}
-              className="btn-shine bg-gradient-to-r from-[#B8960C] via-[#D4AF37] to-[#C9A84C] text-dark border-none px-9 py-3.5 rounded-full text-[14px] font-bold cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_28px_rgba(201,168,76,.50)] tracking-wide max-[640px]:px-7 max-[640px]:text-sm">
+              className="btn-shine bg-gradient-to-r from-[#FF3399] via-[#FF66B2] to-[#FF3399] text-pink-200 border-none px-9 py-3.5 rounded-full text-[14px] font-bold cursor-pointer transition-all hover:-translate-y-0.5 hover:shadow-[0_8px_28px_rgba(255,51,153,.50)] tracking-wide max-[640px]:px-7 max-[640px]:text-sm">
               {promo.btn}
             </button>
           </div>
@@ -72,7 +72,7 @@ export default function PromoSection() {
             </div>
           </div>
 
-          <div className="w-[240px] h-[220px] rounded-2xl bg-white/5 border border-gold/15 flex items-center justify-center text-[80px] relative z-[2] flex-shrink-0 max-[900px]:w-[180px] max-[900px]:h-[160px] max-[900px]:text-[60px] max-[640px]:hidden">
+          <div className="w-[240px] h-[220px] rounded-2xl bg-[#606060]/5 border border-gold/15 flex items-center justify-center text-[80px] relative z-[2] flex-shrink-0 max-[900px]:w-[180px] max-[900px]:h-[160px] max-[900px]:text-[60px] max-[640px]:hidden">
             {promo.emoji}
           </div>
         </div>

@@ -132,7 +132,7 @@ export default function ProductsManager({ showToast }) {
             {list.map(p => (
               <div key={p.id} style={{ border: '1.5px solid var(--gray-200)', borderRadius: 14, overflow: 'hidden', background: p.active ? '#fff' : 'var(--gray-100)', opacity: p.active ? 1 : 0.7, transition: 'all .2s' }}>
                 {/* Image */}
-                <div style={{ width: '100%', height: 140, background: 'linear-gradient(135deg,#F5E6C8,#FDE8F0)', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 44 }}>
+                <div style={{ width: '100%', height: 140, background: 'linear-gradient(135deg,#FFE0EF,#FDE8F0)', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 44 }}>
                   {(p.images?.[0] || p.image_url)
                     // eslint-disable-next-line @next/next/no-img-element
                     ? <img src={p.images?.[0] || p.image_url} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }} />

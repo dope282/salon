@@ -1,6 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import TimeSelect from '@/components/admin/TimeSelect';
 
 function formatDT(date, time) {
   if (!date) return '—';
@@ -192,7 +193,7 @@ export default function BookingsTable({ bookings, onRefresh, showToast }) {
                 </div>
                 <div>
                   <label style={lbl}>Цаг *</label>
-                  <input type="time" value={m.time} onChange={e => setMF('time', e.target.value)} step="300" style={inp} />
+                  <TimeSelect value={m.time} onChange={v => setMF('time', v)} style={{ ...inp, cursor:'pointer' }} />
                 </div>
                 <div>
                   <label style={lbl}>Үргэлжлэх (мин)</label>
