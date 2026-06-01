@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useUI } from '@/contexts/UIContext';
+import RotatingImage from '@/components/RotatingImage';
 
 const FALLBACK = [
   { id:1, name_mn:'Lash Extension',   description_mn:'Classic, Volume, Mega Volume lash',   price_from:45000, emoji:'👁️' },
@@ -37,24 +38,33 @@ export default function Services() {
         </button>
       </div>
 
-      <div className="grid grid-cols-4 gap-5 max-[1200px]:grid-cols-2 max-[640px]:grid-cols-2 max-[640px]:gap-3">
-        {services.map((s) => (
-          <div key={s.id} onClick={openBooking}
-            className="lux-card group bg-[#FEFCF8] rounded-2xl px-6 py-6 flex items-center gap-4 transition-all duration-300 cursor-pointer hover:bg-gradient-to-br hover:from-[#FFFDF5] hover:to-[#FFF8E8] hover:-translate-y-1 max-[640px]:flex-col max-[640px]:items-center max-[640px]:text-center max-[640px]:px-3 max-[640px]:py-4 max-[640px]:gap-2"
-            style={{ opacity: 1 }}>
-            <div className="w-14 h-14 rounded-xl flex items-center justify-center text-[26px] flex-shrink-0 bg-gradient-to-br from-gold-light to-[#EDD98A]/30 group-hover:from-gold-light group-hover:to-gold/20 transition-all max-[640px]:w-12 max-[640px]:h-12 max-[640px]:text-xl border border-gold/15 overflow-hidden">
-              {s.image_url
-                // eslint-disable-next-line @next/next/no-img-element
-                ? <img src={s.image_url} alt={s.name_mn} className="w-full h-full object-cover" />
-                : s.emoji}
+      <div className="grid grid-cols-5 gap-4 max-[1200px]:grid-cols-4 max-[900px]:grid-cols-3 max-[900px]:gap-3.5 max-[640px]:grid-cols-3 max-[640px]:gap-2.5">
+        {services.map((s) => {
+          const imgs = s.images?.length ? s.images : (s.image_url ? [s.image_url] : []);
+          return (
+            <div key={s.id} onClick={openBooking}
+              className="lux-card group bg-[#FEFCF8] rounded-2xl overflow-hidden transition-all duration-300 flex flex-col cursor-pointer hover:-translate-y-1">
+              {imgs.length
+                ? <RotatingImage images={imgs} alt={s.name_mn} className="w-full aspect-[4/3]" dots />
+                : <div className="w-full aspect-[4/3] bg-gradient-to-br from-gold-light to-[#EDD98A]/20 flex items-center justify-center text-[52px]">{s.emoji}</div>}
+              <div className="px-3 py-3 flex-1 flex flex-col">
+                <div className="text-[13px] font-semibold text-dark mb-1 leading-[1.3]">{s.name_mn}</div>
+                {s.description_mn && (
+                  <div className="text-[11px] text-gray-400 leading-[1.5] mb-2.5 flex-1 overflow-hidden max-[640px]:hidden" style={{ display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical' }}>
+                    {s.description_mn}
+                  </div>
+                )}
+                <div className="flex items-center justify-between gap-2 mt-auto">
+                  <span className="font-display text-[15px] font-bold text-gold-dark max-[640px]:text-sm">₮{(s.price_from ?? 0).toLocaleString()}+</span>
+                  <button onClick={openBooking}
+                    className="bg-gradient-to-r from-[#B8960C] to-[#C9A84C] text-white border-none px-3.5 py-1.5 rounded-full text-[11px] font-bold cursor-pointer transition-all hover:shadow-[0_4px_16px_rgba(201,168,76,.40)] hover:-translate-y-0.5 max-[640px]:px-3 max-[640px]:text-[10px]">
+                    Захиалах
+                  </button>
+                </div>
+              </div>
             </div>
-            <div className="flex-1 min-w-0 max-[640px]:w-full">
-              <div className="font-semibold text-[14px] text-dark mb-0.5 group-hover:text-dark truncate max-[640px]:whitespace-normal max-[640px]:text-[13px] max-[640px]:leading-tight">{s.name_mn}</div>
-              <div className="text-xs text-gray-400 mb-2 leading-[1.4] line-clamp-1 max-[640px]:hidden">{s.description_mn}</div>
-              <div className="text-[13px] font-bold text-gold-dark max-[640px]:mt-1">₮{s.price_from?.toLocaleString()}+</div>
-            </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <div className="mt-8 text-center md:hidden">

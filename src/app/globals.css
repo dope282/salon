@@ -153,7 +153,7 @@ tr:hover td { background:#FAFAFA; }
 /* Гарчгийн алтан shimmer */
 @keyframes goldTextShimmer { to { background-position: -200% center; } }
 .gold-shimmer {
-  background: linear-gradient(90deg,#FF3399,#FF3399 25%,#FF3399 45%,#FF3399 50%,#FF3399 55%,#fffbfd 75%,#fad5e7);
+  background: linear-gradient(90deg,#FF3399,#FF3399 25%,#FF3399 45%,#FF3399 50%,#f56cb1 55%,#ffdbed 75%,#ff3596);
   background-size: 200% auto;
   -webkit-background-clip: text; background-clip: text;
   -webkit-text-fill-color: transparent; color: transparent;

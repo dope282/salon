@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useUI }    from '@/contexts/UIContext';
+import RotatingImage from '@/components/RotatingImage';
 
 export default function PackagesSection() {
   const { openBookingForPackage } = useUI();
@@ -35,60 +36,50 @@ export default function PackagesSection() {
           Гоо Сайхны <span className="gold-shimmer">Багц</span> Үйлчилгээ
         </h2>
       </div>
-      <div className="packages-grid">
-        {packages.map(p => (
-          <div key={p.id} className="pkg-card">
-            {/* Savings badge */}
-            {savings(p) > 0 && (
-              <div className="pkg-badge">
-                ₮{savings(p).toLocaleString()} хэмнэлт
-              </div>
-            )}
-
-            {/* Icon / image */}
-            <div className="pkg-icon">
-              {p.image_url
-                // eslint-disable-next-line @next/next/no-img-element
-                ? <img src={p.image_url} alt={p.name} style={{ width: 48, height: 48, borderRadius: 12, objectFit: 'cover' }} />
-                : p.emoji}
-            </div>
-
-            {/* Name */}
-            <div className="pkg-name">{p.name}</div>
-
-            {/* Description */}
-            {p.description && <div className="pkg-desc">{p.description}</div>}
-
-            {/* Included services */}
-            {p.services.length > 0 && (
-              <div className="pkg-services">
-                {p.services.map((s, i) => (
-                  <div key={i} className="pkg-svc-item">
-                    <span className="pkg-svc-ico" style={{ color: 'var(--gold)' }}>✓</span> {s.name}
+      <div className="grid grid-cols-5 gap-4 max-[1200px]:grid-cols-4 max-[900px]:grid-cols-3 max-[900px]:gap-3.5 max-[640px]:grid-cols-3 max-[640px]:gap-2.5">
+        {packages.map(p => {
+          const imgs = p.images?.length ? p.images : (p.image_url ? [p.image_url] : []);
+          return (
+            <div key={p.id} onClick={() => openBookingForPackage(p)}
+              className="lux-card group bg-white rounded-2xl overflow-hidden transition-all duration-300 flex flex-col cursor-pointer hover:-translate-y-1">
+              <div className="relative">
+                {imgs.length
+                  ? <RotatingImage images={imgs} alt={p.name} className="w-full aspect-[4/3]" dots />
+                  : <div className="w-full aspect-[4/3] bg-gradient-to-br from-gold-light to-[#EDD98A]/20 flex items-center justify-center text-[52px]">{p.emoji}</div>}
+                {savings(p) > 0 && (
+                  <div className="absolute top-2 right-2 bg-gradient-to-r from-[#38A169] to-[#276749] text-white text-[10px] font-bold px-2.5 py-1 rounded-full shadow-md">
+                    ₮{savings(p).toLocaleString()} хэмнэлт
                   </div>
-                ))}
-              </div>
-            )}
-
-            {/* Price */}
-            <div className="pkg-footer">
-              <div className="pkg-price-wrap">
-                {p.original_price > p.price && (
-                  <span className="pkg-orig-price">₮{p.original_price.toLocaleString()}</span>
                 )}
-                <span className="pkg-price">₮{p.price.toLocaleString()}</span>
               </div>
-              {p.duration_min > 0 && (
-                <span className="pkg-duration">⏱ {p.duration_min} мин</span>
-              )}
+              <div className="px-3 py-3 flex-1 flex flex-col">
+                <div className="text-[13px] font-semibold text-dark mb-1 leading-[1.3]">{p.name}</div>
+                {p.description && (
+                  <div className="text-[11px] text-gray-400 leading-[1.5] mb-1.5 overflow-hidden max-[640px]:hidden" style={{ display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical' }}>
+                    {p.description}
+                  </div>
+                )}
+                {p.services.length > 0 && (
+                  <div className="text-[10px] text-gold-dark/70 mb-2.5 truncate">
+                    ✓ {p.services.map(s => s.name).join(' · ')}
+                  </div>
+                )}
+                <div className="flex items-center justify-between gap-2 mt-auto">
+                  <div className="flex flex-col leading-tight">
+                    {p.original_price > p.price && (
+                      <span className="text-[10px] text-gray-400 line-through">₮{p.original_price.toLocaleString()}</span>
+                    )}
+                    <span className="font-display text-[15px] font-bold text-gold-dark max-[640px]:text-sm">₮{p.price.toLocaleString()}</span>
+                  </div>
+                  <button onClick={() => openBookingForPackage(p)}
+                    className="bg-gradient-to-r from-[#B8960C] to-[#C9A84C] text-white border-none px-3.5 py-1.5 rounded-full text-[11px] font-bold cursor-pointer transition-all hover:shadow-[0_4px_16px_rgba(201,168,76,.40)] hover:-translate-y-0.5 max-[640px]:px-3 max-[640px]:text-[10px]">
+                    Захиалах
+                  </button>
+                </div>
+              </div>
             </div>
-
-            <button onClick={() => openBookingForPackage(p)}
-              className="btn-shine w-full mt-1 bg-gradient-to-r from-[#B8960C] via-[#D4AF37] to-[#C9A84C] text-white border-none py-2.5 rounded-full text-[13px] font-bold cursor-pointer transition-all shadow-[0_4px_16px_rgba(201,168,76,.35)] hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(201,168,76,.55)] tracking-wide">
-              🎁 Багцаар захиалах
-            </button>
-          </div>
-        ))}
+          );
+        })}
       </div>
     </section>
   );

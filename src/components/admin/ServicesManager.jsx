@@ -1,9 +1,10 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import MultiImageUploader from '@/components/admin/MultiImageUploader';
 
 const EMPTY = {
-  name_mn: '', description_mn: '', price_from: '', duration_min: '60', emoji: '✂️', image_url: '', active: true,
+  name_mn: '', description_mn: '', price_from: '', duration_min: '60', emoji: '✂️', image_url: '', images: [], active: true,
 };
 
 const EMOJI_OPTIONS = ['✂️','🎨','💆','💅','🦶','💄','💇','🧴','💋','🌸','✨','💆‍♀️'];
@@ -14,9 +15,6 @@ export default function ServicesManager({ showToast }) {
   const [form, setForm] = useState(null);
   const [saving, setSaving] = useState(false);
   const [delId, setDelId] = useState(null);
-  const [uploading, setUploading] = useState(false);
-  const [dragOver, setDragOver]   = useState(false);
-  const fileRef = useRef(null);
 
   useEffect(() => { load(); }, []);
 
@@ -33,33 +31,20 @@ export default function ServicesManager({ showToast }) {
     (el || window).scrollTo({ top: 99999, behavior: 'smooth' });
   }, 50);
   const openAdd = () => { setForm({ ...EMPTY }); scrollToForm(); };
-  const openEdit = (s) => { setForm({ ...s, price_from: String(s.price_from), duration_min: String(s.duration_min), image_url: s.image_url || '' }); scrollToForm(); };
-
-  /* ── file upload ── */
-  const handleFile = async (file) => {
-    if (!file?.type.startsWith('image/')) return;
-    setUploading(true);
-    const fname = `service-${Date.now()}.${file.name.split('.').pop()}`;
-    const { error: upErr } = await supabase.storage.from('hero-images').upload(fname, file, { upsert: true });
-    if (upErr) { showToast('Зураг байршуулахад алдаа: ' + upErr.message, 'err'); setUploading(false); return; }
-    const { data } = supabase.storage.from('hero-images').getPublicUrl(fname);
-    setF('image_url', data.publicUrl);
-    setUploading(false);
-  };
-  const handleInputFile = (e) => { handleFile(e.target.files?.[0]); e.target.value = ''; };
-  const handleDrop = (e) => { e.preventDefault(); setDragOver(false); handleFile(e.dataTransfer.files?.[0]); };
+  const openEdit = (s) => { setForm({ ...s, price_from: String(s.price_from), duration_min: String(s.duration_min), images: s.images?.length ? s.images : (s.image_url ? [s.image_url] : []) }); scrollToForm(); };
 
   const save = async () => {
     if (!form.name_mn.trim()) { showToast('Үйлчилгээний нэр оруулна уу', 'err'); return; }
     if (!form.price_from || isNaN(parseInt(form.price_from))) { showToast('Үнэ оруулна уу', 'err'); return; }
     setSaving(true);
+    const imgs = form.images || [];
     const payload = {
       name_mn: form.name_mn.trim(),
       description_mn: form.description_mn.trim(),
       price_from: parseInt(form.price_from) || 0,
       duration_min: parseInt(form.duration_min) || 60,
       emoji: form.emoji.trim() || '✂️',
-      image_url: form.image_url?.trim() || '',
+      images: imgs, image_url: imgs[0] || '',
       active: form.active,
     };
     let error;
@@ -132,9 +117,9 @@ export default function ServicesManager({ showToast }) {
 
                 {/* Service image / emoji fallback */}
                 <div style={{ width: 48, height: 48, borderRadius: 14, background: 'linear-gradient(135deg,#FFD6E8,#FFBCD9)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 24, flexShrink: 0, overflow: 'hidden' }}>
-                  {s.image_url
+                  {(s.images?.[0] || s.image_url)
                     // eslint-disable-next-line @next/next/no-img-element
-                    ? <img src={s.image_url} alt={s.name_mn} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ? <img src={s.images?.[0] || s.image_url} alt={s.name_mn} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     : s.emoji}
                 </div>
 
@@ -219,36 +204,9 @@ export default function ServicesManager({ showToast }) {
             </div>
           </div>
 
-          {/* Image upload */}
+          {/* Зурагнууд */}
           <div style={{ borderTop: '1.5px solid var(--gray-200)', paddingTop: 16, marginBottom: 16 }}>
-            <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-500)', display: 'block', marginBottom: 10, textTransform: 'uppercase', letterSpacing: .8 }}>🖼️ Зураг</label>
-            <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-
-              {/* Preview */}
-              <div style={{ width: 100, height: 100, borderRadius: 14, overflow: 'hidden', border: '2px solid var(--gray-200)', background: 'linear-gradient(135deg,#FFD6E8,#FFBCD9)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40, flexShrink: 0 }}>
-                {form.image_url
-                  // eslint-disable-next-line @next/next/no-img-element
-                  ? <img src={form.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  : form.emoji}
-              </div>
-
-              <div style={{ flex: 1, minWidth: 180 }}>
-                <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-                  <input type="url" value={form.image_url} onChange={e => setF('image_url', e.target.value)} placeholder="https://..." style={{ ...inp, flex: 1 }} />
-                  {form.image_url && <button onClick={() => setF('image_url', '')} style={{ padding: '9px 10px', borderRadius: 10, border: '1.5px solid var(--gray-200)', background: '#fff', cursor: 'pointer', color: 'var(--gray-500)' }}>✕</button>}
-                </div>
-                <div
-                  onClick={() => !uploading && fileRef.current?.click()}
-                  onDragOver={e => { e.preventDefault(); setDragOver(true); }}
-                  onDragLeave={() => setDragOver(false)}
-                  onDrop={handleDrop}
-                  style={{ border: `2px dashed ${dragOver ? 'var(--pink)' : 'var(--gray-200)'}`, borderRadius: 10, padding: '14px', textAlign: 'center', cursor: uploading ? 'not-allowed' : 'pointer', background: dragOver ? 'var(--pink-light)' : '#fff', transition: 'all .2s' }}
-                >
-                  <span style={{ fontSize: 13, color: 'var(--gray-500)' }}>{uploading ? '⏳ Байршуулж байна...' : '📁 Зураг сонгох / чирж тавих'}</span>
-                  <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleInputFile} />
-                </div>
-              </div>
-            </div>
+            <MultiImageUploader images={form.images} onChange={imgs => setF('images', imgs)} prefix="service" showToast={showToast} fallbackEmoji={form.emoji} />
           </div>
 
           {/* Emoji fallback (зураг байхгүй үед) */}

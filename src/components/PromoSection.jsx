@@ -2,12 +2,13 @@
 import { useEffect, useState } from 'react';
 import { useUI }    from '@/contexts/UIContext';
 import { supabase } from '@/lib/supabase';
+import RotatingImage from '@/components/RotatingImage';
 
 const DEFAULT = {
   active: true, mode: 'text', _loaded: false,
   tag: '⚡ ОНЦГОЙ САНАЛ', title: 'Анхны захиалгадаа',
   pct: '20%', all: 'Бүх үйлчилгээнд', btn: 'Одоо захиалах →',
-  badge: 'ОНЦГОЙ · САНАЛ · ЗӨВХӨН · ТАНД', emoji: '💇‍♀️', img: '',
+  badge: 'ОНЦГОЙ · САНАЛ · ЗӨВХӨН · ТАНД', emoji: '💇‍♀️', img: '', imgs: [],
 };
 
 export default function PromoSection() {
@@ -25,12 +26,12 @@ export default function PromoSection() {
   if (promo._loaded && !promo.active) return null;
 
   if (promo.mode === 'image') {
-    if (!promo.img) return null;
+    const imgs = promo.imgs?.length ? promo.imgs : (promo.img ? [promo.img] : []);
+    if (!imgs.length) return null;
     return (
       <section className="py-12 px-12 max-[900px]:px-5 max-[640px]:py-5 max-[640px]:px-4">
         <div className="rounded-[28px] overflow-hidden border border-gold/20 shadow-[0_8px_40px_rgba(201,168,76,.12)]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={promo.img} alt="Промо баннер" className="w-full aspect-[4/1] object-cover block" />
+          <RotatingImage images={imgs} alt="Промо баннер" className="w-full aspect-[4/1]" interval={4500} dots />
         </div>
       </section>
     );

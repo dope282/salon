@@ -45,10 +45,14 @@ CREATE TABLE IF NOT EXISTS public.bookings (
   status           TEXT DEFAULT 'pending'
     CHECK (status IN ('pending','confirmed','completed','cancelled')),
   total_price      INTEGER DEFAULT 0,
+  duration_min     INTEGER DEFAULT 60,
   notes            TEXT,
   user_id          UUID REFERENCES auth.users(id),
   created_at       TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- BOOKINGS: add duration_min column (run separately if table already exists)
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS duration_min INTEGER DEFAULT 60;
 
 -- ================================================================
 -- ROW LEVEL SECURITY
@@ -315,6 +319,44 @@ CREATE POLICY "hero_images_admin_update"
 ON storage.objects FOR UPDATE TO authenticated
 USING (bucket_id = 'hero-images' AND auth.email() = 'jaamaaj26@gmail.com');
 --
+-- ================================================================
+-- 9. TRAININGS — Сургалтууд
+-- ================================================================
+
+CREATE TABLE IF NOT EXISTS public.trainings (
+  id           SERIAL PRIMARY KEY,
+  title        TEXT NOT NULL,
+  description  TEXT DEFAULT '',
+  image_url    TEXT DEFAULT '',
+  price        INTEGER DEFAULT 0,
+  duration     TEXT DEFAULT '',   -- жишээ: "2 өдөр", "3 цаг"
+  level        TEXT DEFAULT '',   -- жишээ: "Эхлэгч", "Дунд"
+  schedule     TEXT DEFAULT '',   -- жишээ: "Бүтэн дор хаяж 2 долоо хоног"
+  active       BOOLEAN DEFAULT true,
+  sort_order   INTEGER DEFAULT 0,
+  created_at   TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE public.trainings ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "trainings_public_read" ON public.trainings FOR SELECT USING (active = true);
+CREATE POLICY "trainings_admin_all"   ON public.trainings FOR ALL
+  USING (auth.email() = 'jaamaaj26@gmail.com')
+  WITH CHECK (auth.email() = 'jaamaaj26@gmail.com');
+
+GRANT SELECT ON public.trainings TO anon;
+GRANT ALL    ON public.trainings TO authenticated;
+
+-- ================================================================
+-- 10. MULTI-IMAGE — олон зураг (ээлжлэн солигдоно)
+-- ================================================================
+ALTER TABLE public.services  ADD COLUMN IF NOT EXISTS images JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.packages  ADD COLUMN IF NOT EXISTS images JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.products  ADD COLUMN IF NOT EXISTS images JSONB DEFAULT '[]'::jsonb;
+ALTER TABLE public.trainings ADD COLUMN IF NOT EXISTS images JSONB DEFAULT '[]'::jsonb;
+-- Hero болон Promo баннерын олон зураг нь site_settings дотор JSON массив хэлбэрээр хадгалагдана
+-- (hero_images, promo_config.imgs)
+
 -- ================================================================
 -- DONE! Суурь мэдээллийг амжилттай оруулав.
 -- ================================================================

@@ -1,10 +1,11 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import MultiImageUploader from '@/components/admin/MultiImageUploader';
 
 const EMPTY = {
   name: '', description: '', price: '',
-  category: '', image_url: '', in_stock: true, active: true,
+  category: '', image_url: '', images: [], in_stock: true, active: true,
 };
 
 export default function ProductsManager({ showToast }) {
@@ -12,11 +13,8 @@ export default function ProductsManager({ showToast }) {
   const [loading,   setLoading]   = useState(true);
   const [form,      setForm]      = useState(null);   // null=closed | {...}=open
   const [saving,    setSaving]    = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [dragOver,  setDragOver]  = useState(false);
   const [tab,       setTab]       = useState('all');  // all | active | inactive
   const [delId,     setDelId]     = useState(null);   // confirm delete id
-  const fileRef = useRef(null);
 
   useEffect(() => { load(); }, []);
 
@@ -36,18 +34,19 @@ export default function ProductsManager({ showToast }) {
     (el || window).scrollTo({ top: 99999, behavior: 'smooth' });
   }, 50);
   const openAdd  = () => { setForm({ ...EMPTY }); scrollToForm(); };
-  const openEdit = (p) => { setForm({ ...p, price: String(p.price) }); scrollToForm(); };
+  const openEdit = (p) => { setForm({ ...p, price: String(p.price), images: p.images?.length ? p.images : (p.image_url ? [p.image_url] : []) }); scrollToForm(); };
 
   /* ── save (insert / update) ── */
   const save = async () => {
     if (!form.name.trim()) { showToast('Бүтээгдэхүүний нэр оруулна уу', 'err'); return; }
     setSaving(true);
+    const imgs = form.images || [];
     const payload = {
       name:        form.name.trim(),
       description: form.description.trim(),
       price:       parseInt(form.price) || 0,
       category:    form.category.trim(),
-      image_url:   form.image_url.trim(),
+      images:      imgs, image_url: imgs[0] || '',
       in_stock:    form.in_stock,
       active:      form.active,
     };
@@ -78,20 +77,6 @@ export default function ProductsManager({ showToast }) {
     await supabase.from('products').update({ [field]: val }).eq('id', id);
     setProducts(ps => ps.map(p => p.id === id ? { ...p, [field]: val } : p));
   };
-
-  /* ── file upload ── */
-  const handleFile = async (file) => {
-    if (!file?.type.startsWith('image/')) return;
-    setUploading(true);
-    const fname = `product-${Date.now()}.${file.name.split('.').pop()}`;
-    const { error: upErr } = await supabase.storage.from('hero-images').upload(fname, file, { upsert: true });
-    if (upErr) { showToast('Зураг байршуулахад алдаа: ' + upErr.message, 'err'); setUploading(false); return; }
-    const { data } = supabase.storage.from('hero-images').getPublicUrl(fname);
-    setF('image_url', data.publicUrl);
-    setUploading(false);
-  };
-  const handleInputFile = (e) => { handleFile(e.target.files?.[0]); e.target.value = ''; };
-  const handleDrop = (e) => { e.preventDefault(); setDragOver(false); handleFile(e.dataTransfer.files?.[0]); };
 
   /* ── filtered list ── */
   const list = products.filter(p =>
@@ -148,9 +133,9 @@ export default function ProductsManager({ showToast }) {
               <div key={p.id} style={{ border: '1.5px solid var(--gray-200)', borderRadius: 14, overflow: 'hidden', background: p.active ? '#fff' : 'var(--gray-100)', opacity: p.active ? 1 : 0.7, transition: 'all .2s' }}>
                 {/* Image */}
                 <div style={{ width: '100%', height: 140, background: 'linear-gradient(135deg,#F5E6C8,#FDE8F0)', position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 44 }}>
-                  {p.image_url
+                  {(p.images?.[0] || p.image_url)
                     // eslint-disable-next-line @next/next/no-img-element
-                    ? <img src={p.image_url} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }} />
+                    ? <img src={p.images?.[0] || p.image_url} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover', position: 'absolute', inset: 0 }} />
                     : '🛒'}
                   {/* Badges */}
                   <div style={{ position: 'absolute', top: 8, left: 8, display: 'flex', gap: 4, flexWrap: 'wrap' }}>
@@ -242,38 +227,9 @@ export default function ProductsManager({ showToast }) {
             </div>
           </div>
 
-          {/* ── Image section ── */}
+          {/* ── Зурагнууд ── */}
           <div style={{ borderTop: '1.5px solid var(--gray-200)', paddingTop: 16, marginBottom: 20 }}>
-            <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-500)', display: 'block', marginBottom: 10, textTransform: 'uppercase', letterSpacing: .8 }}>🖼️ Зураг</label>
-            <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-
-              {/* Preview */}
-              <div style={{ width: 110, height: 100, borderRadius: 12, overflow: 'hidden', border: '2px solid var(--gray-200)', background: 'linear-gradient(135deg,#F5E6C8,#FDE8F0)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40, flexShrink: 0 }}>
-                {form.image_url
-                  // eslint-disable-next-line @next/next/no-img-element
-                  ? <img src={form.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  : '🛒'}
-              </div>
-
-              <div style={{ flex: 1, minWidth: 180 }}>
-                {/* URL input */}
-                <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-                  <input type="url" value={form.image_url} onChange={e => setF('image_url', e.target.value)} placeholder="https://..." style={{ ...inp, flex: 1 }} />
-                  {form.image_url && <button onClick={() => setF('image_url', '')} style={{ padding: '9px 10px', borderRadius: 10, border: '1.5px solid var(--gray-200)', background: '#fff', cursor: 'pointer', color: 'var(--gray-500)' }}>✕</button>}
-                </div>
-                {/* Drop zone */}
-                <div
-                  onClick={() => !uploading && fileRef.current?.click()}
-                  onDragOver={e => { e.preventDefault(); setDragOver(true); }}
-                  onDragLeave={() => setDragOver(false)}
-                  onDrop={handleDrop}
-                  style={{ border: `2px dashed ${dragOver ? 'var(--pink)' : 'var(--gray-200)'}`, borderRadius: 10, padding: '14px', textAlign: 'center', cursor: uploading ? 'not-allowed' : 'pointer', background: dragOver ? 'var(--pink-light)' : '#fff', transition: 'all .2s' }}
-                >
-                  <span style={{ fontSize: 13, color: 'var(--gray-500)' }}>{uploading ? '⏳ Байршуулж байна...' : '📁 Зураг сонгох / чирж тавих'}</span>
-                  <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleInputFile} />
-                </div>
-              </div>
-            </div>
+            <MultiImageUploader images={form.images} onChange={imgs => setF('images', imgs)} prefix="product" showToast={showToast} fallbackEmoji="🛒" />
           </div>
 
           {/* Actions */}

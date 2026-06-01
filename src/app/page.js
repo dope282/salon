@@ -12,6 +12,7 @@ import PackagesSection from '@/components/Packages';
 import BookingModal  from '@/components/BookingModal';
 import AuthModal     from '@/components/AuthModal';
 import MyBookings    from '@/components/MyBookings';
+import Trainings     from '@/components/Trainings';
 import Toast         from '@/components/Toast';
 
 export default function HomePage() {
@@ -37,6 +38,7 @@ export default function HomePage() {
       <PackagesSection />
       <Products />
       <Artists />
+      <Trainings />
       <Features />
       <Footer />
 

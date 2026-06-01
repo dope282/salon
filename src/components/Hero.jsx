@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useUI } from '@/contexts/UIContext';
 import { supabase } from '@/lib/supabase';
+import RotatingImage from '@/components/RotatingImage';
 
 const DEFAULT_IMG = 'https://images.unsplash.com/photo-1560066984-138dadb4c035?w=700&q=85&auto=format&fit=crop';
 const TIMES_DEFAULT = ['09:00','10:00','11:00','12:00','13:00','14:00','16:00','17:00'];
@@ -45,12 +46,19 @@ const findNearestSlot = (artists, schedMap, booked) => {
 
 export default function Hero() {
   const { openBooking } = useUI();
-  const [heroImg, setHeroImg] = useState(DEFAULT_IMG);
+  const [heroImgs, setHeroImgs] = useState([DEFAULT_IMG]);
   const [nextSlot, setNextSlot] = useState(null);
 
   useEffect(() => {
-    supabase.from('site_settings').select('value').eq('key', 'hero_image_url').single()
-      .then(({ data }) => { if (data?.value) setHeroImg(data.value); });
+    supabase.from('site_settings').select('key, value').in('key', ['hero_image_url', 'hero_images'])
+      .then(({ data }) => {
+        const rows = {};
+        (data || []).forEach(r => { rows[r.key] = r.value; });
+        let imgs = [];
+        if (rows.hero_images) { try { imgs = JSON.parse(rows.hero_images); } catch {} }
+        if (!imgs.length && rows.hero_image_url) imgs = [rows.hero_image_url];
+        if (imgs.length) setHeroImgs(imgs);
+      });
 
     // Хамгийн ойр сул цаг
     (async () => {
@@ -135,8 +143,7 @@ export default function Hero() {
         {/* Visual */}
         <div className="flex-1 flex justify-center items-center relative min-w-0">
           <div className="hero-img-wrap relative w-[clamp(340px,32vw,460px)] h-[clamp(420px,40vw,560px)] rounded-[32px] overflow-hidden shadow-[0_20px_80px_rgba(201,168,76,.20),0_8px_40px_rgba(0,0,0,.12)] bg-gold-light flex items-center justify-center flex-shrink-0 border border-gold/20 max-[900px]:w-[clamp(260px,52vw,340px)] max-[900px]:h-[clamp(310px,62vw,420px)] max-[640px]:w-[min(78vw,280px)] max-[640px]:h-[min(93vw,340px)]">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={heroImg} alt="Hatantsetsey lash Beauty Salon" className="absolute inset-0 w-full h-full object-cover block" />
+            <RotatingImage images={heroImgs} alt="Hatantsetsey lash Beauty Salon" className="absolute inset-0 w-full h-full" interval={4000} dots />
             {/* Gold overlay at bottom */}
             <div className="absolute inset-x-0 bottom-0 h-1/3 bg-gradient-to-t from-[rgba(26,26,46,.4)] to-transparent z-[1]" />
           </div>

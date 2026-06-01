@@ -1,10 +1,11 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import MultiImageUploader from '@/components/admin/MultiImageUploader';
 
 const EMPTY = {
   name: '', description: '', price: '', original_price: '',
-  emoji: '🎁', image_url: '', duration_min: '120', active: true, sort_order: '0',
+  emoji: '🎁', image_url: '', images: [], duration_min: '120', active: true, sort_order: '0',
 };
 const EMOJI_OPT = ['🎁','💆','💅','✨','👁️','💄','🌸','💇','🧖','🎀','💎','🌟'];
 
@@ -13,8 +14,6 @@ export default function PackagesManager({ showToast }) {
   const [loading,     setLoading]     = useState(true);
   const [form,        setForm]        = useState(null);
   const [saving,      setSaving]      = useState(false);
-  const [uploading,   setUploading]   = useState(false);
-  const [dragOver,    setDragOver]    = useState(false);
   const [delId,       setDelId]       = useState(null);
   const [allServices, setAllServices] = useState([]);
   const [allArtists,  setAllArtists]  = useState([]);
@@ -22,7 +21,6 @@ export default function PackagesManager({ showToast }) {
   const [selArtists,  setSelArtists]  = useState([]); // artist IDs who can deliver
   const [pkgSvcMap,   setPkgSvcMap]   = useState({}); // { pkgId: svcId[] }
   const [pkgArtMap,   setPkgArtMap]   = useState({}); // { pkgId: artId[] }
-  const fileRef = useRef(null);
 
   useEffect(() => {
     load();
@@ -56,7 +54,7 @@ export default function PackagesManager({ showToast }) {
 
   const openAdd = () => { setForm({ ...EMPTY }); setSelServices([]); setSelArtists([]); scrollToForm(); };
   const openEdit = (p) => {
-    setForm({ ...p, price: String(p.price), original_price: String(p.original_price || ''), duration_min: String(p.duration_min), sort_order: String(p.sort_order) });
+    setForm({ ...p, price: String(p.price), original_price: String(p.original_price || ''), duration_min: String(p.duration_min), sort_order: String(p.sort_order), images: p.images?.length ? p.images : (p.image_url ? [p.image_url] : []) });
     setSelServices(pkgSvcMap[p.id] || []);
     setSelArtists(pkgArtMap[p.id] || []);
     scrollToForm();
@@ -66,10 +64,11 @@ export default function PackagesManager({ showToast }) {
     if (!form.name.trim()) { showToast('Багцын нэр оруулна уу', 'err'); return; }
     if (!form.price || isNaN(parseInt(form.price))) { showToast('Үнэ оруулна уу', 'err'); return; }
     setSaving(true);
+    const imgs = form.images || [];
     const payload = {
       name: form.name.trim(), description: form.description.trim(),
       price: parseInt(form.price) || 0, original_price: parseInt(form.original_price) || 0,
-      emoji: form.emoji || '🎁', image_url: form.image_url.trim(),
+      emoji: form.emoji || '🎁', images: imgs, image_url: imgs[0] || '',
       duration_min: parseInt(form.duration_min) || 120,
       active: form.active, sort_order: parseInt(form.sort_order) || 0,
     };
@@ -113,17 +112,6 @@ export default function PackagesManager({ showToast }) {
     await supabase.from('packages').update({ active: val }).eq('id', id);
     setPackages(ps => ps.map(p => p.id === id ? { ...p, active: val } : p));
   };
-
-  const handleFile = async (file) => {
-    if (!file?.type.startsWith('image/')) return;
-    setUploading(true);
-    const fname = `package-${Date.now()}.${file.name.split('.').pop()}`;
-    const { error: upErr } = await supabase.storage.from('hero-images').upload(fname, file, { upsert: true });
-    if (upErr) { showToast('Зураг байршуулахад алдаа: ' + upErr.message, 'err'); setUploading(false); return; }
-    setF('image_url', supabase.storage.from('hero-images').getPublicUrl(fname).data.publicUrl);
-    setUploading(false); showToast('Зураг байршлаа ✓', 'ok');
-  };
-  const handleDrop = (e) => { e.preventDefault(); setDragOver(false); handleFile(e.dataTransfer.files?.[0]); };
 
   const inp = { width: '100%', padding: '9px 13px', borderRadius: 10, border: '1.5px solid var(--gray-200)', fontSize: 13, fontFamily: 'Inter,sans-serif', outline: 'none', color: 'var(--dark)', background: '#fff' };
 
@@ -175,9 +163,9 @@ export default function PackagesManager({ showToast }) {
               <div key={p.id} style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', borderRadius: 14, border: '1.5px solid var(--gray-200)', background: p.active ? '#fff' : 'var(--gray-100)', opacity: p.active ? 1 : .7, transition: 'all .2s', flexWrap: 'wrap' }}>
                 {/* Package image / emoji fallback */}
                 <div style={{ width: 52, height: 52, borderRadius: 14, background: 'linear-gradient(135deg,#FFF0E6,#FFD6B8)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 26, flexShrink: 0, overflow: 'hidden' }}>
-                  {p.image_url
+                  {(p.images?.[0] || p.image_url)
                     // eslint-disable-next-line @next/next/no-img-element
-                    ? <img src={p.image_url} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    ? <img src={p.images?.[0] || p.image_url} alt={p.name} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     : p.emoji}
                 </div>
                 {/* Info */}
@@ -263,36 +251,9 @@ export default function PackagesManager({ showToast }) {
             </div>
           </div>
 
-          {/* Image upload */}
+          {/* Зурагнууд */}
           <div style={{ borderTop: '1.5px solid var(--gray-200)', paddingTop: 16, marginBottom: 16 }}>
-            <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-500)', display: 'block', marginBottom: 10, textTransform: 'uppercase', letterSpacing: .8 }}>🖼️ Зураг</label>
-            <div style={{ display: 'flex', gap: 14, flexWrap: 'wrap', alignItems: 'flex-start' }}>
-
-              {/* Preview */}
-              <div style={{ width: 100, height: 100, borderRadius: 14, overflow: 'hidden', border: '2px solid var(--gray-200)', background: 'linear-gradient(135deg,#FFF0E6,#FFD6B8)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 40, flexShrink: 0 }}>
-                {form.image_url
-                  // eslint-disable-next-line @next/next/no-img-element
-                  ? <img src={form.image_url} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  : form.emoji}
-              </div>
-
-              <div style={{ flex: 1, minWidth: 180 }}>
-                <div style={{ display: 'flex', gap: 8, marginBottom: 8 }}>
-                  <input type="url" value={form.image_url} onChange={e => setF('image_url', e.target.value)} placeholder="https://..." style={{ ...inp, flex: 1 }} />
-                  {form.image_url && <button onClick={() => setF('image_url', '')} style={{ padding: '9px 10px', borderRadius: 10, border: '1.5px solid var(--gray-200)', background: '#fff', cursor: 'pointer', color: 'var(--gray-500)' }}>✕</button>}
-                </div>
-                <div
-                  onClick={() => !uploading && fileRef.current?.click()}
-                  onDragOver={e => { e.preventDefault(); setDragOver(true); }}
-                  onDragLeave={() => setDragOver(false)}
-                  onDrop={handleDrop}
-                  style={{ border: `2px dashed ${dragOver ? 'var(--pink)' : 'var(--gray-200)'}`, borderRadius: 10, padding: '14px', textAlign: 'center', cursor: uploading ? 'not-allowed' : 'pointer', background: dragOver ? 'var(--pink-light)' : '#fff', transition: 'all .2s' }}
-                >
-                  <span style={{ fontSize: 13, color: 'var(--gray-500)' }}>{uploading ? '⏳ Байршуулж байна...' : '📁 Зураг сонгох / чирж тавих'}</span>
-                  <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={e => { handleFile(e.target.files?.[0]); e.target.value = ''; }} />
-                </div>
-              </div>
-            </div>
+            <MultiImageUploader images={form.images} onChange={imgs => setF('images', imgs)} prefix="package" showToast={showToast} fallbackEmoji={form.emoji} />
           </div>
 
           {/* Emoji fallback (зураг байхгүй үед) */}

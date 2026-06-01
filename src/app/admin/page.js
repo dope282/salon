@@ -12,11 +12,13 @@ import ProductsManager from '@/components/admin/ProductsManager';
 import ArtistsManager  from '@/components/admin/ArtistsManager';
 import ServicesManager  from '@/components/admin/ServicesManager';
 import PackagesManager from '@/components/admin/PackagesManager';
-import CustomersManager from '@/components/admin/CustomersManager';
+import CustomersManager  from '@/components/admin/CustomersManager';
+import TrainingsManager  from '@/components/admin/TrainingsManager';
 
 const VIEW_TITLES = {
   dashboard:'Хяналтын самбар', appointments:'Захиалгууд', products:'Бүтээгдэхүүн',
   customers:'Үйлчлүүлэгчид',  artists:'Артистууд', services:'Үйлчилгээнүүд', packages:'Багц үйлчилгээ',
+  trainings:'Сургалтууд',
   payments:'Төлбөрүүд',        reports:'Тайлан',          settings:'Тохиргоо',
 };
 
@@ -106,6 +108,7 @@ export default function AdminPage() {
         {view === 'services'     && <ServicesManager showToast={showToast} />}
         {view === 'packages'     && <PackagesManager showToast={showToast} />}
         {view === 'customers'    && <CustomersManager showToast={showToast} />}
+        {view === 'trainings'    && <TrainingsManager showToast={showToast} />}
 
         {view === 'settings' && (
           <div>

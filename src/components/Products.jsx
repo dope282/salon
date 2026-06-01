@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { supabase }  from '@/lib/supabase';
 import { useUI }     from '@/contexts/UIContext';
+import RotatingImage from '@/components/RotatingImage';
 
 export default function Products() {
   const { showToast, openBooking } = useUI();
@@ -76,14 +77,15 @@ export default function Products() {
             </div>
           )}
 
-          <div className="grid grid-cols-5 gap-4 max-[1200px]:grid-cols-4 max-[900px]:grid-cols-3 max-[900px]:gap-3.5 max-[640px]:grid-cols-2 max-[640px]:gap-3 max-[480px]:gap-2.5">
+          <div className="grid grid-cols-5 gap-4 max-[1200px]:grid-cols-4 max-[900px]:grid-cols-3 max-[900px]:gap-3.5 max-[640px]:grid-cols-3 max-[640px]:gap-2.5">
             {visible.map((p) => (
               <div key={p.id} className="lux-card group bg-[#FEFCF8] rounded-2xl overflow-hidden transition-all duration-300 flex flex-col hover:-translate-y-1">
-                {p.image_url
-                  // eslint-disable-next-line @next/next/no-img-element
-                  ? <img src={p.image_url} alt={p.name} className="w-full aspect-[4/3] object-cover block" />
-                  : <div className="w-full aspect-[4/3] bg-gradient-to-br from-gold-light to-[#EDD98A]/20 flex items-center justify-center text-[52px]">🛒</div>
-                }
+                {(() => {
+                  const imgs = p.images?.length ? p.images : (p.image_url ? [p.image_url] : []);
+                  return imgs.length
+                    ? <RotatingImage images={imgs} alt={p.name} className="w-full aspect-[4/3]" dots />
+                    : <div className="w-full aspect-[4/3] bg-gradient-to-br from-gold-light to-[#EDD98A]/20 flex items-center justify-center text-[52px]">🛒</div>;
+                })()}
                 <div className="px-3 py-3 flex-1 flex flex-col">
                   {p.category && (
                     <span className="inline-block bg-gold/10 text-gold-dark border border-gold/15 px-2 py-0.5 rounded-full text-[8px] font-bold tracking-[.6px] uppercase mb-1.5 self-start">

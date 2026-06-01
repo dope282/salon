@@ -9,10 +9,11 @@ export default function Sidebar({ view, onSwitch, adminEmail, onLogout, isOpen, 
     { id:'packages',     icon:'fas fa-gift',            label:'Багц үйлчилгээ' },
   ];
   const mgmt = [
-    { id:'services',  icon:'fas fa-star',       label:'Үйлчилгээнүүд' },
-    { id:'payments',  icon:'fas fa-credit-card', label:'Төлбөрүүд' },
-    { id:'reports',   icon:'fas fa-chart-bar',   label:'Тайлан' },
-    { id:'settings',  icon:'fas fa-cog',         label:'Тохиргоо' },
+    { id:'services',  icon:'fas fa-star',         label:'Үйлчилгээнүүд' },
+    { id:'trainings', icon:'fas fa-graduation-cap', label:'Сургалтууд' },
+    { id:'payments',  icon:'fas fa-credit-card',   label:'Төлбөрүүд' },
+    { id:'reports',   icon:'fas fa-chart-bar',     label:'Тайлан' },
+    { id:'settings',  icon:'fas fa-cog',           label:'Тохиргоо' },
   ];
 
   const Item = ({ item }) => (

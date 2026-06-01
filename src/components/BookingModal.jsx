@@ -18,19 +18,13 @@ const ARTISTS_FB = [
   { name:'Өнөржаргал',  specialty_mn:'Nails мэргэжилтэн', avatar_emoji:'👩',   active:true },
   { name:'Номин',        specialty_mn:'Будалт & Wax',      avatar_emoji:'👩‍🦳', active:true },
 ];
-const TIMES_DEFAULT = ['09:00','10:00','11:00','12:00','13:00','14:00','16:00','17:00'];
+const WORK_START = '09:00';   // өдрийн ажлын эхлэл (хуваарьгүй артистад)
+const WORK_END   = '18:00';   // өдрийн ажлын төгсгөл
+const SLOT_STEP  = 30;        // цагийн алхам (мин)
+const LEAD_MIN   = 20;        // одооноос хамгийн багадаа хэдэн минутын дараа захиалж болох (буфер)
 
-// Generate hourly slots between start and end time
-const generateSlots = (start, end, stepMin = 60) => {
-  const slots = [];
-  let [h, m] = start.split(':').map(Number);
-  const [eh, em] = end.split(':').map(Number);
-  while (h * 60 + m < eh * 60 + em) {
-    slots.push(`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`);
-    m += stepMin; h += Math.floor(m / 60); m %= 60;
-  }
-  return slots;
-};
+const timeToMin = (t) => { const [h, m] = String(t).split(':').map(Number); return h * 60 + m; };
+const minToTime = (m) => `${String(Math.floor(m / 60)).padStart(2,'0')}:${String(m % 60).padStart(2,'0')}`;
 const MONTHS  = ['Нэгдүгээр сар','Хоёрдугаар сар','Гуравдугаар сар','Дөрөвдүгээр сар','Тавдугаар сар','Зургаадугаар сар','Долдугаар сар','Наймдугаар сар','Есдүгээр сар','Аравдугаар сар','Арван нэгдүгээр сар','Арван хоёрдугаар сар'];
 const INIT_BK = { mode:'service', svcs:[], pkg:null, art:null, date:null, time:null, pay:'cash' };
 
@@ -50,7 +44,7 @@ export default function BookingModal() {
   const [packages,        setPackages]        = useState([]);
   const [pkgSvcs,         setPkgSvcs]         = useState({});
   const [artistSchedules, setArtistSchedules] = useState({});
-  const [bookedSlots,     setBookedSlots]     = useState({}); // { 'artistName|YYYY-MM-DD': Set<time> }
+  const [bookedSlots,     setBookedSlots]     = useState({}); // { 'artistName|YYYY-MM-DD': [{start,end} мин] }
   const phoneRef = useRef();
   const notesRef = useRef();
 
@@ -68,7 +62,7 @@ export default function BookingModal() {
       supabase.from('package_services').select('package_id, service_id, services(name_mn, emoji)'),
       supabase.from('artist_schedules').select('*'),
       // Захиалагдсан цагууд (цуцлаагүй, 14 хоногийн дотор)
-      supabase.from('bookings').select('artist_name, booking_date, booking_time')
+      supabase.from('bookings').select('artist_name, booking_date, booking_time, duration_min')
         .neq('status', 'cancelled').gte('booking_date', todayStr).lte('booking_date', maxStr),
     ]).then(([{ data: aData }, { data: sData }, { data: asData }, { data: apData }, { data: pkgData }, { data: psData }, { data: schedData }, { data: bkData }]) => {
       if (aData?.length) setArtists(aData);
@@ -107,12 +101,13 @@ export default function BookingModal() {
         schedMap[r.artist_id].push(r);
       });
       setArtistSchedules(schedMap);
-      // Booked slots map: 'artistName|YYYY-MM-DD' → Set<time>
+      // Захиалгын завгүй интервалууд: 'artistName|YYYY-MM-DD' → [{start,end} мин]
       const bkMap = {};
       (bkData || []).forEach(b => {
         const key = `${b.artist_name}|${b.booking_date}`;
-        if (!bkMap[key]) bkMap[key] = new Set();
-        bkMap[key].add(b.booking_time);
+        if (!bkMap[key]) bkMap[key] = [];
+        const start = timeToMin(b.booking_time);
+        bkMap[key].push({ start, end: start + (b.duration_min || 60) });
       });
       setBookedSlots(bkMap);
     });
@@ -144,6 +139,11 @@ export default function BookingModal() {
     setStep(s => s + 1);
   };
 
+  // Сонгосон үйлчилгээ/багцын нийт үргэлжлэх хугацаа (мин)
+  const newDuration = () => bk.mode === 'package'
+    ? (bk.pkg?.duration_min || 60)
+    : (bk.svcs.reduce((s, v) => s + (v.duration || 0), 0) || 60);
+
   const confirm = async () => {
     if (loading) return;
     const phone = phoneRef.current?.value.trim();
@@ -151,27 +151,23 @@ export default function BookingModal() {
     if (!phone) { showToast('Утасны дугаараа оруулна уу', 'err'); return; }
     if (!/^[0-9]{8}$/.test(phone)) { showToast('Утасны дугаар 8 оронтой байх ёстой', 'err'); return; }
     setLoading(true);
+    const dur = newDuration();
     const dateStr = bk.date ? `${bk.date.getFullYear()}-${String(bk.date.getMonth()+1).padStart(2,'0')}-${String(bk.date.getDate()).padStart(2,'0')}` : null;
     const { error } = await supabase.from('bookings').insert([{
       customer_name: phone, customer_phone: phone, customer_email: user?.email || null,
       service_name: bk.mode === 'package' ? `🎁 ${bk.pkg.name}` : bk.svcs.map(s => s.name).join(', '),
       artist_name: bk.art, booking_date: dateStr,
-      booking_time: bk.time, payment_method: bk.pay, notes,
+      booking_time: bk.time, payment_method: bk.pay, notes, duration_min: dur,
       total_price: bk.mode === 'package' ? (bk.pkg.price ?? 0) : bk.svcs.reduce((s, v) => s + (v.price ?? 0), 0),
       status: 'pending', user_id: user?.id || null,
     }]);
     setLoading(false);
     if (error) { showToast('Алдаа гарлаа. Дахин оролдоно уу.', 'err'); return; }
-    // Шинэ захиалгыг local state-д нэмэх (дараагийн хэрэглэгч нэн даруй харна)
+    // Шинэ захиалгыг local интервалд нэмэх (дараагийн хэрэглэгч нэн даруй харна)
     if (bk.art && dateStr && bk.time) {
       const key = `${bk.art}|${dateStr}`;
-      setBookedSlots(prev => {
-        const upd = { ...prev };
-        if (!upd[key]) upd[key] = new Set();
-        else upd[key] = new Set(upd[key]);
-        upd[key].add(bk.time);
-        return upd;
-      });
+      const start = timeToMin(bk.time);
+      setBookedSlots(prev => ({ ...prev, [key]: [...(prev[key] || []), { start, end: start + dur }] }));
     }
     handleClose();
     showToast('Захиалга баталгаажлаа! Удахгүй уулзана 🎉', 'ok');
@@ -189,37 +185,40 @@ export default function BookingModal() {
     return sched.find(s => s.day_of_week === dayOfWeek) || null;
   };
 
-  // Тухайн артист + өдрийн захиалагдсан цагуудын Set
-  const getBookedTimes = (dateObj) => {
-    if (!bk.art || !dateObj) return new Set();
+  // Тухайн артист + өдрийн завгүй интервалууд [{start,end} мин]
+  const getBusyIntervals = (dateObj) => {
+    if (!bk.art || !dateObj) return [];
     const ds = `${dateObj.getFullYear()}-${String(dateObj.getMonth()+1).padStart(2,'0')}-${String(dateObj.getDate()).padStart(2,'0')}`;
-    return bookedSlots[`${bk.art}|${ds}`] || new Set();
+    return bookedSlots[`${bk.art}|${ds}`] || [];
   };
 
-  // Generate available time slots for the selected date (3 шүүлтүүртэй)
+  // Боломжит цагуудыг тооцоолох — хуваарь + буфер + үйлчилгээний үргэлжлэх хугацаа + давхцал
   const getTimeSlots = () => {
-    if (!bk.date) return { available: TIMES_DEFAULT, booked: [] };
+    if (!bk.date) return { available: [], booked: [] };
 
-    // 1. Артистын хуваарийн цагууд
+    // 1. Артистын ажиллах цаг (хуваарьтай бол түүгээр, үгүй бол default)
     const daySched = getArtistDaySched(bk.date.getDay());
     if (daySched && !daySched.is_active) return { available: [], booked: [] };
-    const all = daySched ? generateSlots(daySched.start_time, daySched.end_time, 60) : TIMES_DEFAULT;
+    const winStart = timeToMin(daySched ? daySched.start_time : WORK_START);
+    const winEnd   = timeToMin(daySched ? daySched.end_time   : WORK_END);
 
-    // 2. Өнөөдрийн өнгөрсөн цагийг хасах
+    // 2. Өнөөдрийн буфер (одооноос LEAD_MIN-ийн дотор захиалах боломжгүй)
     const todayMid = new Date(); todayMid.setHours(0,0,0,0);
     const isToday  = bk.date.toDateString() === todayMid.toDateString();
-    const nowMins  = isToday ? (new Date().getHours() * 60 + new Date().getMinutes()) : 0;
+    const nowMins  = new Date().getHours() * 60 + new Date().getMinutes();
 
-    // 3. Захиалагдсан цагуудыг тусгаарлах
-    const booked = getBookedTimes(bk.date);
+    // 3. Завгүй интервалууд + шинэ үйлчилгээний үргэлжлэх хугацаа
+    const busy   = getBusyIntervals(bk.date);
+    const dur    = newDuration();
+    const overlaps = (s, e) => busy.some(b => s < b.end && b.start < e);
 
     const available = [];
     const bookedList = [];
-    all.forEach(t => {
-      const [h, m] = t.split(':').map(Number);
-      if (isToday && h * 60 + m <= nowMins) return; // өнгөрсөн цаг
-      if (booked.has(t)) { bookedList.push(t); } else { available.push(t); }
-    });
+    for (let s = winStart; s + dur <= winEnd; s += SLOT_STEP) {
+      if (isToday && s <= nowMins + LEAD_MIN) continue;   // буфер дотор / өнгөрсөн
+      if (overlaps(s, s + dur)) bookedList.push(minToTime(s));
+      else available.push(minToTime(s));
+    }
     return { available, booked: bookedList };
   };
 

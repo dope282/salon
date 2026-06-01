@@ -1,6 +1,7 @@
 'use client';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
+import MultiImageUploader from '@/components/admin/MultiImageUploader';
 
 const DEFAULT = {
   active : true,
@@ -13,16 +14,14 @@ const DEFAULT = {
   btn    : 'Одоо захиалах →',
   badge  : 'ОНЦГОЙ · САНАЛ · ЗӨВХӨН · ТАНД',
   emoji  : '💇‍♀️',
-  // ── image mode field ──
+  // ── image mode fields ──
   img    : '',
+  imgs   : [],
 };
 
 export default function PromoSettings({ showToast }) {
   const [form, setForm]         = useState(DEFAULT);
   const [saving, setSaving]     = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [dragOver, setDragOver] = useState(false);
-  const fileRef = useRef(null);
 
   useEffect(() => { loadPromo(); }, []);
 
@@ -30,7 +29,11 @@ export default function PromoSettings({ showToast }) {
     const { data } = await supabase
       .from('site_settings').select('value').eq('key', 'promo_config').single();
     if (data?.value) {
-      try { setForm({ ...DEFAULT, ...JSON.parse(data.value) }); } catch {}
+      try {
+        const parsed = JSON.parse(data.value);
+        if (!parsed.imgs?.length && parsed.img) parsed.imgs = [parsed.img];
+        setForm({ ...DEFAULT, ...parsed });
+      } catch {}
     }
   };
 
@@ -38,30 +41,13 @@ export default function PromoSettings({ showToast }) {
 
   const save = async () => {
     setSaving(true);
+    const payload = { ...form, img: (form.imgs && form.imgs[0]) || '' };
     const { error } = await supabase.from('site_settings')
-      .upsert({ key: 'promo_config', value: JSON.stringify(form), updated_at: new Date().toISOString() });
+      .upsert({ key: 'promo_config', value: JSON.stringify(payload), updated_at: new Date().toISOString() });
     setSaving(false);
     if (error) showToast('Хадгалахад алдаа: ' + error.message, 'err');
     else showToast('Промо баннер амжилттай шинэчлэгдлээ! ✓', 'ok');
   };
-
-  /* ── file upload ── */
-  const handleFile = async (file) => {
-    if (!file?.type.startsWith('image/')) return;
-    setUploading(true);
-    const ext  = file.name.split('.').pop();
-    const fname = `promo-${Date.now()}.${ext}`;
-    const { error: upErr } = await supabase.storage
-      .from('hero-images').upload(fname, file, { upsert: true });
-    if (upErr) { showToast('Зураг байршуулахад алдаа: ' + upErr.message, 'err'); setUploading(false); return; }
-    const { data: ud } = supabase.storage.from('hero-images').getPublicUrl(fname);
-    set('img', ud.publicUrl);
-    setUploading(false);
-    showToast('Зураг байршлаа — "Хадгалах" дарна уу', 'ok');
-  };
-
-  const handleInputFile = (e) => { handleFile(e.target.files?.[0]); e.target.value = ''; };
-  const handleDrop = (e) => { e.preventDefault(); setDragOver(false); handleFile(e.dataTransfer.files?.[0]); };
 
   const inp = {
     width: '100%', padding: '9px 13px', borderRadius: 10,
@@ -151,47 +137,9 @@ export default function PromoSettings({ showToast }) {
       {isImage && (
         <div style={{ marginBottom: 20 }}>
           <div style={{ fontSize: 12, color: 'var(--gray-500)', marginBottom: 14 }}>
-            Бэлдсэн баннер зургаа оруулна уу. Зураг нь баннерийн бүх талбайг дүүргэнэ.
+            Баннер зурагнуудаа оруулна уу. Олон зураг оруулбал <strong>автоматаар ээлжлэн</strong> солигдоно. (4:1 харьцаатай өргөн зураг тохиромжтой)
           </div>
-
-          <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap', alignItems: 'flex-start', marginBottom: 14 }}>
-            {/* Preview */}
-            <div style={{ flexShrink: 0 }}>
-              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--gray-500)', marginBottom: 6, textTransform: 'uppercase', letterSpacing: .8 }}>Одоогийн зураг</div>
-              <div style={{ width: 160, height: 90, borderRadius: 12, overflow: 'hidden', border: '2px solid var(--gray-200)', background: 'var(--gray-100)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--gray-500)', fontSize: 12 }}>
-                {form.img
-                  // eslint-disable-next-line @next/next/no-img-element
-                  ? <img src={form.img} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                  : 'Зураг байхгүй'}
-              </div>
-              {form.img && (
-                <button onClick={() => set('img', '')} style={{ marginTop: 8, width: '100%', padding: '6px 0', borderRadius: 8, border: '1.5px solid var(--red)', background: '#fff5f5', color: 'var(--red)', fontSize: 11, fontWeight: 600, cursor: 'pointer' }}>
-                  ✕ Зураг устгах
-                </button>
-              )}
-            </div>
-
-            {/* Upload */}
-            <div style={{ flex: 1, minWidth: 200 }}>
-              <label style={{ fontSize: 11, fontWeight: 600, color: 'var(--gray-500)', display: 'block', marginBottom: 6, textTransform: 'uppercase', letterSpacing: .8 }}>URL оруулах</label>
-              <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
-                <input type="url" value={form.img} onChange={e => set('img', e.target.value)} placeholder="https://example.com/banner.jpg" style={{ ...inp, flex: 1 }} />
-                {form.img && <button onClick={() => set('img', '')} style={{ padding: '9px 12px', borderRadius: 10, border: '1.5px solid var(--gray-200)', background: '#fff', cursor: 'pointer', color: 'var(--gray-500)' }}>✕</button>}
-              </div>
-              <div
-                onClick={() => !uploading && fileRef.current?.click()}
-                onDragOver={e => { e.preventDefault(); setDragOver(true); }}
-                onDragLeave={() => setDragOver(false)}
-                onDrop={handleDrop}
-                style={{ border: `2px dashed ${dragOver ? 'var(--pink)' : 'var(--gray-200)'}`, borderRadius: 12, padding: '24px 16px', textAlign: 'center', cursor: uploading ? 'not-allowed' : 'pointer', transition: 'all .2s', background: dragOver ? 'var(--pink-light)' : uploading ? 'var(--gray-100)' : '#fff' }}
-              >
-                <div style={{ fontSize: 28, marginBottom: 6 }}>{uploading ? '⏳' : '📁'}</div>
-                <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--dark)', marginBottom: 2 }}>{uploading ? 'Байршуулж байна...' : 'Дарж зураг сонгох'}</div>
-                <div style={{ fontSize: 11, color: 'var(--gray-500)' }}>эсвэл чирж тавих · JPG, PNG, WEBP</div>
-                <input ref={fileRef} type="file" accept="image/*" style={{ display: 'none' }} onChange={handleInputFile} />
-              </div>
-            </div>
-          </div>
+          <MultiImageUploader images={form.imgs} onChange={imgs => set('imgs', imgs)} prefix="promo" showToast={showToast} />
         </div>
       )}
 
@@ -222,9 +170,9 @@ export default function PromoSettings({ showToast }) {
         {/* IMAGE preview */}
         {isImage && (
           <div style={{ borderRadius: 16, overflow: 'hidden', background: 'var(--gray-100)', border: '2px solid var(--gray-200)', minHeight: 120, display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: form.active ? 1 : 0.4 }}>
-            {form.img
+            {form.imgs?.[0]
               // eslint-disable-next-line @next/next/no-img-element
-              ? <img src={form.img} alt="promo preview" style={{ width: '100%', maxHeight: 240, objectFit: 'cover', display: 'block' }} />
+              ? <img src={form.imgs[0]} alt="promo preview" style={{ width: '100%', maxHeight: 240, objectFit: 'cover', display: 'block' }} />
               : <div style={{ textAlign: 'center', color: 'var(--gray-500)', padding: 32 }}>
                   <div style={{ fontSize: 32, marginBottom: 8 }}>🖼️</div>
                   <div style={{ fontSize: 13 }}>Зураг байхгүй байна</div>
