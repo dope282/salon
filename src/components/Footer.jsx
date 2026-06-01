@@ -66,7 +66,7 @@ export default function Footer() {
       {/* Bottom */}
       <div className="w-full h-px bg-[#606060]/8 mb-6" />
       <div className="flex items-center justify-between gap-4 flex-wrap max-[640px]:flex-col max-[640px]:text-center">
-        <div className="text-white/25 text-[12px] tracking-wide">© 2024 Hatantsetsey lash Beauty Salon. Бүх эрх хамгаалагдсан.</div>
+        <div className="text-white/25 text-[12px] tracking-wide">© 2026 Hatantsetsey lash Beauty Salon. Бүх эрх хамгаалагдсан.</div>
         <div className="text-white/20 text-[11px] tracking-wider uppercase">LASH · BROW LAMI · NAIL · WAX</div>
       </div>
     </footer>
