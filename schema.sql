@@ -358,5 +358,11 @@ ALTER TABLE public.trainings ADD COLUMN IF NOT EXISTS images JSONB DEFAULT '[]':
 -- (hero_images, promo_config.imgs)
 
 -- ================================================================
+-- 11. QPAY — төлбөрийн талбарууд
+-- ================================================================
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS qpay_invoice_id TEXT;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS paid BOOLEAN DEFAULT false;
+
+-- ================================================================
 -- DONE! Суурь мэдээллийг амжилттай оруулав.
 -- ================================================================

@@ -45,8 +45,31 @@ export default function BookingModal() {
   const [pkgSvcs,         setPkgSvcs]         = useState({});
   const [artistSchedules, setArtistSchedules] = useState({});
   const [bookedSlots,     setBookedSlots]     = useState({}); // { 'artistName|YYYY-MM-DD': [{start,end} мин] }
+  const [qr, setQr] = useState(null);   // QPay { qr_image, urls, bookingId }
   const phoneRef = useRef();
   const notesRef = useRef();
+
+  // QPay төлбөр төлөгдсөн эсэхийг тогтмол шалгах (polling)
+  useEffect(() => {
+    if (!qr?.bookingId) return;
+    const iv = setInterval(async () => {
+      try {
+        const res = await fetch('/api/qpay/check', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ bookingId: qr.bookingId }),
+        });
+        const d = await res.json();
+        if (d.paid) {
+          clearInterval(iv);
+          setQr(null);
+          handleClose();
+          showToast('Төлбөр амжилттай! Захиалга баталгаажлаа 🎉', 'ok');
+        }
+      } catch {}
+    }, 3000);
+    return () => clearInterval(iv);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [qr?.bookingId]);
 
   useEffect(() => {
     const todayStr = new Date().toISOString().split('T')[0];
@@ -113,7 +136,7 @@ export default function BookingModal() {
     });
   }, []);
 
-  const reset = () => { setStep(1); setBk(INIT_BK); setCalY(new Date().getFullYear()); setCalM(new Date().getMonth()); };
+  const reset = () => { setStep(1); setBk(INIT_BK); setQr(null); setCalY(new Date().getFullYear()); setCalM(new Date().getMonth()); };
 
   // Modal нээгдэх бүрт артист/багц урьдчилан тохируулна
   useEffect(() => {
@@ -152,23 +175,44 @@ export default function BookingModal() {
     if (!/^[0-9]{8}$/.test(phone)) { showToast('Утасны дугаар 8 оронтой байх ёстой', 'err'); return; }
     setLoading(true);
     const dur = newDuration();
+    const total = bk.mode === 'package' ? (bk.pkg.price ?? 0) : bk.svcs.reduce((s, v) => s + (v.price ?? 0), 0);
+    const svcName = bk.mode === 'package' ? `🎁 ${bk.pkg.name}` : bk.svcs.map(s => s.name).join(', ');
     const dateStr = bk.date ? `${bk.date.getFullYear()}-${String(bk.date.getMonth()+1).padStart(2,'0')}-${String(bk.date.getDate()).padStart(2,'0')}` : null;
-    const { error } = await supabase.from('bookings').insert([{
+    const { data: inserted, error } = await supabase.from('bookings').insert([{
       customer_name: phone, customer_phone: phone, customer_email: user?.email || null,
-      service_name: bk.mode === 'package' ? `🎁 ${bk.pkg.name}` : bk.svcs.map(s => s.name).join(', '),
+      service_name: svcName,
       artist_name: bk.art, booking_date: dateStr,
       booking_time: bk.time, payment_method: bk.pay, notes, duration_min: dur,
-      total_price: bk.mode === 'package' ? (bk.pkg.price ?? 0) : bk.svcs.reduce((s, v) => s + (v.price ?? 0), 0),
+      total_price: total,
       status: 'pending', user_id: user?.id || null,
-    }]);
-    setLoading(false);
-    if (error) { showToast('Алдаа гарлаа. Дахин оролдоно уу.', 'err'); return; }
+    }]).select('id').single();
+    if (error) { setLoading(false); showToast('Алдаа гарлаа. Дахин оролдоно уу.', 'err'); return; }
     // Шинэ захиалгыг local интервалд нэмэх (дараагийн хэрэглэгч нэн даруй харна)
     if (bk.art && dateStr && bk.time) {
       const key = `${bk.art}|${dateStr}`;
       const start = timeToMin(bk.time);
       setBookedSlots(prev => ({ ...prev, [key]: [...(prev[key] || []), { start, end: start + dur }] }));
     }
+
+    // QPay — нэхэмжлэл үүсгэж QR харуулна
+    if (bk.pay === 'qpay') {
+      try {
+        const res = await fetch('/api/qpay/create-invoice', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ bookingId: inserted.id, amount: total, description: svcName }),
+        });
+        const data = await res.json();
+        setLoading(false);
+        if (!res.ok) { showToast('QPay алдаа: ' + (data.error || ''), 'err'); return; }
+        setQr({ ...data, bookingId: inserted.id, amount: total });
+      } catch {
+        setLoading(false);
+        showToast('QPay-тэй холбогдсонгүй', 'err');
+      }
+      return;
+    }
+
+    setLoading(false);
     handleClose();
     showToast('Захиалга баталгаажлаа! Удахгүй уулзана 🎉', 'ok');
   };
@@ -255,6 +299,7 @@ export default function BookingModal() {
   const H3 = ({ children }) => <h3 className="font-serif text-[22px] font-semibold text-pink-200 mb-6 max-[640px]:text-lg max-[640px]:mb-4">{children}</h3>;
 
   return (
+    <>
     <div className="overlay active" onClick={e => { if (e.target === e.currentTarget) handleClose(); }}>
       <div className="modal modal-sheet bg-[#606060] backdrop-blur-xl rounded-[28px] w-full max-w-[800px] max-h-[90vh] overflow-y-auto p-11 relative border border-gold/15 shadow-[0_32px_80px_rgba(0,0,0,.18)] max-[640px]:p-4" onClick={e => e.stopPropagation()}>
         <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#FF3399] via-[#FF66B2] to-[#FF3399] rounded-t-[28px]" />
@@ -645,5 +690,51 @@ export default function BookingModal() {
         </div>
       </div>
     </div>
+
+    {/* QPay QR overlay */}
+    {qr && (
+      <div className="overlay active" style={{ zIndex: 2100 }} onClick={e => { if (e.target === e.currentTarget) { setQr(null); handleClose(); } }}>
+        <div className="modal bg-[#606060] rounded-[28px] w-full max-w-[420px] p-8 relative border border-gold/15 shadow-[0_32px_80px_rgba(0,0,0,.25)] text-center max-[640px]:p-5" onClick={e => e.stopPropagation()}>
+          <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#FF3399] via-[#FF66B2] to-[#FF3399] rounded-t-[28px]" />
+          <button onClick={() => { setQr(null); handleClose(); }}
+            className="absolute top-5 right-5 w-9 h-9 rounded-full border border-gold/20 bg-gold/8 cursor-pointer text-base text-pink-200 flex items-center justify-center hover:bg-gold/20 z-10">✕</button>
+
+          <h3 className="font-serif text-[22px] font-semibold text-pink-200 mb-1">QPay-ээр төлөх</h3>
+          <p className="text-sm text-pink-400 mb-2">Дүн: <span className="text-pink font-bold">₮{(qr.amount ?? 0).toLocaleString()}</span></p>
+
+          {qr.qr_image && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={qr.qr_image.startsWith('data:') ? qr.qr_image : `data:image/png;base64,${qr.qr_image}`}
+              alt="QPay QR"
+              className="w-[220px] h-[220px] mx-auto rounded-2xl bg-white p-2 my-3" />
+          )}
+
+          <p className="text-xs text-pink-400 mb-3">Банкны апп-аараа QR кодыг уншуулна уу</p>
+
+          {/* Банкны апп холбоосууд (утсан дээр) */}
+          {qr.urls?.length > 0 && (
+            <div className="grid grid-cols-4 gap-2 mb-4 max-h-[180px] overflow-y-auto">
+              {qr.urls.map((u, i) => (
+                <a key={i} href={u.link} target="_blank" rel="noreferrer"
+                  className="flex flex-col items-center gap-1 p-1.5 rounded-xl bg-[#707070] hover:bg-[#787878] transition-colors no-underline">
+                  {u.logo
+                    // eslint-disable-next-line @next/next/no-img-element
+                    ? <img src={u.logo} alt={u.name} className="w-8 h-8 rounded-lg object-contain" />
+                    : <span className="text-lg">🏦</span>}
+                  <span className="text-[8px] text-pink-200 leading-tight text-center line-clamp-1">{u.name}</span>
+                </a>
+              ))}
+            </div>
+          )}
+
+          <div className="flex items-center justify-center gap-2 text-xs text-pink-400">
+            <div className="w-4 h-4 border-2 border-pink border-t-transparent rounded-full animate-spin" />
+            Төлбөр шалгаж байна...
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }
