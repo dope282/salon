@@ -93,7 +93,7 @@ export default function Navbar() {
       <div className={`mob-backdrop fixed inset-0 top-[84px] max-[640px]:top-[64px] bg-[#606060]/30 z-[998] backdrop-blur-sm${mobOpen ? ' open' : ''}`} onClick={() => setMobOpen(false)} />
 
       <div className={`mob-menu fixed top-[84px] max-[640px]:top-[64px] left-0 right-0 bg-[#606060] px-5 pb-6 shadow-[0_16px_48px_rgba(0,0,0,.12)] z-[999] flex-col gap-0 border-t border-pink-100 max-h-[calc(100vh-64px)] overflow-y-auto${mobOpen ? ' open' : ''}`}>
-        {[['home','Нүүр'],['services','Үйлчилгээ'],['packages','Багц'],['products','Бүтээгдэхүүн'],['artists','Уран бүтээлчид'],['trainings','Сургалт'],['about','Бидний тухай'],['contact','Холбоо барих']].map(([id,label]) => (
+        {[['home','Нүүр'],['services','Үйлчилгээ'],['packages','Багц'],['products','Бүтээгдэхүүн'],['artists','Артистууд'],['trainings','Сургалт'],['about','Бидний тухай'],['contact','Холбоо барих']].map(([id,label]) => (
           <a key={id} href={`#${id}`}
             className="group flex items-center justify-between py-3.5 px-2 border-b border-pink-100 last:border-0 no-underline text-pink-100 text-[15px] font-medium tracking-wide hover:text-[#FF3399] transition-colors"
             onClick={e => { e.preventDefault(); scrollTo(id); }}>
