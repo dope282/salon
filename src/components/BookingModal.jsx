@@ -20,7 +20,6 @@ const ARTISTS_FB = [
 ];
 const WORK_START = '09:00';   // өдрийн ажлын эхлэл (хуваарьгүй артистад)
 const WORK_END   = '18:00';   // өдрийн ажлын төгсгөл
-const SLOT_STEP  = 30;        // цагийн алхам (мин)
 const LEAD_MIN   = 20;        // одооноос хамгийн багадаа хэдэн минутын дараа захиалж болох (буфер)
 
 const timeToMin = (t) => { const [h, m] = String(t).split(':').map(Number); return h * 60 + m; };
@@ -309,9 +308,11 @@ export default function BookingModal() {
     const dur    = newDuration();
     const overlaps = (s, e) => busy.some(b => s < b.end && b.start < e);
 
+    // Алхам = үйлчилгээний үргэлжлэх хугацаа (90 мин → 09:00, 10:30, 12:00 ...)
+    const step = dur > 0 ? dur : 60;
     const available = [];
     const bookedList = [];
-    for (let s = winStart; s + dur <= winEnd; s += SLOT_STEP) {
+    for (let s = winStart; s + dur <= winEnd; s += step) {
       if (isToday && s <= nowMins + LEAD_MIN) continue;   // буфер дотор / өнгөрсөн
       if (overlaps(s, s + dur)) bookedList.push(minToTime(s));
       else available.push(minToTime(s));
