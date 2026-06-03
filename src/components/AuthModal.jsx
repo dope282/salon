@@ -71,10 +71,21 @@ export default function AuthModal() {
     if (pass !== pass2)  { showMsg('Нууц үгнүүд таарахгүй байна.'); return; }
     setLoading(true);
     try {
-      await signUp(email, pass, { phone });
-      showMsg('✓ Баталгаажуулах имэйл илгээлээ! Имэйлээ шалгана уу.', 'ok');
+      const data = await signUp(email, pass, { phone });
+      if (data?.session) {
+        // Имэйл баталгаажуулалт унтраалттай → шууд нэвтэрсэн
+        closeAuth();
+        showToast('Бүртгэл амжилттай! Тавтай морил ✨', 'ok');
+        if (isAdminEmail(email)) setTimeout(() => window.location.href = '/admin', 600);
+      } else {
+        showMsg('✓ Бүртгэл үүслээ. Одоо нэвтэрч орно уу.', 'ok');
+        setTimeout(() => switchTab('login'), 1200);
+      }
     } catch (e) {
-      showMsg(e.message === 'User already registered' ? 'Энэ имэйл аль хэдийн бүртгэлтэй байна.' : e.message);
+      const m = (e.message || '').toLowerCase();
+      if (m.includes('rate limit')) showMsg('Хэт олон оролдлого. Түр (1 цаг орчим) хүлээгээд дахин оролдоно уу.');
+      else if (m.includes('already registered') || m.includes('already been registered')) showMsg('Энэ имэйл аль хэдийн бүртгэлтэй байна.');
+      else showMsg(e.message);
     } finally { setLoading(false); }
   };
 
@@ -86,7 +97,10 @@ export default function AuthModal() {
       await resetPassword(email);
       showMsg('✓ Нууц үг сэргээх холбоосыг имэйлээр илгээлээ. Имэйлээ шалгаад холбоос дээр дарна уу.', 'ok');
     }
-    catch (e) { showMsg(e.message); }
+    catch (e) {
+      const m = (e.message || '').toLowerCase();
+      showMsg(m.includes('rate limit') ? 'Хэт олон хүсэлт. Түр хүлээгээд дахин оролдоно уу.' : e.message);
+    }
     finally { setLoading(false); }
   };
 

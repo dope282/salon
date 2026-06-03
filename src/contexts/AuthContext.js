@@ -27,12 +27,13 @@ export function AuthProvider({ children }) {
   }
 
   async function signUp(email, password, metadata = {}) {
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: { data: metadata },
     });
     if (error) throw error;
+    return data;
   }
 
   async function signOut() {
