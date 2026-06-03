@@ -1,7 +1,6 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
-import TimeSelect from '@/components/admin/TimeSelect';
 
 function formatDT(date, time) {
   if (!date) return '—';
@@ -11,8 +10,13 @@ function formatDT(date, time) {
 function badgeCls(s){ return {pending:'pend',confirmed:'ok',completed:'info',cancelled:'fail'}[s]||'pend' }
 function statusMn(s){ return {pending:'Хүлээгдэж байна',confirmed:'Батлагдсан',completed:'Дууссан',cancelled:'Цуцлагдсан'}[s]||s }
 
+// Боломжит цаг тооцоолох туслахууд (үйлчлүүлэгчийн модальтай ижил логик)
+const WORK_START = '09:00', WORK_END = '18:00', LEAD_MIN = 20;
+const timeToMin = (t) => { const [h, m] = String(t).split(':').map(Number); return h * 60 + m; };
+const minToTime = (m) => `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;
+
 const todayStr = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
-const EMPTY_MANUAL = { phone:'', name:'', artist:'', service:'', date: todayStr(), time:'10:00', duration:'60', price:'', notes:'' };
+const EMPTY_MANUAL = { phone:'', name:'', artist:'', service:'', date: todayStr(), time:'', duration:'60', price:'', notes:'' };
 
 export default function BookingsTable({ bookings, onRefresh, showToast }) {
   const [filter, setFilter] = useState('');
@@ -22,6 +26,7 @@ export default function BookingsTable({ bookings, onRefresh, showToast }) {
   const [showAdd, setShowAdd]   = useState(false);
   const [saving, setSaving]     = useState(false);
   const [m, setM]               = useState(EMPTY_MANUAL);
+  const [schedMap, setSchedMap] = useState({}); // { artistId: schedules[] }
   const [orders, setOrders]     = useState([]);
   const [delOrder, setDelOrder] = useState(null); // устгах баталгаажуулах
 
@@ -40,16 +45,48 @@ export default function BookingsTable({ bookings, onRefresh, showToast }) {
 
   useEffect(() => {
     Promise.all([
-      supabase.from('artists').select('name').eq('active', true).order('id'),
+      supabase.from('artists').select('id, name').eq('active', true).order('id'),
       supabase.from('services').select('name_mn, duration_min, price_from').eq('active', true).order('id'),
-    ]).then(([{ data: a }, { data: s }]) => { setArtists(a || []); setServices(s || []); });
+      supabase.from('artist_schedules').select('*'),
+    ]).then(([{ data: a }, { data: s }, { data: sch }]) => {
+      setArtists(a || []); setServices(s || []);
+      const map = {};
+      (sch || []).forEach(r => { if (!map[r.artist_id]) map[r.artist_id] = []; map[r.artist_id].push(r); });
+      setSchedMap(map);
+    });
     loadOrders();
   }, []);
+
+  // Боломжит цагууд — артист, огноо, үйлчилгээний хугацаа, давхцал, буфер тооцсон
+  const adminSlots = useMemo(() => {
+    if (!m.artist || !m.date) return [];
+    const dur = parseInt(m.duration) || 60;
+    const artist = artists.find(a => a.name === m.artist);
+    const dow = new Date(`${m.date}T00:00`).getDay();
+    const sched = artist ? (schedMap[artist.id] || []).find(s => s.day_of_week === dow) : null;
+    if (sched && !sched.is_active) return [];
+    const winStart = timeToMin(sched ? sched.start_time : WORK_START);
+    const winEnd   = timeToMin(sched ? sched.end_time   : WORK_END);
+    const busy = (bookings || [])
+      .filter(b => b.artist_name === m.artist && b.booking_date === m.date && b.status !== 'cancelled')
+      .map(b => { const s = timeToMin(b.booking_time); return { start: s, end: s + (b.duration_min || 60) }; });
+    const overlaps = (s, e) => busy.some(b => s < b.end && b.start < e);
+    const isToday = m.date === todayStr();
+    const nowMins = new Date().getHours() * 60 + new Date().getMinutes();
+    const step = dur > 0 ? dur : 60;
+    const out = [];
+    for (let s = winStart; s + dur <= winEnd; s += step) {
+      if (isToday && s <= nowMins + LEAD_MIN) continue;
+      if (overlaps(s, s + dur)) continue;
+      out.push(minToTime(s));
+    }
+    return out;
+  }, [m.artist, m.date, m.duration, artists, schedMap, bookings]);
 
   const setMF = (k, v) => setM(prev => ({ ...prev, [k]: v }));
   const pickService = (name) => {
     const svc = services.find(s => s.name_mn === name);
-    setM(prev => ({ ...prev, service: name,
+    setM(prev => ({ ...prev, service: name, time: '',
       duration: svc?.duration_min ? String(svc.duration_min) : prev.duration,
       price: svc?.price_from ? String(svc.price_from) : prev.price }));
   };
@@ -192,7 +229,7 @@ export default function BookingsTable({ bookings, onRefresh, showToast }) {
                 </div>
                 <div style={{ gridColumn:'1 / -1' }}>
                   <label style={lbl}>Артист *</label>
-                  <select value={m.artist} onChange={e => setMF('artist', e.target.value)} style={inp}>
+                  <select value={m.artist} onChange={e => setM(prev => ({ ...prev, artist: e.target.value, time: '' }))} style={inp}>
                     <option value="">— Сонгох —</option>
                     {artists.map(a => <option key={a.name} value={a.name}>{a.name}</option>)}
                   </select>
@@ -206,11 +243,18 @@ export default function BookingsTable({ bookings, onRefresh, showToast }) {
                 </div>
                 <div>
                   <label style={lbl}>Огноо *</label>
-                  <input type="date" value={m.date} onChange={e => setMF('date', e.target.value)} style={inp} />
+                  <input type="date" value={m.date} min={todayStr()} onChange={e => setM(prev => ({ ...prev, date: e.target.value, time: '' }))} style={inp} />
                 </div>
                 <div>
-                  <label style={lbl}>Цаг *</label>
-                  <TimeSelect value={m.time} onChange={v => setMF('time', v)} style={{ ...inp, cursor:'pointer' }} />
+                  <label style={lbl}>Цаг * <span style={{ textTransform:'none', fontWeight:400, color:'var(--gray-400)' }}>(боломжит)</span></label>
+                  <select value={m.time} onChange={e => setMF('time', e.target.value)} style={{ ...inp, cursor:'pointer' }}
+                    disabled={!m.artist || !m.date}>
+                    {!m.artist || !m.date
+                      ? <option value="">Артист, огноо сонгоно уу</option>
+                      : adminSlots.length === 0
+                        ? <option value="">Боломжит цаг алга</option>
+                        : <><option value="">— Сонгох —</option>{adminSlots.map(t => <option key={t} value={t}>{t}</option>)}</>}
+                  </select>
                 </div>
                 <div>
                   <label style={lbl}>Үргэлжлэх (мин)</label>
