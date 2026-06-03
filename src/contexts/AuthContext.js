@@ -1,6 +1,6 @@
 'use client';
 import { createContext, useContext, useEffect, useState } from 'react';
-import { supabase, ADMIN_EMAIL } from '@/lib/supabase';
+import { supabase, isAdminEmail } from '@/lib/supabase';
 
 const AuthContext = createContext(null);
 
@@ -50,7 +50,7 @@ export function AuthProvider({ children }) {
     if (error) throw error;
   }
 
-  const isAdmin = user?.email === ADMIN_EMAIL;
+  const isAdmin = isAdminEmail(user?.email);
 
   return (
     <AuthContext.Provider value={{ user, loading, isAdmin, signIn, signUp, signOut, resetPassword, updatePassword }}>

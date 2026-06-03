@@ -22,12 +22,19 @@ export default function BookingsTable({ bookings, onRefresh, showToast }) {
   const [showAdd, setShowAdd]   = useState(false);
   const [saving, setSaving]     = useState(false);
   const [m, setM]               = useState(EMPTY_MANUAL);
+  const [orders, setOrders]     = useState([]);
+
+  const loadOrders = async () => {
+    const { data } = await supabase.from('product_orders').select('*').order('created_at', { ascending: false });
+    setOrders(data || []);
+  };
 
   useEffect(() => {
     Promise.all([
       supabase.from('artists').select('name').eq('active', true).order('id'),
       supabase.from('services').select('name_mn, duration_min, price_from').eq('active', true).order('id'),
     ]).then(([{ data: a }, { data: s }]) => { setArtists(a || []); setServices(s || []); });
+    loadOrders();
   }, []);
 
   const setMF = (k, v) => setM(prev => ({ ...prev, [k]: v }));
@@ -97,6 +104,7 @@ export default function BookingsTable({ bookings, onRefresh, showToast }) {
   };
 
   return (
+    <>
     <div className="card" style={{ marginBottom:20 }}>
       <div className="card-header">
         <div className="card-title">Бүх захиалгууд</div>
@@ -220,5 +228,47 @@ export default function BookingsTable({ bookings, onRefresh, showToast }) {
         );
       })()}
     </div>
+
+    {/* Бүтээгдэхүүн / Сургалтын худалдан авалт */}
+    <div className="card" style={{ marginBottom:20 }}>
+      <div className="card-header">
+        <div className="card-title">🛍️ Худалдан авалт / Сургалт</div>
+        <button style={{ padding:'7px 14px', fontSize:12, border:'1px solid var(--gray-200)', borderRadius:50, background:'#fff', cursor:'pointer' }} onClick={loadOrders}>
+          <i className="fas fa-sync-alt" />
+        </button>
+      </div>
+      <div className="tbl-scroll">
+        <table>
+          <thead>
+            <tr><th>Огноо</th><th>Төрөл</th><th>Нэр</th><th>Утас</th><th>Дүн</th><th>Төлбөр</th></tr>
+          </thead>
+          <tbody>
+            {orders.length === 0
+              ? <tr><td colSpan={6} style={{ textAlign:'center', padding:28, color:'var(--gray-500)' }}>Худалдан авалт байхгүй байна</td></tr>
+              : orders.map(o => {
+                const dt = o.created_at ? new Date(o.created_at) : null;
+                const when = dt ? `${dt.getMonth()+1}/${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}` : '—';
+                const isTraining = o.item_type === 'training';
+                return (
+                  <tr key={o.id}>
+                    <td style={{ whiteSpace:'nowrap', fontSize:12, color:'var(--gray-500)' }}>{when}</td>
+                    <td><span style={{ fontSize:11, fontWeight:700, padding:'3px 9px', borderRadius:50, background: isTraining ? '#EFF6FF' : '#FFE0EF', color: isTraining ? '#1D4ED8' : '#C2186F', whiteSpace:'nowrap' }}>{isTraining ? '🎓 Сургалт' : '🛍️ Бүтээгдэхүүн'}</span></td>
+                    <td>{o.product_name}</td>
+                    <td><strong>{o.customer_phone || '—'}</strong></td>
+                    <td style={{ fontWeight:700, color:'var(--pink-dark)', whiteSpace:'nowrap' }}>₮{(o.price||0).toLocaleString()}</td>
+                    <td>
+                      <span style={{ fontSize:11, fontWeight:700, padding:'3px 9px', borderRadius:50, background: o.paid ? '#F0FDF4' : '#FFF7ED', color: o.paid ? '#15803D' : '#C2410C', whiteSpace:'nowrap' }}>
+                        {o.paid ? '✓ Төлсөн' : 'Хүлээгдэж буй'}
+                      </span>
+                      {o.paid && o.paid_at && (() => { const d = new Date(o.paid_at); return <div style={{ fontSize:10, color:'var(--gray-500)', marginTop:3 }}>🕐 {d.getMonth()+1}/{d.getDate()} {String(d.getHours()).padStart(2,'0')}:{String(d.getMinutes()).padStart(2,'0')}</div>; })()}
+                    </td>
+                  </tr>
+                );
+              })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    </>
   );
 }

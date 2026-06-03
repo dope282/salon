@@ -379,6 +379,7 @@ ALTER TABLE public.artists   ADD COLUMN IF NOT EXISTS deposit INTEGER DEFAULT 0;
 -- ================================================================
 CREATE TABLE IF NOT EXISTS public.product_orders (
   id              UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  item_type       TEXT DEFAULT 'product',  -- 'product' | 'training'
   product_id      UUID,
   product_name    TEXT NOT NULL,
   quantity        INTEGER DEFAULT 1,
@@ -400,6 +401,8 @@ CREATE POLICY "porders_admin_all" ON public.product_orders FOR ALL
   USING (auth.email() = 'jaamaaj26@gmail.com') WITH CHECK (auth.email() = 'jaamaaj26@gmail.com');
 GRANT SELECT, INSERT ON public.product_orders TO anon;
 GRANT ALL ON public.product_orders TO authenticated;
+-- (хэрэв хүснэгт өмнө үүссэн бол) item_type багана нэмэх
+ALTER TABLE public.product_orders ADD COLUMN IF NOT EXISTS item_type TEXT DEFAULT 'product';
 
 -- ================================================================
 -- DONE! Суурь мэдээллийг амжилттай оруулав.

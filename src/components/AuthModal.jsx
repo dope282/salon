@@ -1,12 +1,28 @@
 'use client';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, forwardRef } from 'react';
 import Image from 'next/image';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUI }   from '@/contexts/UIContext';
-import { ADMIN_EMAIL } from '@/lib/supabase';
+import { isAdminEmail } from '@/lib/supabase';
 
 const inp = 'w-full px-4 py-3 border border-gold/20 rounded-xl text-[14px] font-sans outline-none transition-all bg-[#606060] focus:border-gold focus:shadow-[0_0_0_3px_rgba(255,51,153,.12)] text-pink-200 placeholder:text-pink-400 max-[640px]:text-base';
 const lbl = 'block text-[12px] font-semibold text-pink-200/60 mb-1.5 uppercase tracking-[.8px]';
+
+// 4 оронтой PIN нууц үг — харах/нуух товчтой
+const PwInput = forwardRef(function PwInput({ placeholder = '6 оронтой тоо', autoComplete, onKeyDown }, ref) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="relative">
+      <input ref={ref} type={show ? 'text' : 'password'} inputMode="numeric" maxLength={6} pattern="[0-9]*"
+        placeholder={placeholder} autoComplete={autoComplete} onKeyDown={onKeyDown}
+        className={`${inp} pr-12 tracking-[.3em]`} />
+      <button type="button" tabIndex={-1} onClick={() => setShow(s => !s)} aria-label="Нууц үг харах"
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-[18px] cursor-pointer bg-transparent border-none leading-none">
+        {show ? '🙈' : '👁️'}
+      </button>
+    </div>
+  );
+});
 
 export default function AuthModal() {
   const { signIn, signUp, resetPassword } = useAuth();
@@ -39,7 +55,7 @@ export default function AuthModal() {
       await signIn(email, pass);
       closeAuth();
       showToast('Тавтай морилно уу! ✨', 'ok');
-      if (email === ADMIN_EMAIL) setTimeout(() => window.location.href = '/admin', 600);
+      if (isAdminEmail(email)) setTimeout(() => window.location.href = '/admin', 600);
     } catch { showMsg('Имэйл эсвэл нууц үг буруу байна.'); }
     finally { setLoading(false); }
   };
@@ -51,7 +67,7 @@ export default function AuthModal() {
     const pass2 = regPass2Ref.current.value;
     if (!phone || !email || !pass || !pass2) { showMsg('Бүх талбарыг бөглөнө үү.'); return; }
     if (!/^[0-9]{8}$/.test(phone)) { showMsg('Утасны дугаар 8 оронтой байх ёстой.'); return; }
-    if (pass.length < 8) { showMsg('Нууц үг хамгийн багадаа 8 тэмдэгт байх ёстой.'); return; }
+    if (!/^[0-9]{6}$/.test(pass)) { showMsg('Нууц үг 6 оронтой тоо байх ёстой.'); return; }
     if (pass !== pass2)  { showMsg('Нууц үгнүүд таарахгүй байна.'); return; }
     setLoading(true);
     try {
@@ -121,7 +137,7 @@ export default function AuthModal() {
             </div>
             <div className="mb-2">
               <label className={lbl}>Нууц үг</label>
-              <input ref={loginPassRef} type="password" placeholder="••••••••" autoComplete="current-password" onKeyDown={handleKeyDown} className={inp} />
+              <PwInput ref={loginPassRef} placeholder="6 оронтой тоо" autoComplete="current-password" onKeyDown={handleKeyDown} />
               <a className="block text-right text-[11px] text-[#FF3399] mt-1.5 cursor-pointer hover:text-gold tracking-wide" onClick={() => switchTab('forgot')}>Нууц үгээ мартсан уу?</a>
             </div>
             <button disabled={loading} onClick={handleLogin}
@@ -138,12 +154,14 @@ export default function AuthModal() {
             {[
               { ref: regPhoneRef, label: 'Утасны дугаар',  type: 'tel',      ph: '99xxxxxx',           ac: 'tel' },
               { ref: regEmailRef, label: 'Имэйл хаяг',     type: 'email',    ph: 'name@example.com',   ac: 'email' },
-              { ref: regPassRef,  label: 'Нууц үг',        type: 'password', ph: '••••••••',            ac: 'new-password', hint: '(8+ тэмдэгт)' },
-              { ref: regPass2Ref, label: 'Нууц үг давтах', type: 'password', ph: '••••••••',            ac: 'new-password' },
+              { ref: regPassRef,  label: 'Нууц үг',        type: 'password', ph: '6 оронтой тоо',       ac: 'new-password', hint: '(6 оронтой тоо)' },
+              { ref: regPass2Ref, label: 'Нууц үг давтах', type: 'password', ph: '6 оронтой тоо',       ac: 'new-password' },
             ].map(({ ref, label, type, ph, ac, hint }) => (
               <div key={label} className="mb-3">
                 <label className={lbl}>{label} {hint && <span className="text-pink-200/25 normal-case tracking-normal font-normal">{hint}</span>}</label>
-                <input ref={ref} type={type} placeholder={ph} autoComplete={ac} onKeyDown={handleKeyDown} className={inp} />
+                {type === 'password'
+                  ? <PwInput ref={ref} placeholder={ph} autoComplete={ac} onKeyDown={handleKeyDown} />
+                  : <input ref={ref} type={type} placeholder={ph} autoComplete={ac} onKeyDown={handleKeyDown} className={inp} />}
               </div>
             ))}
             <button disabled={loading} onClick={handleRegister}

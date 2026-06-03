@@ -13,6 +13,7 @@ export default function ResetPasswordPage() {
   const [loading, setLoading] = useState(false);
   const [done, setDone]       = useState(false);
   const [msg, setMsg]         = useState(null);
+  const [show, setShow]       = useState(false);
 
   useEffect(() => {
     // supabase-js нь URL hash доторх recovery token-г автоматаар уншиж session үүсгэнэ
@@ -27,7 +28,7 @@ export default function ResetPasswordPage() {
   }, []);
 
   const submit = async () => {
-    if (pass.length < 8) { setMsg({ type: 'err', text: 'Нууц үг хамгийн багадаа 8 тэмдэгт байх ёстой.' }); return; }
+    if (!/^[0-9]{6}$/.test(pass)) { setMsg({ type: 'err', text: 'Нууц үг 6 оронтой тоо байх ёстой.' }); return; }
     if (pass !== pass2)  { setMsg({ type: 'err', text: 'Нууц үгнүүд таарахгүй байна.' }); return; }
     setLoading(true);
     const { error } = await supabase.auth.updateUser({ password: pass });
@@ -80,13 +81,16 @@ export default function ResetPasswordPage() {
             )}
 
             <div className="mb-3">
-              <label className={lbl}>Шинэ нууц үг <span className="text-pink-200/25 normal-case tracking-normal font-normal">(8+ тэмдэгт)</span></label>
-              <input type="password" value={pass} onChange={e => setPass(e.target.value)} placeholder="••••••••" autoComplete="new-password" className={inp} />
+              <label className={lbl}>Шинэ нууц үг <span className="text-pink-200/25 normal-case tracking-normal font-normal">(6 оронтой тоо)</span></label>
+              <div className="relative">
+                <input type={show ? 'text' : 'password'} inputMode="numeric" maxLength={6} value={pass} onChange={e => setPass(e.target.value)} placeholder="6 оронтой тоо" autoComplete="new-password" className={`${inp} pr-12 tracking-[.3em]`} />
+                <button type="button" tabIndex={-1} onClick={() => setShow(s => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[18px] cursor-pointer bg-transparent border-none leading-none">{show ? '🙈' : '👁️'}</button>
+              </div>
             </div>
             <div className="mb-2">
               <label className={lbl}>Нууц үг давтах</label>
-              <input type="password" value={pass2} onChange={e => setPass2(e.target.value)} placeholder="••••••••" autoComplete="new-password"
-                onKeyDown={e => { if (e.key === 'Enter') submit(); }} className={inp} />
+              <input type={show ? 'text' : 'password'} inputMode="numeric" maxLength={6} value={pass2} onChange={e => setPass2(e.target.value)} placeholder="6 оронтой тоо" autoComplete="new-password"
+                onKeyDown={e => { if (e.key === 'Enter') submit(); }} className={`${inp} tracking-[.3em]`} />
             </div>
             <button disabled={loading} onClick={submit}
               className="w-full py-3.5 bg-gradient-to-r from-[#FF3399] via-[#FF66B2] to-[#FF3399] text-white border-none rounded-full text-[14px] font-bold cursor-pointer mt-3 transition-all shadow-[0_4px_16px_rgba(255,51,153,.35)] hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed tracking-wide">

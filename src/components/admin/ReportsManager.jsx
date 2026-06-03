@@ -8,8 +8,41 @@ const STATUS = {
   cancelled: { label: 'Цуцлагдсан',     color: '#EF4444' },
 };
 
+const STATUS_MN = { pending:'Хүлээгдэж байна', confirmed:'Баталгаажсан', completed:'Дууссан', cancelled:'Цуцлагдсан' };
+const METHOD_MN = { qpay:'QPay', card:'Карт', cash:'Бэлэн' };
+
 export default function ReportsManager({ bookings }) {
   const [range, setRange] = useState(30); // 7 | 30 | 9999 (бүх)
+
+  // Тайланг CSV болгож татах (Excel-д зориулж UTF-8 BOM)
+  const downloadCSV = () => {
+    const now = new Date();
+    const from = new Date(); from.setDate(now.getDate() - range + 1); from.setHours(0,0,0,0);
+    const rows = bookings.filter(b => range >= 9999 || new Date(b.created_at || b.booking_date) >= from)
+      .sort((a, b) => new Date(b.booking_date) - new Date(a.booking_date));
+
+    const headers = ['Огноо', 'Цаг', 'Утас', 'Үйлчилгээ', 'Артист', 'Нийт үнэ', 'Урьдчилгаа', 'Төлбөрийн арга', 'Төлсөн', 'Төлсөн огноо', 'Төлөв'];
+    const esc = (v) => `"${String(v ?? '').replace(/"/g, '""')}"`;
+    const lines = rows.map(b => [
+      b.booking_date || '', b.booking_time || '', b.customer_phone || '',
+      b.service_name || '', b.artist_name || '',
+      b.total_price || 0, b.deposit_amount || 0,
+      METHOD_MN[b.payment_method] || b.payment_method || '',
+      b.paid ? 'Тийм' : 'Үгүй',
+      b.paid_at ? new Date(b.paid_at).toLocaleString('mn-MN') : '',
+      STATUS_MN[b.status] || b.status || '',
+    ].map(esc).join(','));
+
+    const csv = '﻿' + [headers.map(esc).join(','), ...lines].join('\r\n');
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const label = range >= 9999 ? 'bukh' : `suuliyn-${range}-honog`;
+    a.href = url;
+    a.download = `tailan-${label}-${now.toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+  };
 
   const data = useMemo(() => {
     const now = new Date();
@@ -61,8 +94,8 @@ export default function ReportsManager({ bookings }) {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-      {/* Range toggle */}
-      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+      {/* Range toggle + татах */}
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
         {[[7, 'Сүүлийн 7 хоног'], [30, 'Сүүлийн 30 хоног'], [9999, 'Бүх хугацаа']].map(([r, lbl]) => (
           <button key={r} onClick={() => setRange(r)}
             style={{ padding: '8px 16px', borderRadius: 50, fontSize: 12, fontWeight: 600, cursor: 'pointer', border: '1.5px solid',
@@ -72,6 +105,10 @@ export default function ReportsManager({ bookings }) {
             {lbl}
           </button>
         ))}
+        <button className="btn-primary" onClick={downloadCSV} disabled={data.count === 0}
+          style={{ marginLeft: 'auto', padding: '8px 18px', fontSize: 13 }}>
+          📥 Тайлан татах (CSV)
+        </button>
       </div>
 
       {/* Stats */}

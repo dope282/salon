@@ -38,7 +38,7 @@ export default function Products() {
     setPlacing(true);
     const p = buyProduct;
     const { data: order, error } = await supabase.from('product_orders').insert([{
-      product_id: p.id, product_name: p.name, quantity: 1, price: p.price || 0,
+      item_type: 'product', product_id: p.id, product_name: p.name, quantity: 1, price: p.price || 0,
       customer_phone: phone, customer_email: user?.email || null,
       status: 'pending', user_id: user?.id || null,
     }]).select('id').single();

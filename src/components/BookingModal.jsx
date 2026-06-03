@@ -206,7 +206,13 @@ export default function BookingModal() {
 
   // Нийт үнэ ба урьдчилгаа
   const totalPrice = () => bk.mode === 'package' ? (bk.pkg?.price ?? 0) : bk.svcs.reduce((s, v) => s + (v.price ?? 0), 0);
-  const computeDeposit = () => bk.mode === 'package' ? (bk.pkg?.deposit || 0) : bk.svcs.reduce((s, v) => s + (v.deposit || 0), 0);
+  // Урьдчилгаа: багц → багцын урьдчилгаа; 1 үйлчилгээ → тухайн үйлчилгээний урьдчилгаа;
+  //            2 ба түүнээс дээш үйлчилгээ → тогтмол 15,000 (нэмэхгүй)
+  const computeDeposit = () => {
+    if (bk.mode === 'package') return bk.pkg?.deposit || 0;
+    if (bk.svcs.length >= 2) return 15000;
+    return bk.svcs.reduce((s, v) => s + (v.deposit || 0), 0);
+  };
   // QPay-ээр төлөх дүн: урьдчилгаа байвал урьдчилгаа, үгүй бол бүтэн үнэ
   const chargeAmount = () => { const d = computeDeposit(); return d > 0 ? d : totalPrice(); };
 

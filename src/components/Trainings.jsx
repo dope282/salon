@@ -1,17 +1,56 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useUI } from '@/contexts/UIContext';
+import { useAuth } from '@/contexts/AuthContext';
 import RotatingImage from '@/components/RotatingImage';
+import QPayQR from '@/components/QPayQR';
 
 export default function Trainings() {
+  const { showToast } = useUI();
+  const { user } = useAuth();
   const [trainings, setTrainings] = useState([]);
   const [loading,   setLoading]   = useState(true);
   const [selected,  setSelected]  = useState(null);
+  const [enrollT,   setEnrollT]   = useState(null);  // утас оруулах modal (сургалт)
+  const [placing,   setPlacing]   = useState(false);
+  const [qr,        setQr]        = useState(null);
+  const enrollPhoneRef = useRef();
 
   useEffect(() => {
     supabase.from('trainings').select('*').eq('active', true).order('sort_order').order('id')
       .then(({ data }) => { setTrainings(data || []); setLoading(false); });
   }, []);
+
+  // Сургалтын QPay төлбөр: урьдчилгаа байвал урьдчилгаа, үгүй бол үнэ
+  const trainingCharge = (t) => (t.deposit > 0 ? t.deposit : (t.price || 0));
+
+  const placeEnroll = async () => {
+    const phone = enrollPhoneRef.current?.value.trim();
+    if (!/^[0-9]{8}$/.test(phone || '')) { showToast('Утасны дугаар 8 оронтой байх ёстой', 'err'); return; }
+    const t = enrollT;
+    const charge = trainingCharge(t);
+    setPlacing(true);
+    const { data: order, error } = await supabase.from('product_orders').insert([{
+      item_type: 'training', product_name: `🎓 ${t.title}`, quantity: 1, price: charge,
+      customer_phone: phone, customer_email: user?.email || null,
+      status: 'pending', user_id: user?.id || null,
+    }]).select('id').single();
+    if (error) { setPlacing(false); showToast('Алдаа гарлаа. Дахин оролдоно уу.', 'err'); return; }
+    try {
+      const res = await fetch('/api/qpay/create-invoice', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ recordId: order.id, table: 'product_orders', amount: charge, description: `🎓 ${t.title}` }),
+      });
+      const data = await res.json();
+      setPlacing(false);
+      if (!res.ok) { showToast('QPay алдаа: ' + (data.error || ''), 'err'); return; }
+      setEnrollT(null); setSelected(null);
+      setQr({ ...data, recordId: order.id, table: 'product_orders', amount: charge, title: `🎓 ${t.title}` });
+    } catch {
+      setPlacing(false); showToast('QPay-тэй холбогдсонгүй', 'err');
+    }
+  };
 
   if (!loading && trainings.length === 0) return null;
 
@@ -122,14 +161,50 @@ export default function Trainings() {
                 <div className="text-[14px] text-pink-300 leading-[1.85] mb-6 whitespace-pre-wrap">{selected.description}</div>
               )}
 
-              <a href="#contact" onClick={() => setSelected(null)}
-                className="btn-shine block w-full bg-gradient-to-r from-[#FF3399] via-[#FF66B2] to-[#FF3399] text-white text-center border-none py-3.5 rounded-full text-[14px] font-bold cursor-pointer transition-all shadow-[0_4px_18px_rgba(255,51,153,.40)] hover:-translate-y-0.5 hover:shadow-[0_8px_28px_rgba(255,51,153,.55)] no-underline">
-                Бүртгүүлэх / Холбоо барих
-              </a>
+              {trainingCharge(selected) > 0 ? (
+                <button onClick={() => setEnrollT(selected)}
+                  className="btn-shine block w-full bg-gradient-to-r from-[#FF3399] via-[#FF66B2] to-[#FF3399] text-white text-center border-none py-3.5 rounded-full text-[14px] font-bold cursor-pointer transition-all shadow-[0_4px_18px_rgba(255,51,153,.40)] hover:-translate-y-0.5">
+                  📱 QPay-ээр бүртгүүлэх {selected.deposit > 0 ? `(урьдчилгаа ₮${selected.deposit.toLocaleString()})` : `(₮${(selected.price||0).toLocaleString()})`}
+                </button>
+              ) : (
+                <a href="#contact" onClick={() => setSelected(null)}
+                  className="btn-shine block w-full bg-gradient-to-r from-[#FF3399] via-[#FF66B2] to-[#FF3399] text-white text-center border-none py-3.5 rounded-full text-[14px] font-bold cursor-pointer transition-all shadow-[0_4px_18px_rgba(255,51,153,.40)] hover:-translate-y-0.5 no-underline">
+                  Бүртгүүлэх / Холбоо барих
+                </a>
+              )}
             </div>
           </div>
         </div>
       )}
+
+      {/* Сургалтад бүртгүүлэх — утас оруулах modal */}
+      {enrollT && (
+        <div className="overlay active" style={{ zIndex: 2100 }} onClick={e => { if (e.target === e.currentTarget) setEnrollT(null); }}>
+          <div className="modal bg-[#606060] rounded-[28px] w-full max-w-[400px] p-8 relative border border-gold/15 shadow-[0_32px_80px_rgba(0,0,0,.25)] max-[640px]:p-5" onClick={e => e.stopPropagation()}>
+            <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#FF3399] via-[#FF66B2] to-[#FF3399] rounded-t-[28px]" />
+            <button onClick={() => setEnrollT(null)}
+              className="absolute top-5 right-5 w-9 h-9 rounded-full border border-gold/20 bg-gold/8 cursor-pointer text-base text-pink-200 flex items-center justify-center hover:bg-gold/20 z-10">✕</button>
+
+            <h3 className="font-serif text-[20px] font-semibold text-pink-200 mb-1">🎓 Сургалтад бүртгүүлэх</h3>
+            <div className="text-sm text-pink-200 font-semibold mb-1">{enrollT.title}</div>
+            <div className="text-pink font-bold text-lg mb-1">₮{trainingCharge(enrollT).toLocaleString()}</div>
+            {enrollT.deposit > 0 && enrollT.price > 0 && (
+              <div className="text-[11px] text-pink-400 mb-4">Урьдчилгаа · Үлдэгдэл ₮{(enrollT.price - enrollT.deposit).toLocaleString()}-г дараа төлнө</div>
+            )}
+
+            <label className="block text-xs font-semibold mb-1.5 mt-3 text-pink-200 uppercase tracking-wide">Утасны дугаар</label>
+            <input ref={enrollPhoneRef} type="tel" placeholder="99xxxxxx" defaultValue={user?.user_metadata?.phone || ''}
+              className="w-full text-pink-200 px-3 py-2.5 border-[1.5px] border-gold/20 rounded-xl text-sm font-sans outline-none focus:border-gold transition-all bg-[#707070] placeholder:text-pink-400 mb-4" />
+
+            <button disabled={placing} onClick={placeEnroll}
+              className="w-full bg-gradient-to-r from-[#FF3399] via-[#FF66B2] to-[#FF3399] text-white border-none py-3 rounded-full text-sm font-bold cursor-pointer disabled:opacity-60">
+              {placing ? 'Түр хүлээнэ үү...' : '📱 QPay-ээр төлөх'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {qr && <QPayQR qr={qr} onClose={({ paid }) => { setQr(null); showToast(paid ? 'Бүртгэл амжилттай! 🎉' : 'Цуцлагдлаа.', paid ? 'ok' : 'err'); }} />}
     </section>
   );
 }
