@@ -26,7 +26,7 @@ const LEAD_MIN   = 20;        // одооноос хамгийн багадаа 
 const timeToMin = (t) => { const [h, m] = String(t).split(':').map(Number); return h * 60 + m; };
 const minToTime = (m) => `${String(Math.floor(m / 60)).padStart(2,'0')}:${String(m % 60).padStart(2,'0')}`;
 const MONTHS  = ['Нэгдүгээр сар','Хоёрдугаар сар','Гуравдугаар сар','Дөрөвдүгээр сар','Тавдугаар сар','Зургаадугаар сар','Долдугаар сар','Наймдугаар сар','Есдүгээр сар','Аравдугаар сар','Арван нэгдүгээр сар','Арван хоёрдугаар сар'];
-const INIT_BK = { mode:'service', svcs:[], pkg:null, art:null, date:null, time:null, pay:'cash' };
+const INIT_BK = { mode:'service', svcs:[], pkg:null, art:null, date:null, time:null, pay:'qpay' };
 
 export default function BookingModal() {
   const { user } = useAuth();
@@ -45,13 +45,41 @@ export default function BookingModal() {
   const [pkgSvcs,         setPkgSvcs]         = useState({});
   const [artistSchedules, setArtistSchedules] = useState({});
   const [bookedSlots,     setBookedSlots]     = useState({}); // { 'artistName|YYYY-MM-DD': [{start,end} мин] }
-  const [qr, setQr] = useState(null);   // QPay { qr_image, urls, bookingId }
+  const [qr, setQr]       = useState(null);   // QPay { qr_image, urls, bookingId, slotKey, slotStart, slotEnd }
+  const [qrPaid, setQrPaid] = useState(false); // төлбөр амжилттай (хэрэглэгч өөрөө хаана)
+  const [secsLeft, setSecsLeft] = useState(300); // 5 минут countdown
   const phoneRef = useRef();
   const notesRef = useRef();
 
+  // Локал цагийн нөөцийг буцааж чөлөөлөх (цуцлах үед)
+  const releaseSlot = () => {
+    if (!qr?.slotKey) return;
+    setBookedSlots(prev => ({
+      ...prev,
+      [qr.slotKey]: (prev[qr.slotKey] || []).filter(iv => !(iv.start === qr.slotStart && iv.end === qr.slotEnd)),
+    }));
+  };
+
+  // Төлбөр төлөгдөөгүй захиалгыг цуцлах
+  const cancelQr = async (reason) => {
+    if (!qr?.bookingId) return;
+    const id = qr.bookingId;
+    releaseSlot();
+    setQr(null); setQrPaid(false);
+    try {
+      await fetch('/api/qpay/cancel', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookingId: id }),
+      });
+    } catch {}
+    handleClose();
+    if (reason === 'timeout') showToast('Төлбөрийн хугацаа дууслаа. Захиалга цуцлагдлаа.', 'err');
+    else showToast('Захиалга цуцлагдлаа.', 'err');
+  };
+
   // QPay төлбөр төлөгдсөн эсэхийг тогтмол шалгах (polling)
   useEffect(() => {
-    if (!qr?.bookingId) return;
+    if (!qr?.bookingId || qrPaid) return;
     const iv = setInterval(async () => {
       try {
         const res = await fetch('/api/qpay/check', {
@@ -59,17 +87,26 @@ export default function BookingModal() {
           body: JSON.stringify({ bookingId: qr.bookingId }),
         });
         const d = await res.json();
-        if (d.paid) {
-          clearInterval(iv);
-          setQr(null);
-          handleClose();
-          showToast('Төлбөр амжилттай! Захиалга баталгаажлаа 🎉', 'ok');
-        }
+        if (d.paid) { clearInterval(iv); setQrPaid(true); }
       } catch {}
     }, 3000);
     return () => clearInterval(iv);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [qr?.bookingId]);
+  }, [qr?.bookingId, qrPaid]);
+
+  // 5 минутын countdown — дуусвал авто-цуцлана
+  useEffect(() => {
+    if (!qr?.bookingId || qrPaid) return;
+    setSecsLeft(300);
+    const iv = setInterval(() => {
+      setSecsLeft(prev => {
+        if (prev <= 1) { clearInterval(iv); cancelQr('timeout'); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(iv);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [qr?.bookingId, qrPaid]);
 
   useEffect(() => {
     const todayStr = new Date().toISOString().split('T')[0];
@@ -90,7 +127,7 @@ export default function BookingModal() {
     ]).then(([{ data: aData }, { data: sData }, { data: asData }, { data: apData }, { data: pkgData }, { data: psData }, { data: schedData }, { data: bkData }]) => {
       if (aData?.length) setArtists(aData);
       if (sData?.length) {
-        setServices(sData.map(s => ({ id: s.id, name: s.name_mn, price: s.price_from, ico: s.emoji, img: s.image_url, duration: s.duration_min })));
+        setServices(sData.map(s => ({ id: s.id, name: s.name_mn, price: s.price_from, ico: s.emoji, img: s.image_url, duration: s.duration_min, deposit: s.deposit || 0 })));
         const nameToId = {};
         sData.forEach(s => { nameToId[s.name_mn] = s.id; });
         setSvcIdMap(nameToId);
@@ -136,7 +173,7 @@ export default function BookingModal() {
     });
   }, []);
 
-  const reset = () => { setStep(1); setBk(INIT_BK); setQr(null); setCalY(new Date().getFullYear()); setCalM(new Date().getMonth()); };
+  const reset = () => { setStep(1); setBk(INIT_BK); setQr(null); setQrPaid(false); setCalY(new Date().getFullYear()); setCalM(new Date().getMonth()); };
 
   // Modal нээгдэх бүрт артист/багц урьдчилан тохируулна
   useEffect(() => {
@@ -167,6 +204,12 @@ export default function BookingModal() {
     ? (bk.pkg?.duration_min || 60)
     : (bk.svcs.reduce((s, v) => s + (v.duration || 0), 0) || 60);
 
+  // Нийт үнэ ба урьдчилгаа
+  const totalPrice = () => bk.mode === 'package' ? (bk.pkg?.price ?? 0) : bk.svcs.reduce((s, v) => s + (v.price ?? 0), 0);
+  const computeDeposit = () => bk.mode === 'package' ? (bk.pkg?.deposit || 0) : bk.svcs.reduce((s, v) => s + (v.deposit || 0), 0);
+  // QPay-ээр төлөх дүн: урьдчилгаа байвал урьдчилгаа, үгүй бол бүтэн үнэ
+  const chargeAmount = () => { const d = computeDeposit(); return d > 0 ? d : totalPrice(); };
+
   const confirm = async () => {
     if (loading) return;
     const phone = phoneRef.current?.value.trim();
@@ -175,7 +218,8 @@ export default function BookingModal() {
     if (!/^[0-9]{8}$/.test(phone)) { showToast('Утасны дугаар 8 оронтой байх ёстой', 'err'); return; }
     setLoading(true);
     const dur = newDuration();
-    const total = bk.mode === 'package' ? (bk.pkg.price ?? 0) : bk.svcs.reduce((s, v) => s + (v.price ?? 0), 0);
+    const total = totalPrice();
+    const charge = chargeAmount();        // QPay-ээр төлөх дүн (урьдчилгаа эсвэл бүтэн)
     const svcName = bk.mode === 'package' ? `🎁 ${bk.pkg.name}` : bk.svcs.map(s => s.name).join(', ');
     const dateStr = bk.date ? `${bk.date.getFullYear()}-${String(bk.date.getMonth()+1).padStart(2,'0')}-${String(bk.date.getDate()).padStart(2,'0')}` : null;
     const { data: inserted, error } = await supabase.from('bookings').insert([{
@@ -183,15 +227,17 @@ export default function BookingModal() {
       service_name: svcName,
       artist_name: bk.art, booking_date: dateStr,
       booking_time: bk.time, payment_method: bk.pay, notes, duration_min: dur,
-      total_price: total,
+      total_price: total, deposit_amount: charge,
       status: 'pending', user_id: user?.id || null,
     }]).select('id').single();
     if (error) { setLoading(false); showToast('Алдаа гарлаа. Дахин оролдоно уу.', 'err'); return; }
     // Шинэ захиалгыг local интервалд нэмэх (дараагийн хэрэглэгч нэн даруй харна)
+    let slotKey = null, slotStart = null, slotEnd = null;
     if (bk.art && dateStr && bk.time) {
-      const key = `${bk.art}|${dateStr}`;
-      const start = timeToMin(bk.time);
-      setBookedSlots(prev => ({ ...prev, [key]: [...(prev[key] || []), { start, end: start + dur }] }));
+      slotKey = `${bk.art}|${dateStr}`;
+      slotStart = timeToMin(bk.time);
+      slotEnd = slotStart + dur;
+      setBookedSlots(prev => ({ ...prev, [slotKey]: [...(prev[slotKey] || []), { start: slotStart, end: slotEnd }] }));
     }
 
     // QPay — нэхэмжлэл үүсгэж QR харуулна
@@ -199,12 +245,13 @@ export default function BookingModal() {
       try {
         const res = await fetch('/api/qpay/create-invoice', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ bookingId: inserted.id, amount: total, description: svcName }),
+          body: JSON.stringify({ bookingId: inserted.id, amount: charge, description: svcName }),
         });
         const data = await res.json();
         setLoading(false);
         if (!res.ok) { showToast('QPay алдаа: ' + (data.error || ''), 'err'); return; }
-        setQr({ ...data, bookingId: inserted.id, amount: total });
+        setQrPaid(false);
+        setQr({ ...data, bookingId: inserted.id, amount: charge, slotKey, slotStart, slotEnd });
       } catch {
         setLoading(false);
         showToast('QPay-тэй холбогдсонгүй', 'err');
@@ -642,12 +689,20 @@ export default function BookingModal() {
                 ))}
                 <div className="flex justify-between py-3.5 border-t-2 border-gray-200 mt-1.5">
                   <span className="text-[15px] font-bold text-pink-200">Нийт үнэ</span>
-                  <span className="text-xl font-bold text-pink">
-                    ₮{bk.mode === 'package'
-                      ? (bk.pkg?.price ?? 0).toLocaleString()
-                      : bk.svcs.reduce((s, v) => s + (v.price ?? 0), 0).toLocaleString()}
-                  </span>
+                  <span className="text-xl font-bold text-pink">₮{totalPrice().toLocaleString()}</span>
                 </div>
+                {computeDeposit() > 0 && (
+                  <div className="bg-[#707070] rounded-xl px-3.5 py-3 -mt-1">
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-semibold text-pink-200">📱 Урьдчилгаа (QPay-ээр төлнө)</span>
+                      <span className="text-base font-bold text-pink">₮{computeDeposit().toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between items-center mt-1 text-xs text-pink-400">
+                      <span>Үлдэгдлийг салон дээр төлнө</span>
+                      <span>₮{(totalPrice() - computeDeposit()).toLocaleString()}</span>
+                    </div>
+                  </div>
+                )}
                 <div className="mt-4 border-t border-gray-200 pt-3.5">
                   <div className="text-sm font-semibold text-pink-200 mb-2.5">Холбоо барих мэдээлэл</div>
                   <div className="mb-2.5">
@@ -664,14 +719,16 @@ export default function BookingModal() {
               </div>
               <div>
                 <h4 className="text-base font-bold mb-4 pb-3 border-b border-gray-200 text-pink-200">Төлбөрийн арга</h4>
-                {[{method:'card',ico:'💳',lbl:'Кредит / Дебит карт'},{method:'qpay',ico:'📱',lbl:'QPay'}].map(p => (
-                  <div key={p.method} onClick={() => setBk(b => ({ ...b, pay:p.method }))}
-                    className={`flex text-pink-200 items-center gap-3 px-4 py-3 border-2 rounded-2xl cursor-pointer mb-2.5 transition-all hover:border-pink-light ${bk.pay===p.method ? 'border-pink bg-gray-800' : 'border-gray-200'}`}>
-                    <input type="radio" name="pay" readOnly checked={bk.pay===p.method} className="accent-pink" />
-                    <span className="text-xl">{p.ico}</span>
-                    <span className="text-sm font-medium">{p.lbl}</span>
+                <div className="flex items-center gap-3 px-4 py-3.5 border-2 border-pink rounded-2xl bg-[#707070] text-pink-200">
+                  <span className="text-2xl">📱</span>
+                  <div>
+                    <div className="text-sm font-semibold">QPay-ээр төлнө</div>
+                    <div className="text-[11px] text-pink-400">Бүх банкны апп-аар QR уншуулж төлнө</div>
                   </div>
-                ))}
+                </div>
+                <p className="text-[11px] text-pink-400 mt-3 leading-relaxed">
+                  ⏱ Захиалга баталгаажуулсны дараа <strong>5 минутын дотор</strong> төлбөрөө төлнө. Төлөгдөөгүй бол захиалга автоматаар цуцлагдана.
+                </p>
               </div>
             </div>
           </div>
@@ -693,45 +750,76 @@ export default function BookingModal() {
 
     {/* QPay QR overlay */}
     {qr && (
-      <div className="overlay active" style={{ zIndex: 2100 }} onClick={e => { if (e.target === e.currentTarget) { setQr(null); handleClose(); } }}>
+      <div className="overlay active" style={{ zIndex: 2100 }} onClick={e => { if (e.target === e.currentTarget && !qrPaid) cancelQr(); }}>
         <div className="modal bg-[#606060] rounded-[28px] w-full max-w-[420px] p-8 relative border border-gold/15 shadow-[0_32px_80px_rgba(0,0,0,.25)] text-center max-[640px]:p-5" onClick={e => e.stopPropagation()}>
           <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#FF3399] via-[#FF66B2] to-[#FF3399] rounded-t-[28px]" />
-          <button onClick={() => { setQr(null); handleClose(); }}
-            className="absolute top-5 right-5 w-9 h-9 rounded-full border border-gold/20 bg-gold/8 cursor-pointer text-base text-pink-200 flex items-center justify-center hover:bg-gold/20 z-10">✕</button>
 
-          <h3 className="font-serif text-[22px] font-semibold text-pink-200 mb-1">QPay-ээр төлөх</h3>
-          <p className="text-sm text-pink-400 mb-2">Дүн: <span className="text-pink font-bold">₮{(qr.amount ?? 0).toLocaleString()}</span></p>
+          {qrPaid ? (
+            /* ── Амжилттай — хэрэглэгч өөрөө X дарж хаана ── */
+            <>
+              <button onClick={() => { setQr(null); setQrPaid(false); handleClose(); }}
+                className="absolute top-5 right-5 w-9 h-9 rounded-full border border-gold/20 bg-gold/8 cursor-pointer text-base text-pink-200 flex items-center justify-center hover:bg-gold/20 z-10">✕</button>
+              <div className="py-6">
+                <div className="text-[64px] mb-3">✅</div>
+                <h3 className="font-serif text-[24px] font-semibold text-pink-200 mb-2">Төлбөр амжилттай!</h3>
+                <p className="text-sm text-pink-400 mb-1">Захиалга баталгаажлаа 🎉</p>
+                <p className="text-xs text-pink-400 mb-6">Удахгүй уулзана. Баярлалаа!</p>
+                <button onClick={() => { setQr(null); setQrPaid(false); handleClose(); }}
+                  className="bg-gradient-to-r from-[#FF3399] via-[#FF66B2] to-[#FF3399] text-white border-none px-8 py-3 rounded-full text-sm font-bold cursor-pointer">
+                  Хаах
+                </button>
+              </div>
+            </>
+          ) : (
+            /* ── Төлбөр хүлээж буй ── */
+            <>
+              <button onClick={() => cancelQr()}
+                className="absolute top-5 right-5 w-9 h-9 rounded-full border border-gold/20 bg-gold/8 cursor-pointer text-base text-pink-200 flex items-center justify-center hover:bg-gold/20 z-10">✕</button>
 
-          {qr.qr_image && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={qr.qr_image.startsWith('data:') ? qr.qr_image : `data:image/png;base64,${qr.qr_image}`}
-              alt="QPay QR"
-              className="w-[220px] h-[220px] mx-auto rounded-2xl bg-white p-2 my-3" />
+              <h3 className="font-serif text-[22px] font-semibold text-pink-200 mb-1">QPay-ээр төлөх</h3>
+              <p className="text-sm text-pink-400 mb-1">Дүн: <span className="text-pink font-bold">₮{(qr.amount ?? 0).toLocaleString()}</span></p>
+
+              {/* Countdown */}
+              <div className={`text-sm font-bold mb-2 ${secsLeft <= 60 ? 'text-red-400' : 'text-pink-200'}`}>
+                ⏱ {Math.floor(secsLeft/60)}:{String(secsLeft%60).padStart(2,'0')}
+              </div>
+
+              {qr.qr_image && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={qr.qr_image.startsWith('data:') ? qr.qr_image : `data:image/png;base64,${qr.qr_image}`}
+                  alt="QPay QR"
+                  className="w-[220px] h-[220px] mx-auto rounded-2xl bg-white p-2 my-3" />
+              )}
+
+              <p className="text-xs text-pink-400 mb-3">Банкны апп-аараа QR кодыг уншуулна уу</p>
+
+              {qr.urls?.length > 0 && (
+                <div className="grid grid-cols-4 gap-2 mb-4 max-h-[180px] overflow-y-auto">
+                  {qr.urls.map((u, i) => (
+                    <a key={i} href={u.link} target="_blank" rel="noreferrer"
+                      className="flex flex-col items-center gap-1 p-1.5 rounded-xl bg-[#707070] hover:bg-[#787878] transition-colors no-underline">
+                      {u.logo
+                        // eslint-disable-next-line @next/next/no-img-element
+                        ? <img src={u.logo} alt={u.name} className="w-8 h-8 rounded-lg object-contain" />
+                        : <span className="text-lg">🏦</span>}
+                      <span className="text-[8px] text-pink-200 leading-tight text-center line-clamp-1">{u.name}</span>
+                    </a>
+                  ))}
+                </div>
+              )}
+
+              <div className="flex items-center justify-center gap-2 text-xs text-pink-400 mb-4">
+                <div className="w-4 h-4 border-2 border-pink border-t-transparent rounded-full animate-spin" />
+                Төлбөр шалгаж байна...
+              </div>
+
+              <button onClick={() => cancelQr()}
+                className="w-full py-2.5 rounded-full border border-red-400/40 bg-transparent text-red-400 text-sm font-semibold cursor-pointer hover:bg-red-400/10 transition-colors">
+                Цуцлах
+              </button>
+            </>
           )}
-
-          <p className="text-xs text-pink-400 mb-3">Банкны апп-аараа QR кодыг уншуулна уу</p>
-
-          {/* Банкны апп холбоосууд (утсан дээр) */}
-          {qr.urls?.length > 0 && (
-            <div className="grid grid-cols-4 gap-2 mb-4 max-h-[180px] overflow-y-auto">
-              {qr.urls.map((u, i) => (
-                <a key={i} href={u.link} target="_blank" rel="noreferrer"
-                  className="flex flex-col items-center gap-1 p-1.5 rounded-xl bg-[#707070] hover:bg-[#787878] transition-colors no-underline">
-                  {u.logo
-                    // eslint-disable-next-line @next/next/no-img-element
-                    ? <img src={u.logo} alt={u.name} className="w-8 h-8 rounded-lg object-contain" />
-                    : <span className="text-lg">🏦</span>}
-                  <span className="text-[8px] text-pink-200 leading-tight text-center line-clamp-1">{u.name}</span>
-                </a>
-              ))}
-            </div>
-          )}
-
-          <div className="flex items-center justify-center gap-2 text-xs text-pink-400">
-            <div className="w-4 h-4 border-2 border-pink border-t-transparent rounded-full animate-spin" />
-            Төлбөр шалгаж байна...
-          </div>
         </div>
       </div>
     )}

@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 import MultiImageUploader from '@/components/admin/MultiImageUploader';
 
 const EMPTY = {
-  name: '', description: '', price: '', original_price: '',
+  name: '', description: '', price: '', original_price: '', deposit: '',
   emoji: '🎁', image_url: '', images: [], duration_min: '120', active: true, sort_order: '0',
 };
 const EMOJI_OPT = ['🎁','💆','💅','✨','👁️','💄','🌸','💇','🧖','🎀','💎','🌟'];
@@ -54,7 +54,7 @@ export default function PackagesManager({ showToast }) {
 
   const openAdd = () => { setForm({ ...EMPTY }); setSelServices([]); setSelArtists([]); scrollToForm(); };
   const openEdit = (p) => {
-    setForm({ ...p, price: String(p.price), original_price: String(p.original_price || ''), duration_min: String(p.duration_min), sort_order: String(p.sort_order), images: p.images?.length ? p.images : (p.image_url ? [p.image_url] : []) });
+    setForm({ ...p, price: String(p.price), original_price: String(p.original_price || ''), deposit: String(p.deposit || ''), duration_min: String(p.duration_min), sort_order: String(p.sort_order), images: p.images?.length ? p.images : (p.image_url ? [p.image_url] : []) });
     setSelServices(pkgSvcMap[p.id] || []);
     setSelArtists(pkgArtMap[p.id] || []);
     scrollToForm();
@@ -68,6 +68,7 @@ export default function PackagesManager({ showToast }) {
     const payload = {
       name: form.name.trim(), description: form.description.trim(),
       price: parseInt(form.price) || 0, original_price: parseInt(form.original_price) || 0,
+      deposit: parseInt(form.deposit) || 0,
       emoji: form.emoji || '🎁', images: imgs, image_url: imgs[0] || '',
       duration_min: parseInt(form.duration_min) || 120,
       active: form.active, sort_order: parseInt(form.sort_order) || 0,
@@ -237,6 +238,10 @@ export default function PackagesManager({ showToast }) {
             <div>
               <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-500)', display: 'block', marginBottom: 5, textTransform: 'uppercase', letterSpacing: .8 }}>Анхны үнэ (хэмнэлт харуулах)</label>
               <input type="number" value={form.original_price} onChange={e => setF('original_price', e.target.value)} placeholder="100000" min="0" style={inp} />
+            </div>
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-500)', display: 'block', marginBottom: 5, textTransform: 'uppercase', letterSpacing: .8 }}>Урьдчилгаа (₮)</label>
+              <input type="number" value={form.deposit} onChange={e => setF('deposit', e.target.value)} placeholder="0 = бүтэн төлбөр" min="0" style={inp} />
             </div>
             <div>
               <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-500)', display: 'block', marginBottom: 5, textTransform: 'uppercase', letterSpacing: .8 }}>Хугацаа (мин)</label>

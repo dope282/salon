@@ -5,27 +5,28 @@ import { supabaseAdmin } from '@/lib/supabaseAdmin';
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
 
+const TBL = (t) => (t === 'product_orders' ? 'product_orders' : 'bookings');
+
 export async function POST(req) {
   try {
-    const { bookingId, amount, description } = await req.json();
-    if (!bookingId || !amount) {
-      return NextResponse.json({ error: 'bookingId, amount шаардлагатай' }, { status: 400 });
+    const body = await req.json();
+    const { amount, description, table } = body;
+    const recordId = body.recordId || body.bookingId;
+    if (!recordId || !amount) {
+      return NextResponse.json({ error: 'recordId, amount шаардлагатай' }, { status: 400 });
     }
-
+    const tbl = TBL(table);
     const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || req.nextUrl.origin;
-    const callbackUrl = `${baseUrl}/api/qpay/callback?booking_id=${bookingId}`;
+    const callbackUrl = `${baseUrl}/api/qpay/callback?id=${recordId}&table=${tbl}`;
 
     const invoice = await createInvoice({
       amount: Number(amount),
       description,
-      senderInvoiceNo: bookingId,
+      senderInvoiceNo: recordId,
       callbackUrl,
     });
 
-    // Захиалга дээр qpay invoice_id-г хадгална
-    await supabaseAdmin.from('bookings')
-      .update({ qpay_invoice_id: invoice.invoice_id })
-      .eq('id', bookingId);
+    await supabaseAdmin.from(tbl).update({ qpay_invoice_id: invoice.invoice_id }).eq('id', recordId);
 
     return NextResponse.json({
       invoice_id: invoice.invoice_id,

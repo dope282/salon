@@ -40,14 +40,20 @@ export function AuthProvider({ children }) {
   }
 
   async function resetPassword(email) {
-    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    const redirectTo = typeof window !== 'undefined' ? `${window.location.origin}/reset-password` : undefined;
+    const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo });
+    if (error) throw error;
+  }
+
+  async function updatePassword(newPassword) {
+    const { error } = await supabase.auth.updateUser({ password: newPassword });
     if (error) throw error;
   }
 
   const isAdmin = user?.email === ADMIN_EMAIL;
 
   return (
-    <AuthContext.Provider value={{ user, loading, isAdmin, signIn, signUp, signOut, resetPassword }}>
+    <AuthContext.Provider value={{ user, loading, isAdmin, signIn, signUp, signOut, resetPassword, updatePassword }}>
       {children}
     </AuthContext.Provider>
   );

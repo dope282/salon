@@ -46,6 +46,17 @@ export async function createInvoice({ amount, description, senderInvoiceNo, call
   return data; // { invoice_id, qr_text, qr_image, qPay_shortUrl, urls: [{name, logo, link}] }
 }
 
+// Нэхэмжлэл цуцлах (төлбөр төлөгдөөгүй үед)
+export async function cancelInvoice(invoiceId) {
+  try {
+    const token = await getToken();
+    await fetch(`${QPAY_HOST}/invoice/${invoiceId}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  } catch { /* нэхэмжлэл аль хэдийн цуцлагдсан/төлөгдсөн байж болзошгүй — алгасна */ }
+}
+
 // Нэхэмжлэлийн төлбөр төлөгдсөн эсэхийг шалгана → { paid: bool, amount }
 export async function checkPayment(invoiceId) {
   const token = await getToken();

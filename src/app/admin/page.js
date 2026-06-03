@@ -14,6 +14,8 @@ import ServicesManager  from '@/components/admin/ServicesManager';
 import PackagesManager from '@/components/admin/PackagesManager';
 import CustomersManager  from '@/components/admin/CustomersManager';
 import TrainingsManager  from '@/components/admin/TrainingsManager';
+import PaymentsManager   from '@/components/admin/PaymentsManager';
+import ReportsManager    from '@/components/admin/ReportsManager';
 
 const VIEW_TITLES = {
   dashboard:'Хяналтын самбар', appointments:'Захиалгууд', products:'Бүтээгдэхүүн',
@@ -109,6 +111,8 @@ export default function AdminPage() {
         {view === 'packages'     && <PackagesManager showToast={showToast} />}
         {view === 'customers'    && <CustomersManager showToast={showToast} />}
         {view === 'trainings'    && <TrainingsManager showToast={showToast} />}
+        {view === 'payments'     && <PaymentsManager bookings={bookings} onRefresh={loadBookings} showToast={showToast} />}
+        {view === 'reports'      && <ReportsManager bookings={bookings} />}
 
         {view === 'settings' && (
           <div>
@@ -125,7 +129,7 @@ export default function AdminPage() {
           </div>
         )}
 
-        {!['dashboard','appointments','products','artists','services','packages','customers','settings'].includes(view) && (
+        {!['dashboard','appointments','products','artists','services','packages','customers','trainings','payments','reports','settings'].includes(view) && (
           <div className="bg-white rounded-[24px] p-6 shadow-sm flex flex-col items-center justify-center min-h-[300px] gap-4 text-gray-500">
             <div className="text-5xl">🚧</div>
             <div className="text-base font-semibold">{VIEW_TITLES[view]} — Удахгүй нэмэгдэнэ</div>

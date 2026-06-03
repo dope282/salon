@@ -17,6 +17,7 @@ export default function AuthModal() {
 
   const loginEmailRef = useRef();
   const loginPassRef  = useRef();
+  const forgotEmailRef = useRef();
   const regPhoneRef   = useRef();
   const regEmailRef   = useRef();
   const regPassRef    = useRef();
@@ -62,10 +63,13 @@ export default function AuthModal() {
   };
 
   const handleForgot = async () => {
-    const email = loginEmailRef.current?.value.trim();
+    const email = forgotEmailRef.current?.value.trim();
     if (!email) { showMsg('Имэйл хаягаа оруулна уу.'); return; }
     setLoading(true);
-    try { await resetPassword(email); showMsg('✓ Нууц үг шинэчлэх холбоос илгээлээ.', 'ok'); }
+    try {
+      await resetPassword(email);
+      showMsg('✓ Нууц үг сэргээх холбоосыг имэйлээр илгээлээ. Имэйлээ шалгаад холбоос дээр дарна уу.', 'ok');
+    }
     catch (e) { showMsg(e.message); }
     finally { setLoading(false); }
   };
@@ -90,14 +94,16 @@ export default function AuthModal() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-1 bg-[#606060]/5 rounded-xl p-1 mb-6">
-          {[['login','Нэвтрэх'],['reg','Бүртгүүлэх']].map(([id, label]) => (
-            <button key={id} onClick={() => switchTab(id)}
-              className={`flex-1 py-2.5 border-none rounded-[10px] text-sm font-semibold cursor-pointer transition-all tracking-wide ${tab === id ? 'bg-gradient-to-r from-[#FF3399] via-[#FF66B2] to-[#FF3399] text-white shadow-sm' : 'bg-transparent text-pink-200/40 hover:text-pink-200/60'}`}>
-              {label}
-            </button>
-          ))}
-        </div>
+        {tab !== 'forgot' && (
+          <div className="flex gap-1 bg-[#606060]/5 rounded-xl p-1 mb-6">
+            {[['login','Нэвтрэх'],['reg','Бүртгүүлэх']].map(([id, label]) => (
+              <button key={id} onClick={() => switchTab(id)}
+                className={`flex-1 py-2.5 border-none rounded-[10px] text-sm font-semibold cursor-pointer transition-all tracking-wide ${tab === id ? 'bg-gradient-to-r from-[#FF3399] via-[#FF66B2] to-[#FF3399] text-white shadow-sm' : 'bg-transparent text-pink-200/40 hover:text-pink-200/60'}`}>
+                {label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {msg && (
           <div className={`rounded-xl px-4 py-3 text-[13px] mb-4 border ${msg.type === 'ok' ? 'bg-[#f0fff4] text-[#276749] border-[#68D391]/30' : 'bg-[#fff5f5] text-[#C53030] border-[#FC8181]/30'}`}>
@@ -116,7 +122,7 @@ export default function AuthModal() {
             <div className="mb-2">
               <label className={lbl}>Нууц үг</label>
               <input ref={loginPassRef} type="password" placeholder="••••••••" autoComplete="current-password" onKeyDown={handleKeyDown} className={inp} />
-              <a className="block text-right text-[11px] text-[#FF3399] mt-1.5 cursor-pointer hover:text-gold tracking-wide" onClick={handleForgot}>Нууц үгээ мартсан уу?</a>
+              <a className="block text-right text-[11px] text-[#FF3399] mt-1.5 cursor-pointer hover:text-gold tracking-wide" onClick={() => switchTab('forgot')}>Нууц үгээ мартсан уу?</a>
             </div>
             <button disabled={loading} onClick={handleLogin}
               className="w-full py-3.5 bg-gradient-to-r from-[#FF3399] via-[#FF66B2] to-[#FF3399] text-pink-200 border-none rounded-full text-[14px] font-bold cursor-pointer mt-3 transition-all shadow-[0_4px_16px_rgba(255,51,153,.35)] hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(255,51,153,.50)] disabled:opacity-60 disabled:cursor-not-allowed disabled:translate-y-0 tracking-wide">
@@ -143,6 +149,26 @@ export default function AuthModal() {
             <button disabled={loading} onClick={handleRegister}
               className="w-full py-3.5 bg-gradient-to-r from-[#FF3399] via-[#FF66B2] to-[#FF3399] text-pink-200 border-none rounded-full text-[14px] font-bold cursor-pointer mt-1 transition-all shadow-[0_4px_16px_rgba(255,51,153,.35)] hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(255,51,153,.50)] disabled:opacity-60 disabled:cursor-not-allowed disabled:translate-y-0 tracking-wide">
               {loading ? 'Бүртгэж байна...' : 'Бүртгүүлэх'}
+            </button>
+          </>
+        )}
+
+        {tab === 'forgot' && (
+          <>
+            <h2 className="font-serif text-[24px] font-semibold text-center mb-1 text-pink-200">Нууц үг сэргээх</h2>
+            <p className="text-xs text-pink-200/35 text-center mb-6 tracking-wide">Бүртгэлтэй имэйл хаягаа оруулна уу. Бид нууц үг сэргээх холбоос илгээнэ.</p>
+            <div className="mb-2">
+              <label className={lbl}>Имэйл хаяг</label>
+              <input ref={forgotEmailRef} type="email" placeholder="name@example.com" autoComplete="email"
+                onKeyDown={e => { if (e.key === 'Enter') handleForgot(); }} className={inp} />
+            </div>
+            <button disabled={loading} onClick={handleForgot}
+              className="w-full py-3.5 bg-gradient-to-r from-[#FF3399] via-[#FF66B2] to-[#FF3399] text-white border-none rounded-full text-[14px] font-bold cursor-pointer mt-3 transition-all shadow-[0_4px_16px_rgba(255,51,153,.35)] hover:-translate-y-0.5 hover:shadow-[0_8px_24px_rgba(255,51,153,.50)] disabled:opacity-60 disabled:cursor-not-allowed disabled:translate-y-0 tracking-wide">
+              {loading ? 'Илгээж байна...' : 'Сэргээх холбоос илгээх'}
+            </button>
+            <button onClick={() => switchTab('login')}
+              className="w-full text-center text-[12px] text-pink-200/50 mt-4 cursor-pointer hover:text-pink-200 bg-transparent border-none tracking-wide">
+              ← Нэвтрэх рүү буцах
             </button>
           </>
         )}

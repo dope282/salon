@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import MultiImageUploader from '@/components/admin/MultiImageUploader';
 
-const EMPTY = { title:'', description:'', image_url:'', images:[], price:'', duration:'', level:'', schedule:'', active:true, sort_order:'0' };
+const EMPTY = { title:'', description:'', image_url:'', images:[], price:'', deposit:'', duration:'', level:'', schedule:'', active:true, sort_order:'0' };
 
 export default function TrainingsManager({ showToast }) {
   const [list,      setList]      = useState([]);
@@ -24,7 +24,7 @@ export default function TrainingsManager({ showToast }) {
   const setF = (k, v) => setForm(f => ({ ...f, [k]: v }));
   const scroll = () => setTimeout(() => { const el = document.getElementById('adminMain'); (el || window).scrollTo({ top:99999, behavior:'smooth' }); }, 50);
   const openAdd  = () => { setForm({ ...EMPTY }); scroll(); };
-  const openEdit = (t) => { setForm({ ...t, price: String(t.price), sort_order: String(t.sort_order), images: t.images?.length ? t.images : (t.image_url ? [t.image_url] : []) }); scroll(); };
+  const openEdit = (t) => { setForm({ ...t, price: String(t.price), deposit: String(t.deposit || ''), sort_order: String(t.sort_order), images: t.images?.length ? t.images : (t.image_url ? [t.image_url] : []) }); scroll(); };
 
   const save = async () => {
     if (!form.title.trim()) { showToast('Гарчиг оруулна уу', 'err'); return; }
@@ -33,6 +33,7 @@ export default function TrainingsManager({ showToast }) {
     const payload = {
       title: form.title.trim(), description: form.description.trim(),
       images: imgs, image_url: imgs[0] || '', price: parseInt(form.price) || 0,
+      deposit: parseInt(form.deposit) || 0,
       duration: form.duration.trim(), level: form.level.trim(),
       schedule: form.schedule.trim(), active: form.active,
       sort_order: parseInt(form.sort_order) || 0,
@@ -158,6 +159,10 @@ export default function TrainingsManager({ showToast }) {
             <div>
               <label style={{ fontSize:12, fontWeight:600, color:'var(--gray-500)', display:'block', marginBottom:5, textTransform:'uppercase', letterSpacing:.8 }}>Үнэ (₮)</label>
               <input type="number" value={form.price} onChange={e => setF('price', e.target.value)} placeholder="0" min="0" style={inp} />
+            </div>
+            <div>
+              <label style={{ fontSize:12, fontWeight:600, color:'var(--gray-500)', display:'block', marginBottom:5, textTransform:'uppercase', letterSpacing:.8 }}>Урьдчилгаа (₮)</label>
+              <input type="number" value={form.deposit} onChange={e => setF('deposit', e.target.value)} placeholder="0 = бүтэн төлбөр" min="0" style={inp} />
             </div>
             <div>
               <label style={{ fontSize:12, fontWeight:600, color:'var(--gray-500)', display:'block', marginBottom:5, textTransform:'uppercase', letterSpacing:.8 }}>Үргэлжлэх хугацаа</label>

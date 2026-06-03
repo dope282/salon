@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 import MultiImageUploader from '@/components/admin/MultiImageUploader';
 
 const EMPTY = {
-  name_mn: '', description_mn: '', price_from: '', duration_min: '60', emoji: '✂️', image_url: '', images: [], active: true,
+  name_mn: '', description_mn: '', price_from: '', deposit: '', duration_min: '60', emoji: '✂️', image_url: '', images: [], active: true,
 };
 
 const EMOJI_OPTIONS = ['✂️','🎨','💆','💅','🦶','💄','💇','🧴','💋','🌸','✨','💆‍♀️'];
@@ -31,7 +31,7 @@ export default function ServicesManager({ showToast }) {
     (el || window).scrollTo({ top: 99999, behavior: 'smooth' });
   }, 50);
   const openAdd = () => { setForm({ ...EMPTY }); scrollToForm(); };
-  const openEdit = (s) => { setForm({ ...s, price_from: String(s.price_from), duration_min: String(s.duration_min), images: s.images?.length ? s.images : (s.image_url ? [s.image_url] : []) }); scrollToForm(); };
+  const openEdit = (s) => { setForm({ ...s, price_from: String(s.price_from), deposit: String(s.deposit || ''), duration_min: String(s.duration_min), images: s.images?.length ? s.images : (s.image_url ? [s.image_url] : []) }); scrollToForm(); };
 
   const save = async () => {
     if (!form.name_mn.trim()) { showToast('Үйлчилгээний нэр оруулна уу', 'err'); return; }
@@ -44,6 +44,7 @@ export default function ServicesManager({ showToast }) {
       price_from: parseInt(form.price_from) || 0,
       duration_min: parseInt(form.duration_min) || 60,
       emoji: form.emoji.trim() || '✂️',
+      deposit: parseInt(form.deposit) || 0,
       images: imgs, image_url: imgs[0] || '',
       active: form.active,
     };
@@ -190,6 +191,12 @@ export default function ServicesManager({ showToast }) {
             <div>
               <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-500)', display: 'block', marginBottom: 5, textTransform: 'uppercase', letterSpacing: .8 }}>Үнэ (₮) *</label>
               <input type="number" value={form.price_from} onChange={e => setF('price_from', e.target.value)} placeholder="35000" min="0" style={inp} />
+            </div>
+
+            {/* Deposit */}
+            <div>
+              <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-500)', display: 'block', marginBottom: 5, textTransform: 'uppercase', letterSpacing: .8 }}>Урьдчилгаа (₮)</label>
+              <input type="number" value={form.deposit} onChange={e => setF('deposit', e.target.value)} placeholder="0 = бүтэн төлбөр" min="0" style={inp} />
             </div>
 
             {/* Duration */}

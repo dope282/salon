@@ -1,15 +1,22 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { supabase }  from '@/lib/supabase';
 import { useUI }     from '@/contexts/UIContext';
+import { useAuth }   from '@/contexts/AuthContext';
 import RotatingImage from '@/components/RotatingImage';
+import QPayQR        from '@/components/QPayQR';
 
 export default function Products() {
   const { showToast, openBooking } = useUI();
+  const { user } = useAuth();
   const [products, setProducts] = useState([]);
   const [loading,  setLoading]  = useState(true);
   const [dbError,  setDbError]  = useState('');
   const [filter,   setFilter]   = useState('');
+  const [buyProduct, setBuyProduct] = useState(null); // утас оруулах modal
+  const [placing, setPlacing] = useState(false);
+  const [qr, setQr] = useState(null); // QPayQR
+  const buyPhoneRef = useRef();
 
   useEffect(() => {
     supabase.from('products').select('*').eq('active', true)
@@ -23,7 +30,39 @@ export default function Products() {
 
   const cats    = ['Бүгд', ...Array.from(new Set(products.map(p => p.category).filter(Boolean)))];
   const visible = filter && filter !== 'Бүгд' ? products.filter(p => p.category === filter) : products;
-  const handleBuy = (p) => { if (!p.in_stock) return; showToast(`"${p.name}" захиалахын тулд биднийтэй холбогтно уу 📞`, 'ok'); };
+  const handleBuy = (p) => { if (!p.in_stock) return; setBuyProduct(p); };
+
+  const placeOrder = async () => {
+    const phone = buyPhoneRef.current?.value.trim();
+    if (!/^[0-9]{8}$/.test(phone || '')) { showToast('Утасны дугаар 8 оронтой байх ёстой', 'err'); return; }
+    setPlacing(true);
+    const p = buyProduct;
+    const { data: order, error } = await supabase.from('product_orders').insert([{
+      product_id: p.id, product_name: p.name, quantity: 1, price: p.price || 0,
+      customer_phone: phone, customer_email: user?.email || null,
+      status: 'pending', user_id: user?.id || null,
+    }]).select('id').single();
+    if (error) { setPlacing(false); showToast('Алдаа гарлаа. Дахин оролдоно уу.', 'err'); return; }
+    try {
+      const res = await fetch('/api/qpay/create-invoice', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ recordId: order.id, table: 'product_orders', amount: p.price || 0, description: `🛍️ ${p.name}` }),
+      });
+      const data = await res.json();
+      setPlacing(false);
+      if (!res.ok) { showToast('QPay алдаа: ' + (data.error || ''), 'err'); return; }
+      setBuyProduct(null);
+      setQr({ ...data, recordId: order.id, table: 'product_orders', amount: p.price || 0, title: `🛍️ ${p.name}` });
+    } catch {
+      setPlacing(false);
+      showToast('QPay-тэй холбогдсонгүй', 'err');
+    }
+  };
+
+  const onQrClose = ({ paid }) => {
+    setQr(null);
+    showToast(paid ? 'Худалдан авалт амжилттай! 🎉' : 'Худалдан авалт цуцлагдлаа.', paid ? 'ok' : 'err');
+  };
 
   return (
     <section id="products" className="py-[70px] px-12 bg-[#404040] max-[900px]:px-5 max-[900px]:py-12 max-[640px]:px-4 max-[640px]:py-9">
@@ -111,6 +150,32 @@ export default function Products() {
           </div>
         </>
       )}
+
+      {/* Худалдан авах — утас оруулах modal */}
+      {buyProduct && (
+        <div className="overlay active" style={{ zIndex: 2100 }} onClick={e => { if (e.target === e.currentTarget) setBuyProduct(null); }}>
+          <div className="modal bg-[#606060] rounded-[28px] w-full max-w-[400px] p-8 relative border border-gold/15 shadow-[0_32px_80px_rgba(0,0,0,.25)] max-[640px]:p-5" onClick={e => e.stopPropagation()}>
+            <div className="absolute top-0 left-0 right-0 h-[3px] bg-gradient-to-r from-[#FF3399] via-[#FF66B2] to-[#FF3399] rounded-t-[28px]" />
+            <button onClick={() => setBuyProduct(null)}
+              className="absolute top-5 right-5 w-9 h-9 rounded-full border border-gold/20 bg-gold/8 cursor-pointer text-base text-pink-200 flex items-center justify-center hover:bg-gold/20 z-10">✕</button>
+
+            <h3 className="font-serif text-[20px] font-semibold text-pink-200 mb-1">🛍️ Худалдан авах</h3>
+            <div className="text-sm text-pink-200 font-semibold mb-1">{buyProduct.name}</div>
+            <div className="text-pink font-bold text-lg mb-5">₮{(buyProduct.price ?? 0).toLocaleString()}</div>
+
+            <label className="block text-xs font-semibold mb-1.5 text-pink-200 uppercase tracking-wide">Утасны дугаар</label>
+            <input ref={buyPhoneRef} type="tel" placeholder="99xxxxxx" defaultValue={user?.user_metadata?.phone || ''}
+              className="w-full text-pink-200 px-3 py-2.5 border-[1.5px] border-gold/20 rounded-xl text-sm font-sans outline-none focus:border-gold transition-all bg-[#707070] placeholder:text-pink-400 mb-4" />
+
+            <button disabled={placing} onClick={placeOrder}
+              className="w-full bg-gradient-to-r from-[#FF3399] via-[#FF66B2] to-[#FF3399] text-white border-none py-3 rounded-full text-sm font-bold cursor-pointer disabled:opacity-60">
+              {placing ? 'Түр хүлээнэ үү...' : '📱 QPay-ээр төлж авах'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {qr && <QPayQR qr={qr} onClose={onQrClose} />}
     </section>
   );
 }

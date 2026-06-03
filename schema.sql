@@ -362,6 +362,44 @@ ALTER TABLE public.trainings ADD COLUMN IF NOT EXISTS images JSONB DEFAULT '[]':
 -- ================================================================
 ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS qpay_invoice_id TEXT;
 ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS paid BOOLEAN DEFAULT false;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS paid_at TIMESTAMPTZ;
+ALTER TABLE public.bookings ADD COLUMN IF NOT EXISTS deposit_amount INTEGER DEFAULT 0;
+
+-- ================================================================
+-- 12. DEPOSIT — урьдчилгаа (админ тохируулна)
+-- ================================================================
+ALTER TABLE public.services  ADD COLUMN IF NOT EXISTS deposit INTEGER DEFAULT 0;
+ALTER TABLE public.packages  ADD COLUMN IF NOT EXISTS deposit INTEGER DEFAULT 0;
+ALTER TABLE public.products  ADD COLUMN IF NOT EXISTS deposit INTEGER DEFAULT 0;
+ALTER TABLE public.trainings ADD COLUMN IF NOT EXISTS deposit INTEGER DEFAULT 0;
+ALTER TABLE public.artists   ADD COLUMN IF NOT EXISTS deposit INTEGER DEFAULT 0;
+
+-- ================================================================
+-- 13. PRODUCT ORDERS — бүтээгдэхүүний шууд худалдан авалт (QPay)
+-- ================================================================
+CREATE TABLE IF NOT EXISTS public.product_orders (
+  id              UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  product_id      UUID,
+  product_name    TEXT NOT NULL,
+  quantity        INTEGER DEFAULT 1,
+  price           INTEGER NOT NULL DEFAULT 0,
+  customer_phone  TEXT,
+  customer_email  TEXT,
+  qpay_invoice_id TEXT,
+  paid            BOOLEAN DEFAULT false,
+  paid_at         TIMESTAMPTZ,
+  status          TEXT DEFAULT 'pending',
+  user_id         UUID REFERENCES auth.users(id),
+  created_at      TIMESTAMPTZ DEFAULT NOW()
+);
+ALTER TABLE public.product_orders ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "porders_public_insert" ON public.product_orders FOR INSERT WITH CHECK (true);
+CREATE POLICY "porders_self_read" ON public.product_orders FOR SELECT
+  USING (auth.uid() = user_id OR auth.email() = customer_email OR auth.email() = 'jaamaaj26@gmail.com');
+CREATE POLICY "porders_admin_all" ON public.product_orders FOR ALL
+  USING (auth.email() = 'jaamaaj26@gmail.com') WITH CHECK (auth.email() = 'jaamaaj26@gmail.com');
+GRANT SELECT, INSERT ON public.product_orders TO anon;
+GRANT ALL ON public.product_orders TO authenticated;
 
 -- ================================================================
 -- DONE! Суурь мэдээллийг амжилттай оруулав.

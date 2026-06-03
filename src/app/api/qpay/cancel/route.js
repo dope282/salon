@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { checkPayment } from '@/lib/qpay';
+import { cancelInvoice, checkPayment } from '@/lib/qpay';
 import { supabaseAdmin } from '@/lib/supabaseAdmin';
 
 export const runtime = 'nodejs';
@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 const TBL = (t) => (t === 'product_orders' ? 'product_orders' : 'bookings');
 
-// Клиент энэ route-аар төлбөр төлөгдсөн эсэхийг тогтмол шалгана (polling)
+// Төлбөр төлөгдөөгүй захиалга/захиалгыг цуцлах
 export async function POST(req) {
   try {
     const body = await req.json();
@@ -17,17 +17,22 @@ export async function POST(req) {
 
     const { data: rec } = await supabaseAdmin.from(tbl)
       .select('qpay_invoice_id, paid').eq('id', recordId).single();
-    if (!rec?.qpay_invoice_id) return NextResponse.json({ paid: false });
+    if (!rec) return NextResponse.json({ ok: true });
     if (rec.paid) return NextResponse.json({ paid: true });
 
-    const result = await checkPayment(rec.qpay_invoice_id);
-    if (result.paid) {
-      const upd = { paid: true, paid_at: new Date().toISOString() };
-      if (tbl === 'bookings') upd.status = 'confirmed';
-      else upd.status = 'paid';
-      await supabaseAdmin.from(tbl).update(upd).eq('id', recordId);
+    if (rec.qpay_invoice_id) {
+      const result = await checkPayment(rec.qpay_invoice_id).catch(() => ({ paid: false }));
+      if (result.paid) {
+        const upd = { paid: true, paid_at: new Date().toISOString() };
+        upd.status = tbl === 'bookings' ? 'confirmed' : 'paid';
+        await supabaseAdmin.from(tbl).update(upd).eq('id', recordId);
+        return NextResponse.json({ paid: true });
+      }
+      await cancelInvoice(rec.qpay_invoice_id);
     }
-    return NextResponse.json({ paid: result.paid });
+
+    await supabaseAdmin.from(tbl).delete().eq('id', recordId);
+    return NextResponse.json({ ok: true, cancelled: true });
   } catch (e) {
     return NextResponse.json({ error: e.message }, { status: 500 });
   }
