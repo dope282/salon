@@ -23,10 +23,19 @@ export default function BookingsTable({ bookings, onRefresh, showToast }) {
   const [saving, setSaving]     = useState(false);
   const [m, setM]               = useState(EMPTY_MANUAL);
   const [orders, setOrders]     = useState([]);
+  const [delOrder, setDelOrder] = useState(null); // устгах баталгаажуулах
 
   const loadOrders = async () => {
     const { data } = await supabase.from('product_orders').select('*').order('created_at', { ascending: false });
     setOrders(data || []);
+  };
+
+  const removeOrder = async (id) => {
+    const { error } = await supabase.from('product_orders').delete().eq('id', id);
+    setDelOrder(null);
+    if (error) { showToast('Устгахад алдаа: ' + error.message, 'err'); return; }
+    showToast('Захиалга устгагдлаа', 'ok');
+    loadOrders();
   };
 
   useEffect(() => {
@@ -240,11 +249,11 @@ export default function BookingsTable({ bookings, onRefresh, showToast }) {
       <div className="tbl-scroll">
         <table>
           <thead>
-            <tr><th>Огноо</th><th>Төрөл</th><th>Нэр</th><th>Утас</th><th>Дүн</th><th>Төлбөр</th></tr>
+            <tr><th>Огноо</th><th>Төрөл</th><th>Нэр</th><th>Утас</th><th>Дүн</th><th>Төлбөр</th><th>Үйлдэл</th></tr>
           </thead>
           <tbody>
             {orders.length === 0
-              ? <tr><td colSpan={6} style={{ textAlign:'center', padding:28, color:'var(--gray-500)' }}>Худалдан авалт байхгүй байна</td></tr>
+              ? <tr><td colSpan={7} style={{ textAlign:'center', padding:28, color:'var(--gray-500)' }}>Худалдан авалт байхгүй байна</td></tr>
               : orders.map(o => {
                 const dt = o.created_at ? new Date(o.created_at) : null;
                 const when = dt ? `${dt.getMonth()+1}/${dt.getDate()} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}` : '—';
@@ -262,6 +271,11 @@ export default function BookingsTable({ bookings, onRefresh, showToast }) {
                       </span>
                       {o.paid && o.paid_at && (() => { const d = new Date(o.paid_at); return <div style={{ fontSize:10, color:'var(--gray-500)', marginTop:3 }}>🕐 {d.getMonth()+1}/{d.getDate()} {String(d.getHours()).padStart(2,'0')}:{String(d.getMinutes()).padStart(2,'0')}</div>; })()}
                     </td>
+                    <td>
+                      <button className="btn-outline-sm" style={{ color:'var(--red)', borderColor:'#fecaca' }} onClick={() => setDelOrder(o)}>
+                        🗑 Устгах
+                      </button>
+                    </td>
                   </tr>
                 );
               })}
@@ -269,6 +283,23 @@ export default function BookingsTable({ bookings, onRefresh, showToast }) {
         </table>
       </div>
     </div>
+
+    {/* Худалдан авалт устгах баталгаажуулах */}
+    {delOrder && (
+      <div style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.5)', zIndex:3000, display:'flex', alignItems:'center', justifyContent:'center', padding:20 }}
+        onClick={e => { if (e.target === e.currentTarget) setDelOrder(null); }}>
+        <div style={{ background:'#fff', borderRadius:20, padding:32, maxWidth:360, width:'100%', textAlign:'center', boxShadow:'0 24px 80px rgba(0,0,0,.18)' }}>
+          <div style={{ fontSize:40, marginBottom:12 }}>🗑️</div>
+          <div style={{ fontSize:16, fontWeight:700, marginBottom:6 }}>{delOrder.item_type === 'training' ? 'Сургалт' : 'Худалдан авалт'} устгах уу?</div>
+          <div style={{ fontSize:13, color:'var(--gray-500)', marginBottom:4 }}>{delOrder.product_name}</div>
+          <div style={{ fontSize:12, color:'var(--gray-500)', marginBottom:20 }}>{delOrder.customer_phone} · ₮{(delOrder.price||0).toLocaleString()}{delOrder.paid ? ' · Төлсөн' : ''}</div>
+          <div style={{ display:'flex', gap:10 }}>
+            <button className="btn-outline" onClick={() => setDelOrder(null)} style={{ flex:1, fontSize:13, padding:'10px 0' }}>Болих</button>
+            <button onClick={() => removeOrder(delOrder.id)} style={{ flex:1, padding:'10px 0', borderRadius:50, border:'none', background:'var(--red)', color:'#fff', fontSize:13, fontWeight:700, cursor:'pointer' }}>Устгах</button>
+          </div>
+        </div>
+      </div>
+    )}
     </>
   );
 }
