@@ -71,19 +71,41 @@ export default function Footer() {
         </div>
       </div>
 
-      {/* ── Биднийг дагаарай — Facebook Page Plugin ── */}
-      <div className="flex flex-col items-center gap-5 mb-14 max-[640px]:mb-10">
+      {/* ── Биднийг дагаарай — Facebook + Instagram ── */}
+      <div className="flex flex-col items-center gap-3 mb-14 max-[640px]:mb-10">
         <div className="text-[10px] font-bold uppercase tracking-[2.5px] text-gold">Биднийг дагаарай</div>
 
-        <div className="bg-white rounded-2xl p-2 shadow-[0_8px_30px_rgba(0,0,0,.25)] overflow-hidden">
-          <iframe
-            title="Facebook Page"
-            src={`https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(FB_PAGE)}&tabs=&width=340&height=150&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true`}
-            width="340" height="150"
-            className="border-none overflow-hidden block max-[380px]:w-[300px]"
-            scrolling="no" frameBorder="0" allowFullScreen
-            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
-          />
+        <div className="flex items-stretch justify-center gap-4 flex-wrap">
+          {/* Facebook Page Plugin */}
+          <div className="bg-white rounded-2xl p-2 shadow-[0_8px_30px_rgba(0,0,0,.25)] overflow-hidden w-[356px] h-[166px] max-[380px]:w-[316px]">
+            <iframe
+              title="Facebook Page"
+              src={`https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(FB_PAGE)}&tabs=&width=340&height=150&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true`}
+              width="340" height="150"
+              className="border-none overflow-hidden block max-[380px]:w-[300px]"
+              scrolling="no" frameBorder="0" allowFullScreen
+              allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+            />
+          </div>
+
+          <a href={IG_PAGE} target="_blank" rel="noopener noreferrer"
+            className="bg-white rounded-2xl p-4 shadow-[0_8px_30px_rgba(0,0,0,.25)] no-underline flex flex-col justify-between w-[356px] h-[166px] max-[380px]:w-[316px]">
+            <div className="flex items-center gap-3">
+              <div className="w-[58px] h-[58px] rounded-xl flex items-center justify-center text-white text-[28px] flex-shrink-0"
+                style={{ background: 'linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888)' }}>
+                <i className="fab fa-instagram" />
+              </div>
+              <div className="min-w-0">
+                <div className="text-[15px] font-bold leading-tight" style={{ color: '#111' }}>Hatantsetseg Lash</div>
+                <div className="text-[12px] truncate" style={{ color: '#8a8a8a' }}>@hatantsetseg_lash_brow_artist</div>
+                <div className="text-[12px] mt-0.5" style={{ color: '#8a8a8a' }}>Instagram дээр дагаарай</div>
+              </div>
+            </div>
+            <div className="flex items-center justify-center gap-2 w-full py-2.5 rounded-lg text-white text-[13px] font-semibold"
+              style={{ background: 'linear-gradient(45deg,#f09433,#dc2743,#bc1888)' }}>
+              <i className="fab fa-instagram" /> Дагах
+            </div>
+          </a>
         </div>
 
         {/* Social icons row */}
