@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useUI }   from '@/contexts/UIContext';
 
 export default function Navbar() {
-  const { user, signOut, isAdmin } = useAuth();
+  const { user, signOut, isAdmin, isArtist } = useAuth();
   const { openBooking, openAuth, openMyBookings }  = useUI();
   const [scrolled, setScrolled] = useState(false);
   const [mobOpen, setMobOpen]   = useState(false);
@@ -74,6 +74,7 @@ export default function Navbar() {
                   {user.user_metadata?.full_name || user.email}
                 </span>
                 {isAdmin && <a href="/admin" className="text-[10px] text-[#FF3399] font-bold no-underline uppercase tracking-wider">Admin</a>}
+                {!isAdmin && isArtist && <a href="/artist" className="text-[10px] text-[#FF3399] font-bold no-underline uppercase tracking-wider">Артист</a>}
                 <button className="border-none bg-none text-pink-400 text-[11px] cursor-pointer hover:text-salon-red transition-colors ml-0.5" onClick={handleLogout}>✕</button>
               </div>
             </div>
@@ -122,6 +123,11 @@ export default function Navbar() {
               {isAdmin && (
                 <a href="/admin" className="px-3 py-3 bg-gold-light/80 rounded-xl text-[#FF3399] font-bold text-sm no-underline border border-gold/20 text-center tracking-wide" onClick={() => setMobOpen(false)}>
                   Админ панель
+                </a>
+              )}
+              {!isAdmin && isArtist && (
+                <a href="/artist" className="px-3 py-3 bg-gold-light/80 rounded-xl text-[#FF3399] font-bold text-sm no-underline border border-gold/20 text-center tracking-wide" onClick={() => setMobOpen(false)}>
+                  Миний артист хэсэг
                 </a>
               )}
             </>

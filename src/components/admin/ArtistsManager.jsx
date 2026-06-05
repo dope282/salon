@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase';
 import TimeSelect from '@/components/admin/TimeSelect';
 
 const EMPTY = {
-  name: '', specialty_mn: '', rating: '5.0',
+  name: '', specialty_mn: '', email: '', rating: '5.0',
   review_count: '0', avatar_emoji: '👩', image_url: '', active: true,
   pay_qpay: true, pay_cash: false,
 };
@@ -82,7 +82,7 @@ export default function ArtistsManager({ showToast }) {
     scrollToForm();
   };
   const openEdit = (a) => {
-    setForm({ ...a, rating: String(a.rating), review_count: String(a.review_count) });
+    setForm({ ...a, email: a.email || '', rating: String(a.rating), review_count: String(a.review_count) });
     setSelServices(artistServiceMap[a.id] || []);
     loadSchedule(a.id);
     scrollToForm();
@@ -95,6 +95,7 @@ export default function ArtistsManager({ showToast }) {
     const payload = {
       name:         form.name.trim(),
       specialty_mn: form.specialty_mn.trim(),
+      email:        form.email.trim().toLowerCase() || null,
       rating:       parseFloat(form.rating) || 5.0,
       review_count: parseInt(form.review_count) || 0,
       avatar_emoji: form.avatar_emoji.trim() || '👩',
@@ -300,6 +301,12 @@ export default function ArtistsManager({ showToast }) {
             <div style={{ gridColumn: '1 / -1' }}>
               <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-500)', display: 'block', marginBottom: 5, textTransform: 'uppercase', letterSpacing: .8 }}>Мэргэжил / Чиглэл</label>
               <input type="text" value={form.specialty_mn} onChange={e => setF('specialty_mn', e.target.value)} placeholder="жишээ: Lash мэргэжилтэн" style={inp} />
+            </div>
+            <div style={{ gridColumn: '1 / -1' }}>
+              <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-500)', display: 'block', marginBottom: 5, textTransform: 'uppercase', letterSpacing: .8 }}>
+                📧 Нэвтрэх мэйл <span style={{ textTransform: 'none', letterSpacing: 0, fontWeight: 500, color: 'var(--gray-400)' }}>(артист энэ мэйлээр нэвтэрч хуваарь/захиалгаа удирдана)</span>
+              </label>
+              <input type="email" value={form.email} onChange={e => setF('email', e.target.value)} placeholder="artist@example.com" style={inp} />
             </div>
             <div>
               <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-500)', display: 'block', marginBottom: 5, textTransform: 'uppercase', letterSpacing: .8 }}>Үнэлгээ (0–5)</label>

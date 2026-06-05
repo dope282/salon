@@ -1,5 +1,13 @@
 import Image from 'next/image';
 
+const FB_PAGE = 'https://www.facebook.com/Hatantsetsegsalon';
+const IG_PAGE = 'https://www.instagram.com/hatantsetseg_lash_brow_artist/?hl=en';
+
+const SOCIALS = [
+  { name: 'facebook',  icon: 'fa-facebook-f', href: FB_PAGE },
+  { name: 'instagram', icon: 'fa-instagram',  href: IG_PAGE },
+];
+
 export default function Footer() {
   return (
     <footer id="contact" className="bg-[#404040] text-white pt-20 px-12 pb-8 max-[900px]:px-5 max-[900px]:pt-12 max-[640px]:px-4 max-[640px]:pt-9 max-[640px]:pb-6">
@@ -14,10 +22,10 @@ export default function Footer() {
             Hatantsetsey lash Beauty Salon — тансаглал, мэргэжил, итгэлийн нэгдэл. Та бидэнтэй хамт гоо сайхныхаа шинэ хуудсыг нээнэ үү.
           </p>
           <div className="flex gap-3">
-            {['facebook'].map(s => (
-              <a key={s} href="https://www.facebook.com/Hatantsetsegsalon"
+            {SOCIALS.map(s => (
+              <a key={s.name} href={s.href} target="_blank" rel="noopener noreferrer"
                 className="w-9 h-9 rounded-full bg-[#606060]/6 border border-white/10 flex items-center justify-center text-white/50 no-underline text-sm transition-all hover:bg-gold/20 hover:border-gold/30 hover:text-gold">
-                <i className={`fab fa-${s}`} />
+                <i className={`fab ${s.icon}`} />
               </a>
             ))}
           </div>
@@ -58,6 +66,33 @@ export default function Footer() {
               className="flex items-start gap-3 text-white/40 text-[13px] mb-3 no-underline hover:text-gold transition-colors">
               <i className={`fas ${icon} text-gold/70 w-4 text-center mt-0.5 flex-shrink-0`} />
               <span>{text}</span>
+            </a>
+          ))}
+        </div>
+      </div>
+
+      {/* ── Биднийг дагаарай — Facebook Page Plugin ── */}
+      <div className="flex flex-col items-center gap-5 mb-14 max-[640px]:mb-10">
+        <div className="text-[10px] font-bold uppercase tracking-[2.5px] text-gold">Биднийг дагаарай</div>
+
+        <div className="bg-white rounded-2xl p-2 shadow-[0_8px_30px_rgba(0,0,0,.25)] overflow-hidden">
+          <iframe
+            title="Facebook Page"
+            src={`https://www.facebook.com/plugins/page.php?href=${encodeURIComponent(FB_PAGE)}&tabs=&width=340&height=150&small_header=false&adapt_container_width=true&hide_cover=false&show_facepile=true`}
+            width="340" height="150"
+            className="border-none overflow-hidden block max-[380px]:w-[300px]"
+            scrolling="no" frameBorder="0" allowFullScreen
+            allow="autoplay; clipboard-write; encrypted-media; picture-in-picture; web-share"
+          />
+        </div>
+
+        {/* Social icons row */}
+        <div className="flex items-center gap-4">
+          {SOCIALS.map(s => (
+            <a key={s.name} href={s.href} target="_blank" rel="noopener noreferrer"
+              aria-label={s.name}
+              className="w-11 h-11 rounded-full bg-white/8 border border-white/15 flex items-center justify-center text-white/70 no-underline text-lg transition-all hover:bg-gold/20 hover:border-gold/40 hover:text-gold hover:-translate-y-0.5">
+              <i className={`fab ${s.icon}`} />
             </a>
           ))}
         </div>

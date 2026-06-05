@@ -7,6 +7,8 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [artist, setArtist] = useState(null);          // нэвтэрсэн хэрэглэгчтэй тохирох артист (байвал)
+  const [artistChecked, setArtistChecked] = useState(false);
 
   useEffect(() => {
     supabase.auth.getSession()
@@ -20,6 +22,23 @@ export function AuthProvider({ children }) {
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Нэвтэрсэн хэрэглэгчийн мэйл артистын мэйлтэй тохирч байгаа эсэхийг шалгана
+  useEffect(() => {
+    const email = user?.email?.toLowerCase();
+    if (!email) {
+      setArtist(null);
+      // Auth ачаалал дуусаагүй бол "шалгасан" гэж тэмдэглэхгүй (false хэвээр) —
+      // ингэснээр хуудасны guard цаг бусаар буцаахгүй
+      setArtistChecked(!loading);
+      return;
+    }
+    setArtistChecked(false);
+    supabase.from('artists').select('*').ilike('email', email).limit(1)
+      .then(({ data }) => { setArtist(data?.[0] || null); })
+      .catch(() => setArtist(null))
+      .finally(() => setArtistChecked(true));
+  }, [user?.email, loading]);
 
   async function signIn(email, password) {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -52,9 +71,10 @@ export function AuthProvider({ children }) {
   }
 
   const isAdmin = isAdminEmail(user?.email);
+  const isArtist = !!artist;
 
   return (
-    <AuthContext.Provider value={{ user, loading, isAdmin, signIn, signUp, signOut, resetPassword, updatePassword }}>
+    <AuthContext.Provider value={{ user, loading, isAdmin, artist, isArtist, artistChecked, signIn, signUp, signOut, resetPassword, updatePassword }}>
       {children}
     </AuthContext.Provider>
   );
