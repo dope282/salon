@@ -1,5 +1,9 @@
 // cPanel "Setup Node.js App" / VPS дээр ажиллуулах серверийн эхлэл файл.
 // Passenger эсвэл орчин PORT-г process.env.PORT-оор дамжуулна.
+
+// .env.local / .env-ээс орчны хувьсагчдыг runtime дээр ачаална (QPay, service role г.м.)
+try { require('@next/env').loadEnvConfig(process.cwd()); } catch {}
+
 const { createServer } = require('http');
 const { parse } = require('url');
 const next = require('next');
