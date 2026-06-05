@@ -6,6 +6,7 @@ import TimeSelect from '@/components/admin/TimeSelect';
 const EMPTY = {
   name: '', specialty_mn: '', rating: '5.0',
   review_count: '0', avatar_emoji: '👩', image_url: '', active: true,
+  pay_qpay: true, pay_cash: false,
 };
 
 const DAYS = [
@@ -99,6 +100,8 @@ export default function ArtistsManager({ showToast }) {
       avatar_emoji: form.avatar_emoji.trim() || '👩',
       image_url:    form.image_url.trim(),
       active:       form.active,
+      pay_qpay:     form.pay_qpay !== false,
+      pay_cash:     form.pay_cash === true,
     };
 
     let error, artistId = form.id;
@@ -348,6 +351,22 @@ export default function ArtistsManager({ showToast }) {
               </div>
             </div>
           )}
+
+          {/* ── Payment methods ── */}
+          <div style={{ borderTop: '1.5px solid var(--gray-200)', paddingTop: 16, marginBottom: 20 }}>
+            <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--gray-500)', display: 'block', marginBottom: 10, textTransform: 'uppercase', letterSpacing: .8 }}>
+              💳 Төлбөрийн арга
+            </label>
+            <div style={{ display: 'flex', gap: 24, flexWrap: 'wrap' }}>
+              <Toggle value={form.pay_qpay !== false} onChange={v => setF('pay_qpay', v)} label="📱 QPay-ээр" />
+              <Toggle value={form.pay_cash === true}  onChange={v => setF('pay_cash', v)}  label="💵 Бэлнээр" />
+            </div>
+            {!form.pay_qpay && !form.pay_cash && (
+              <div style={{ fontSize: 11, marginTop: 8, fontWeight: 600, color: 'var(--red)' }}>
+                ⚠️ Дор хаяж нэг арга идэвхтэй байх ёстой (үгүй бол QPay автоматаар ашиглагдана)
+              </div>
+            )}
+          </div>
 
           {/* ── Weekly schedule ── */}
           <div style={{ borderTop: '1.5px solid var(--gray-200)', paddingTop: 16, marginBottom: 16 }}>

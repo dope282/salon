@@ -187,6 +187,23 @@ export default function BookingModal() {
   }, [bookingOpen, bookingArtist, bookingPackage]);
   const handleClose = () => { closeBooking(); reset(); };
 
+  // Сонгосон артистын зөвшөөрсөн төлбөрийн аргууд
+  const payMethods = () => {
+    const a = artists.find(x => x.name === bk.art);
+    const methods = [];
+    if (a?.pay_qpay !== false) methods.push('qpay');   // default: QPay асаалттай
+    if (a?.pay_cash === true)  methods.push('cash');
+    return methods.length ? methods : ['qpay'];          // дор хаяж нэг
+  };
+
+  // Step 4-т орох / артист солигдоход бэлэн бус арга сонгогдсон бол анхдагчийг тааруулна
+  useEffect(() => {
+    if (step !== 4) return;
+    const methods = payMethods();
+    if (!methods.includes(bk.pay)) setBk(b => ({ ...b, pay: methods[0] }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, bk.art, artists]);
+
   const next = async () => {
     if (step === 1 && bk.mode === 'service' && bk.svcs.length === 0) { showToast('Үйлчилгээ сонгоно уу', 'err'); return; }
     if (step === 1 && bk.mode === 'package' && !bk.pkg) { showToast('Багц сонгоно уу', 'err'); return; }
@@ -232,7 +249,7 @@ export default function BookingModal() {
       service_name: svcName,
       artist_name: bk.art, booking_date: dateStr,
       booking_time: bk.time, payment_method: bk.pay, notes, duration_min: dur,
-      total_price: total, deposit_amount: charge,
+      total_price: total, deposit_amount: bk.pay === 'qpay' ? charge : 0,
       status: 'pending', user_id: user?.id || null,
     }]).select('id').single();
     if (error) { setLoading(false); showToast('Алдаа гарлаа. Дахин оролдоно уу.', 'err'); return; }
@@ -698,7 +715,7 @@ export default function BookingModal() {
                   <span className="text-[15px] font-bold text-pink-200">Нийт үнэ</span>
                   <span className="text-xl font-bold text-pink">₮{totalPrice().toLocaleString()}</span>
                 </div>
-                {computeDeposit() > 0 && (
+                {bk.pay === 'qpay' && computeDeposit() > 0 && (
                   <div className="bg-[#707070] rounded-xl px-3.5 py-3 -mt-1">
                     <div className="flex justify-between items-center">
                       <span className="text-sm font-semibold text-pink-200">📱 Урьдчилгаа (QPay-ээр төлнө)</span>
@@ -726,16 +743,43 @@ export default function BookingModal() {
               </div>
               <div>
                 <h4 className="text-base font-bold mb-4 pb-3 border-b border-gray-200 text-pink-200">Төлбөрийн арга</h4>
-                <div className="flex items-center gap-3 px-4 py-3.5 border-2 border-pink rounded-2xl bg-[#707070] text-pink-200">
-                  <span className="text-2xl">📱</span>
-                  <div>
-                    <div className="text-sm font-semibold">QPay-ээр төлнө</div>
-                    <div className="text-[11px] text-pink-400">Бүх банкны апп-аар QR уншуулж төлнө</div>
-                  </div>
-                </div>
-                <p className="text-[11px] text-pink-400 mt-3 leading-relaxed">
-                  ⏱ Захиалга баталгаажуулсны дараа <strong>5 минутын дотор</strong> төлбөрөө төлнө. Төлөгдөөгүй бол захиалга автоматаар цуцлагдана.
-                </p>
+                {(() => {
+                  const methods = payMethods();
+                  const OPT = {
+                    qpay: { ico:'📱', title:'QPay-ээр төлнө',  desc:'Бүх банкны апп-аар QR уншуулж төлнө' },
+                    cash: { ico:'💵', title:'Бэлнээр төлнө',    desc:'Салон дээр биеэр төлбөрөө хийнэ' },
+                  };
+                  return (
+                    <div className="flex flex-col gap-2.5">
+                      {methods.map(m => {
+                        const sel = bk.pay === m;
+                        const o = OPT[m];
+                        return (
+                          <div key={m} onClick={() => setBk(b => ({ ...b, pay:m }))}
+                            className={`flex items-center gap-3 px-4 py-3.5 border-2 rounded-2xl cursor-pointer transition-all ${sel ? 'border-pink bg-[#707070]' : 'border-gray-200 bg-[#606060] hover:border-pink-light'} text-pink-200`}>
+                            <span className="text-2xl">{o.ico}</span>
+                            <div className="flex-1">
+                              <div className="text-sm font-semibold">{o.title}</div>
+                              <div className="text-[11px] text-pink-400">{o.desc}</div>
+                            </div>
+                            <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center flex-shrink-0 ${sel ? 'border-pink bg-pink' : 'border-gray-300'}`}>
+                              {sel && <span className="text-white text-[10px] font-bold">✓</span>}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })()}
+                {bk.pay === 'qpay' ? (
+                  <p className="text-[11px] text-pink-400 mt-3 leading-relaxed">
+                    ⏱ Захиалга баталгаажуулсны дараа <strong>5 минутын дотор</strong> төлбөрөө төлнө. Төлөгдөөгүй бол захиалга автоматаар цуцлагдана.
+                  </p>
+                ) : (
+                  <p className="text-[11px] text-pink-400 mt-3 leading-relaxed">
+                    💡 Захиалга баталгаажуулсны дараа товлосон цагтаа ирж, төлбөрөө салон дээр <strong>бэлнээр</strong> төлнө.
+                  </p>
+                )}
               </div>
             </div>
           </div>
