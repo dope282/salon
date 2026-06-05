@@ -8,7 +8,11 @@ const nextConfig = {
       { protocol: 'https', hostname: 'zbyibqszdwqngzpgsstn.supabase.co' },
     ],
   },
-  experimental: {},
+  // Хуваалцсан хостингийн процессын хязгаарт (EAGAIN) тулгаралгүй build хийх — ажилчин процессыг 1 болгох
+  experimental: {
+    cpus: 1,
+    workerThreads: false,
+  },
 };
 
 export default nextConfig;
