@@ -264,6 +264,14 @@ export default function BookingModal() {
 
     // QPay — нэхэмжлэл үүсгэж QR харуулна
     if (bk.pay === 'qpay') {
+      const cleanupBooking = async () => {
+        // Ghost booking-г устгана — QPay амжилтгүй болоход захиалга хадгалагдсан хэвээр байх ёсгүй
+        try { await supabase.from('bookings').delete().eq('id', inserted.id); } catch {}
+        if (slotKey) setBookedSlots(prev => ({
+          ...prev,
+          [slotKey]: (prev[slotKey] || []).filter(iv => !(iv.start === slotStart && iv.end === slotEnd)),
+        }));
+      };
       try {
         const res = await fetch('/api/qpay/create-invoice', {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -271,12 +279,18 @@ export default function BookingModal() {
         });
         const data = await res.json();
         setLoading(false);
-        if (!res.ok) { showToast('QPay алдаа: ' + (data.error || ''), 'err'); return; }
+        if (!res.ok) {
+          await cleanupBooking();
+          const errMsg = data.error || 'Тодорхойгүй алдаа';
+          showToast('QPay алдаа: ' + errMsg, 'err');
+          return;
+        }
         setQrPaid(false);
         setQr({ ...data, bookingId: inserted.id, amount: charge, slotKey, slotStart, slotEnd });
-      } catch {
+      } catch (err) {
         setLoading(false);
-        showToast('QPay-тэй холбогдсонгүй', 'err');
+        await cleanupBooking();
+        showToast('QPay-тэй холбогдсонгүй: ' + (err?.message || 'Network error'), 'err');
       }
       return;
     }
