@@ -1,34 +1,47 @@
 'use client';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, Fragment } from 'react';
 import { supabase } from '@/lib/supabase';
 
-function formatDT(date, time) {
-  if (!date) return '—';
-  const d = new Date(date);
-  return `${d.getMonth()+1}-р сар ${d.getDate()}, ${time||''}`;
-}
-function badgeCls(s){ return {pending:'pend',confirmed:'ok',completed:'info',cancelled:'fail'}[s]||'pend' }
-function statusMn(s){ return {pending:'Хүлээгдэж байна',confirmed:'Батлагдсан',completed:'Дууссан',cancelled:'Цуцлагдсан'}[s]||s }
+const DAY_MN   = ['Ням','Даваа','Мягмар','Лхагва','Пүрэв','Баасан','Бямба'];
+const MONTH_MN = ['1-р сар','2-р сар','3-р сар','4-р сар','5-р сар','6-р сар',
+                  '7-р сар','8-р сар','9-р сар','10-р сар','11-р сар','12-р сар'];
 
-// Боломжит цаг тооцоолох туслахууд (үйлчлүүлэгчийн модальтай ижил логик)
+function formatDateLabel(dateStr) {
+  if (!dateStr || dateStr === '__nodate__') return '📋 Огноогүй';
+  const d     = new Date(dateStr + 'T00:00');
+  const today = new Date(); today.setHours(0,0,0,0);
+  const diff  = Math.round((d - today) / 86_400_000);
+  const base  = `${d.getFullYear()} оны ${MONTH_MN[d.getMonth()]} ${d.getDate()}-ны өдөр · ${DAY_MN[d.getDay()]}`;
+  if (diff === 0)  return `🟢 Өнөөдөр · ${base}`;
+  if (diff === 1)  return `🔵 Маргааш · ${base}`;
+  if (diff === -1) return `⚫ Өчигдөр · ${base}`;
+  if (diff < 0)    return `⚫ ${base}`;
+  return `📅 ${base}`;
+}
+
+function formatTime(time) { return time ? time.slice(0,5) : '—'; }
+function badgeCls(s)  { return {pending:'pend',confirmed:'ok',completed:'info',cancelled:'fail'}[s]||'pend'; }
+function statusMn(s)  { return {pending:'Хүлээгдэж байна',confirmed:'Батлагдсан',completed:'Дууссан',cancelled:'Цуцлагдсан'}[s]||s; }
+
+// Боломжит цаг тооцоолох туслахууд
 const WORK_START = '09:00', WORK_END = '18:00', LEAD_MIN = 20;
 const timeToMin = (t) => { const [h, m] = String(t).split(':').map(Number); return h * 60 + m; };
 const minToTime = (m) => `${String(Math.floor(m/60)).padStart(2,'0')}:${String(m%60).padStart(2,'0')}`;
+const todayStr  = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
 
-const todayStr = () => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; };
 const EMPTY_MANUAL = { phone:'', name:'', artist:'', service:'', date: todayStr(), time:'', duration:'60', price:'', notes:'' };
 
 export default function BookingsTable({ bookings, onRefresh, showToast }) {
-  const [filter, setFilter] = useState('');
+  const [filter,   setFilter]   = useState('');
   const [updating, setUpdating] = useState(null);
-  const [artists, setArtists]   = useState([]);
+  const [artists,  setArtists]  = useState([]);
   const [services, setServices] = useState([]);
-  const [showAdd, setShowAdd]   = useState(false);
-  const [saving, setSaving]     = useState(false);
-  const [m, setM]               = useState(EMPTY_MANUAL);
-  const [schedMap, setSchedMap] = useState({}); // { artistId: schedules[] }
-  const [orders, setOrders]     = useState([]);
-  const [delOrder, setDelOrder] = useState(null); // устгах баталгаажуулах
+  const [showAdd,  setShowAdd]  = useState(false);
+  const [saving,   setSaving]   = useState(false);
+  const [m,        setM]        = useState(EMPTY_MANUAL);
+  const [schedMap, setSchedMap] = useState({});
+  const [orders,   setOrders]   = useState([]);
+  const [delOrder, setDelOrder] = useState(null);
 
   const loadOrders = async () => {
     const { data } = await supabase.from('product_orders').select('*').order('created_at', { ascending: false });
@@ -60,10 +73,10 @@ export default function BookingsTable({ bookings, onRefresh, showToast }) {
   // Боломжит цагууд — артист, огноо, үйлчилгээний хугацаа, давхцал, буфер тооцсон
   const adminSlots = useMemo(() => {
     if (!m.artist || !m.date) return [];
-    const dur = parseInt(m.duration) || 60;
+    const dur    = parseInt(m.duration) || 60;
     const artist = artists.find(a => a.name === m.artist);
-    const dow = new Date(`${m.date}T00:00`).getDay();
-    const sched = artist ? (schedMap[artist.id] || []).find(s => s.day_of_week === dow) : null;
+    const dow    = new Date(`${m.date}T00:00`).getDay();
+    const sched  = artist ? (schedMap[artist.id] || []).find(s => s.day_of_week === dow) : null;
     if (sched && !sched.is_active) return [];
     const winStart = timeToMin(sched ? sched.start_time : WORK_START);
     const winEnd   = timeToMin(sched ? sched.end_time   : WORK_END);
@@ -71,9 +84,9 @@ export default function BookingsTable({ bookings, onRefresh, showToast }) {
       .filter(b => b.artist_name === m.artist && b.booking_date === m.date && b.status !== 'cancelled')
       .map(b => { const s = timeToMin(b.booking_time); return { start: s, end: s + (b.duration_min || 60) }; });
     const overlaps = (s, e) => busy.some(b => s < b.end && b.start < e);
-    const isToday = m.date === todayStr();
-    const nowMins = new Date().getHours() * 60 + new Date().getMinutes();
-    const step = dur > 0 ? dur : 60;
+    const isToday  = m.date === todayStr();
+    const nowMins  = new Date().getHours() * 60 + new Date().getMinutes();
+    const step     = dur > 0 ? dur : 60;
     const out = [];
     for (let s = winStart; s + dur <= winEnd; s += step) {
       if (isToday && s <= nowMins + LEAD_MIN) continue;
@@ -83,40 +96,38 @@ export default function BookingsTable({ bookings, onRefresh, showToast }) {
     return out;
   }, [m.artist, m.date, m.duration, artists, schedMap, bookings]);
 
-  const setMF = (k, v) => setM(prev => ({ ...prev, [k]: v }));
+  const setMF     = (k, v) => setM(prev => ({ ...prev, [k]: v }));
   const pickService = (name) => {
     const svc = services.find(s => s.name_mn === name);
     setM(prev => ({ ...prev, service: name, time: '',
       duration: svc?.duration_min ? String(svc.duration_min) : prev.duration,
-      price: svc?.price_from ? String(svc.price_from) : prev.price }));
+      price:    svc?.price_from   ? String(svc.price_from)   : prev.price }));
   };
 
   const saveManual = async () => {
     if (!/^[0-9]{8}$/.test(m.phone.trim())) { showToast('Утасны дугаар 8 оронтой байх ёстой', 'err'); return; }
-    if (!m.artist)  { showToast('Артист сонгоно уу', 'err'); return; }
-    if (!m.service.trim()) { showToast('Үйлчилгээ оруулна уу', 'err'); return; }
+    if (!m.artist)          { showToast('Артист сонгоно уу', 'err'); return; }
+    if (!m.service.trim())  { showToast('Үйлчилгээ оруулна уу', 'err'); return; }
     if (!m.date || !m.time) { showToast('Огноо болон цаг оруулна уу', 'err'); return; }
     setSaving(true);
     const { error } = await supabase.from('bookings').insert([{
-      customer_name: m.name.trim() || m.phone.trim(),
+      customer_name:  m.name.trim() || m.phone.trim(),
       customer_phone: m.phone.trim(),
-      service_name: m.service.trim(),
-      artist_name: m.artist,
-      booking_date: m.date,
-      booking_time: m.time,
-      duration_min: parseInt(m.duration) || 60,
-      total_price: parseInt(m.price) || 0,
+      service_name:   m.service.trim(),
+      artist_name:    m.artist,
+      booking_date:   m.date,
+      booking_time:   m.time,
+      duration_min:   parseInt(m.duration) || 60,
+      total_price:    parseInt(m.price) || 0,
       payment_method: 'cash',
-      notes: m.notes.trim() || null,
-      status: 'confirmed',
+      notes:          m.notes.trim() || null,
+      status:         'confirmed',
     }]);
     setSaving(false);
     if (error) { showToast('Алдаа: ' + error.message, 'err'); return; }
     showToast('Цаг амжилттай нэмэгдлээ ✓', 'ok');
     setShowAdd(false); setM(EMPTY_MANUAL); onRefresh();
   };
-
-  const filtered = filter ? bookings.filter(b => b.status === filter) : bookings;
 
   const setStatus = async (id, status) => {
     setUpdating(id);
@@ -128,18 +139,46 @@ export default function BookingsTable({ bookings, onRefresh, showToast }) {
     onRefresh();
   };
 
+  // ── Өдрөөр бүлэглэх ──────────────────────────────────────────────
+  const filtered = filter ? bookings.filter(b => b.status === filter) : bookings;
+
+  const groupedByDate = useMemo(() => {
+    // Тухайн өдрийн захиалгуудыг цагаар эрэмблэх
+    const sorted = [...filtered].sort((a, b) =>
+      (a.booking_time || '').localeCompare(b.booking_time || '')
+    );
+    const map = {};
+    sorted.forEach(b => {
+      const key = b.booking_date || '__nodate__';
+      if (!map[key]) map[key] = [];
+      map[key].push(b);
+    });
+    const today = todayStr();
+    // Өнөөдөр → Ирээдүй (өсөх) → Өнгөрсөн (буурах — хамгийн сүүлийн өчигдрөөс)
+    const keys = Object.keys(map);
+    const todayKeys  = keys.filter(k => k === today);
+    const futureKeys = keys.filter(k => k !== '__nodate__' && k > today).sort();
+    const pastKeys   = keys.filter(k => k !== '__nodate__' && k < today).sort().reverse();
+    const noDateKeys = keys.filter(k => k === '__nodate__');
+    return [...todayKeys, ...futureKeys, ...pastKeys, ...noDateKeys].map(k => [k, map[k]]);
+  }, [filtered]);
+
+  // Өнөөдрийн мөрийн artstyle
+  const isToday = (dateStr) => dateStr === todayStr();
+  const isPast  = (dateStr) => dateStr && dateStr < todayStr();
+
   const ActionBtns = ({ b }) => {
     const { id, status } = b;
     const dis = updating === id;
     return (
       <div style={{ display:'flex', gap:5, flexWrap:'wrap' }}>
         {status === 'pending' && <>
-          <button className="btn-outline-sm" style={{ color:'var(--green)', borderColor:'var(--green)' }} disabled={dis} onClick={() => setStatus(id,'confirmed')}>Батлах</button>
-          <button className="btn-outline-sm" style={{ color:'var(--red)', borderColor:'var(--red)' }}     disabled={dis} onClick={() => setStatus(id,'cancelled')}>Цуцлах</button>
+          <button className="btn-outline-sm" style={{ color:'var(--green)', borderColor:'var(--green)' }}   disabled={dis} onClick={() => setStatus(id,'confirmed')}>Батлах</button>
+          <button className="btn-outline-sm" style={{ color:'var(--red)',   borderColor:'var(--red)' }}     disabled={dis} onClick={() => setStatus(id,'cancelled')}>Цуцлах</button>
         </>}
         {status === 'confirmed' && <>
-          <button className="btn-outline-sm" style={{ color:'var(--gold)', borderColor:'var(--gold)' }}   disabled={dis} onClick={() => setStatus(id,'completed')}>Дуусгах</button>
-          <button className="btn-outline-sm" style={{ color:'var(--red)', borderColor:'var(--red)' }}     disabled={dis} onClick={() => setStatus(id,'cancelled')}>Цуцлах</button>
+          <button className="btn-outline-sm" style={{ color:'var(--gold)', borderColor:'var(--gold)' }}     disabled={dis} onClick={() => setStatus(id,'completed')}>Дуусгах</button>
+          <button className="btn-outline-sm" style={{ color:'var(--red)',  borderColor:'var(--red)' }}      disabled={dis} onClick={() => setStatus(id,'cancelled')}>Цуцлах</button>
         </>}
         {status === 'cancelled' && (
           <button className="btn-outline-sm" disabled={dis} onClick={() => setStatus(id,'pending')}>Сэргээх</button>
@@ -153,7 +192,14 @@ export default function BookingsTable({ bookings, onRefresh, showToast }) {
     <>
     <div className="card" style={{ marginBottom:20 }}>
       <div className="card-header">
-        <div className="card-title">Бүх захиалгууд</div>
+        <div style={{ display:'flex', alignItems:'center', gap:10, flexWrap:'wrap' }}>
+          <div className="card-title" style={{ marginBottom:0 }}>Бүх захиалгууд</div>
+          {filtered.length > 0 && (
+            <span style={{ fontSize:11, fontWeight:700, padding:'2px 9px', borderRadius:50, background:'#F3E8FF', color:'#7C3AED' }}>
+              {filtered.length} нийт · {groupedByDate.length} өдөр
+            </span>
+          )}
+        </div>
         <div style={{ display:'flex', gap:8, alignItems:'center', flexWrap:'wrap' }}>
           <button className="btn-primary" style={{ padding:'8px 16px', fontSize:13 }} onClick={() => { setM(EMPTY_MANUAL); setShowAdd(true); }}>
             + Гараар цаг нэмэх
@@ -177,32 +223,81 @@ export default function BookingsTable({ bookings, onRefresh, showToast }) {
           </button>
         </div>
       </div>
-      <div className="tbl-scroll">
-        <table>
-          <thead>
-            <tr><th>#</th><th>Утас</th><th>Үйлчилгээ</th><th>Уран бүтээлч</th><th>Огноо & Цаг</th><th>Тэмдэглэл</th><th>Статус</th><th>Үйлдэл</th></tr>
-          </thead>
-          <tbody>
-            {filtered.length === 0
-              ? <tr><td colSpan={8} style={{ textAlign:'center', padding:32, color:'var(--gray-500)' }}>Захиалга байхгүй байна</td></tr>
-              : filtered.map(b => (
-                <tr key={b.id}>
-                  <td style={{ fontSize:11, color:'var(--gray-500)' }}>{b.id.slice(0,6).toUpperCase()}</td>
-                  <td><strong>{b.customer_phone}</strong></td>
-                  <td>{b.service_name}</td>
-                  <td>{b.artist_name}</td>
-                  <td>{formatDT(b.booking_date, b.booking_time)}</td>
-                  <td style={{ maxWidth:200, fontSize:12, color: b.notes ? 'var(--dark)' : 'var(--gray-300)' }}>
-                    {b.notes ? <span title={b.notes}>📝 {b.notes}</span> : '—'}
-                  </td>
-                  <td><span className={`badge ${badgeCls(b.status)}`}>{statusMn(b.status)}</span></td>
-                  <td><ActionBtns b={b} /></td>
-                </tr>
-              ))
-            }
-          </tbody>
-        </table>
-      </div>
+
+      {/* ── Өдрөөр бүлэглэсэн захиалгууд ── */}
+      {groupedByDate.length === 0 ? (
+        <div style={{ textAlign:'center', padding:'40px 20px', color:'var(--gray-400)' }}>
+          <div style={{ fontSize:36, marginBottom:8 }}>📭</div>
+          <div style={{ fontSize:14, fontWeight:600 }}>Захиалга байхгүй байна</div>
+        </div>
+      ) : (
+        groupedByDate.map(([dateKey, dayBookings]) => {
+          const today  = isToday(dateKey);
+          const past   = isPast(dateKey);
+          const headerBg    = today ? '#ECFDF5' : past ? '#F9FAFB' : '#EFF6FF';
+          const headerColor = today ? '#065F46' : past ? '#6B7280' : '#1E40AF';
+          const headerBorder= today ? '#A7F3D0' : past ? '#E5E7EB' : '#BFDBFE';
+
+          return (
+            <Fragment key={dateKey}>
+              {/* ── Өдрийн хэсгийн header ── */}
+              <div style={{
+                display:'flex', alignItems:'center', justifyContent:'space-between',
+                padding:'10px 20px', background:headerBg,
+                borderTop:`2px solid ${headerBorder}`,
+                borderBottom:`1px solid ${headerBorder}`,
+              }}>
+                <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+                  <span style={{ fontSize:13, fontWeight:700, color:headerColor }}>
+                    {formatDateLabel(dateKey)}
+                  </span>
+                </div>
+                <span style={{
+                  fontSize:11, fontWeight:700, padding:'3px 10px', borderRadius:50,
+                  background: today ? '#059669' : past ? '#9CA3AF' : '#2563EB',
+                  color:'#fff',
+                }}>
+                  {dayBookings.length} захиалга
+                </span>
+              </div>
+
+              {/* ── Тухайн өдрийн захиалгууд ── */}
+              <div className="tbl-scroll" style={{ marginBottom:0 }}>
+                <table style={{ marginBottom:0 }}>
+                  <thead>
+                    <tr>
+                      <th style={{ width:64 }}>#</th>
+                      <th>Утас</th>
+                      <th>Үйлчилгээ</th>
+                      <th>Артист</th>
+                      <th style={{ width:80 }}>Цаг</th>
+                      <th>Тэмдэглэл</th>
+                      <th>Статус</th>
+                      <th>Үйлдэл</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dayBookings.map(b => (
+                      <tr key={b.id} style={today ? { background:'#FFFBF5' } : past && b.status !== 'cancelled' ? { opacity:.72 } : {}}>
+                        <td style={{ fontSize:11, color:'var(--gray-500)' }}>{b.id.slice(0,6).toUpperCase()}</td>
+                        <td><strong>{b.customer_phone}</strong></td>
+                        <td style={{ maxWidth:200 }}>{b.service_name}</td>
+                        <td>{b.artist_name}</td>
+                        <td style={{ fontWeight:700, whiteSpace:'nowrap' }}>{formatTime(b.booking_time)}</td>
+                        <td style={{ maxWidth:160, fontSize:12, color: b.notes ? 'var(--dark)' : 'var(--gray-300)' }}>
+                          {b.notes ? <span title={b.notes}>📝 {b.notes}</span> : '—'}
+                        </td>
+                        <td><span className={`badge ${badgeCls(b.status)}`}>{statusMn(b.status)}</span></td>
+                        <td><ActionBtns b={b} /></td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </Fragment>
+          );
+        })
+      )}
 
       {/* Гараар цаг нэмэх — модал */}
       {showAdd && (() => {

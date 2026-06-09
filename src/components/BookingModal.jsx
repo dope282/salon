@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUI }   from '@/contexts/UIContext';
 import { supabase } from '@/lib/supabase';
@@ -49,6 +49,25 @@ export default function BookingModal() {
   const [secsLeft, setSecsLeft] = useState(300); // 5 минут countdown
   const phoneRef = useRef();
   const notesRef = useRef();
+
+  // ── Захиалагдсан цагуудыг DB-ээс шинэчлэх (stale дата засах) ──
+  const refreshBookedSlots = useCallback(async () => {
+    const todayStr = new Date().toISOString().split('T')[0];
+    const maxDay   = new Date(); maxDay.setDate(maxDay.getDate() + 14);
+    const maxStr   = maxDay.toISOString().split('T')[0];
+    const { data: bkData } = await supabase
+      .from('bookings').select('artist_name, booking_date, booking_time, duration_min')
+      .neq('status', 'cancelled').gte('booking_date', todayStr).lte('booking_date', maxStr);
+    if (!bkData) return;
+    const bkMap = {};
+    bkData.forEach(b => {
+      const key = `${b.artist_name}|${b.booking_date}`;
+      if (!bkMap[key]) bkMap[key] = [];
+      const start = timeToMin(b.booking_time);
+      bkMap[key].push({ start, end: start + (b.duration_min || 60) });
+    });
+    setBookedSlots(bkMap);
+  }, []);
 
   // Локал цагийн нөөцийг буцааж чөлөөлөх (цуцлах үед)
   const releaseSlot = () => {
@@ -174,7 +193,7 @@ export default function BookingModal() {
 
   const reset = () => { setStep(1); setBk(INIT_BK); setQr(null); setQrPaid(false); setCalY(new Date().getFullYear()); setCalM(new Date().getMonth()); };
 
-  // Modal нээгдэх бүрт артист/багц урьдчилан тохируулна
+  // Modal нээгдэх бүрт артист/багц урьдчилан тохируулна + цагийн слот шинэчлэх
   useEffect(() => {
     if (bookingOpen) {
       if (bookingPackage) {
@@ -183,8 +202,21 @@ export default function BookingModal() {
         setBk({ ...INIT_BK, art: bookingArtist || null });
       }
       setStep(1);
+      refreshBookedSlots(); // ← Modal нээгдэх бүрт шинэ мэдээлэл татна
     }
-  }, [bookingOpen, bookingArtist, bookingPackage]);
+  }, [bookingOpen, bookingArtist, bookingPackage, refreshBookedSlots]);
+
+  // Step 3 (Огноо & Цаг) руу орох бүрт слотыг дахин шинэчлэх
+  useEffect(() => {
+    if (step === 3) refreshBookedSlots();
+  }, [step, refreshBookedSlots]);
+
+  // Хуудас арын tab-аас идэвхжих үед (дараа өдөр/маргааш орвол) шинэчлэх
+  useEffect(() => {
+    const onVisible = () => { if (document.visibilityState === 'visible') refreshBookedSlots(); };
+    document.addEventListener('visibilitychange', onVisible);
+    return () => document.removeEventListener('visibilitychange', onVisible);
+  }, [refreshBookedSlots]);
   const handleClose = () => { closeBooking(); reset(); };
 
   // Сонгосон артистын зөвшөөрсөн төлбөрийн аргууд
