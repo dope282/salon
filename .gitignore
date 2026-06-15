@@ -1,6 +1,15 @@
 node_modules
 .next
-.env.local
 *.log
 .vercel
+
+# Орчны хувьсагч (нууц) — example-ийг үлдээнэ
 .env*
+!.env.local.example
+
+# Байршуулсан зургууд (runtime)
+/public/uploads/
+
+# Supabase-аас экспортолсон дата (хувийн мэдээлэл агуулна — бүү commit)
+supabase-export*.json
+*-export.json

@@ -1,108 +1,134 @@
-# Datacom хостинг дээр байршуулах заавар
+# Datacom (cPanel) дээр байршуулах заавар — MySQL хувилбар
 
-Энэ апп нь **Next.js (Node.js сервер)** — QPay төлбөр (`/api/qpay/*`), нууц үг сэргээх зэрэг
-серверийн хэсэгтэй тул **Node.js орчин шаардана**.
+Энэ апп нь **Next.js (Node.js сервер) + MySQL/MariaDB** дээр ажиллана.
+Бүх backend (database, нэвтрэх/Auth, зураг байршуулах, QPay) нь Datacom доторх Node сервер
+дээр ажиллах тул **Supabase шаардлагагүй** боллоо.
 
----
-
-## 0. Эхлээд хостингоо ШАЛГА
-
-cPanel-д нэвтрээд (https://таны-домэйн:2083 эсвэл Datacom-ийн өгсөн хаяг) дараахыг хар:
-
-- **"Software" хэсэгт `Setup Node.js App` эсвэл `Application Manager` байна уу?**
-  - ✅ Байвал → **A хувилбар** (доор). QPay бүрэн ажиллана.
-  - ❌ Байхгүй, зөвхөн PHP/файл менежер бол → **C хувилбар** (статик, QPay ажиллахгүй).
-- VPS / SSH хандалттай бол → **B хувилбар**.
-
-Мэдэхгүй бол cPanel-ийн дэлгэцийн зургийг авч надад илгээ.
+> Танай Datacom үйлчилгээ: **Node.js Hosting** (домэйн `hatantsetseglash.mn`) + cPanel + MySQL.
 
 ---
 
-## A. cPanel + Node.js (хамгийн магадлалтай)
+## 1. MySQL database үүсгэх (cPanel)
 
-1. **Код байршуулах:** GitHub-аас татах эсвэл cPanel File Manager-аар `public_html`-д (эсвэл тусдаа фолдер) бүх файлыг хуулна. `node_modules`, `.next`, `.env.local`-ийг хуулахгүй.
-
-2. **Setup Node.js App** → **Create Application**:
-   - Node.js version: **20.x** (эсвэл 18.x)
-   - Application mode: **Production**
-   - Application root: код байгаа фолдер (ж: `salon`)
-   - Application URL: домэйн
-   - **Application startup file: `server.js`**
-
-3. **Environment Variables** (тэр хэсэгт нэмнэ):
-
-   ```
-   NEXT_PUBLIC_SUPABASE_URL=...
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=...
-   NEXT_PUBLIC_ADMIN_EMAIL=jaamaaj26@gmail.com
-   SUPABASE_SERVICE_ROLE_KEY=...
-   QPAY_USERNAME=HATANTSETSEG_MN
-   QPAY_PASSWORD=nEHEDq9K
-   QPAY_INVOICE_CODE=HATANTSETSEG_MN_INVOICE
-   NEXT_PUBLIC_SITE_URL=https://таны-домэйн
-   ```
-
-4. **Terminal нээх** (cPanel Terminal эсвэл "Run NPM Install" дараад дараа нь):
-
-   ```bash
-   cd ~/salon
-   source /home/ХЭРЭГЛЭГЧ/nodevenv/salon/20/bin/activate   # cPanel-ийн заасан activate мөр
-   npm install
-   npm run build
-   ```
-
-5. **Restart** дарж аппликейшнаа дахин асаа.
-
-6. **Supabase → Auth → URL Configuration → Redirect URLs**-д
-   `https://таны-домэйн/reset-password` нэмэх.
-
-7. **QPay merchant**-д callback домэйнаа бүртгүүлэх шаардлагатай бол Datacom домэйнаа өг.
-
-> Хэрэв "Passenger" 503 өгвөл: build хийгдсэн эсэх (`.next` фолдер үүссэн эсэх), Node version,
-> startup file `server.js` мөн эсэхийг шалга.
+1. cPanel → **MySQL® Databases**:
+   - **Create New Database**: ж. `hatantse_salon` → бүтэн нэр нь `hatantse_salon`.
+   - **Add New User**: ж. `hatantse_salon` + хүчтэй нууц үг.
+   - **Add User To Database** → бүх эрх (ALL PRIVILEGES).
+2. cPanel → **phpMyAdmin** → зүүн талаас database-ээ сонго → дээд талын **Import** →
+   `schema.mysql.sql` файлыг сонгож **Go**. (12 хүснэгт + `users`, `password_resets` үүснэ.)
 
 ---
 
-## B. VPS / Cloud сервер (SSH-тэй)
+## 2. Код байршуулах
+
+**Git (зөвлөмж):** cPanel → **Git™ Version Control** → Create → Clone URL
+`https://github.com/dope282/salon.git` → `repositories/salon`.
+Эсвэл **File Manager**-аар бүх файлыг хуулна (`node_modules`, `.next`, `.env.local`-ийг **хуулахгүй**).
+
+---
+
+## 3. Setup Node.js App
+
+cPanel → **Setup Node.js App** → **Create Application**:
+- Node.js version: **20.x**
+- Application mode: **Production**
+- Application root: код байгаа фолдер (ж. `repositories/salon`)
+- Application URL: `hatantsetseglash.mn`
+- **Application startup file: `server.js`**
+
+**Environment Variables** (тэр хэсэгт нэмнэ — `.env.local.example`-г хар):
+
+```
+DB_HOST=localhost
+DB_PORT=3306
+DB_USER=hatantse_salon
+DB_PASSWORD=<MySQL нууц үг>
+DB_NAME=hatantse_salon
+AUTH_SECRET=<урт санамсаргүй тэмдэгт>
+NEXT_PUBLIC_ADMIN_EMAILS=jaamaaj26@gmail.com,bdolmoosuren@gmail.com
+NEXT_PUBLIC_SITE_URL=https://hatantsetseglash.mn
+SMTP_HOST=mail.hatantsetseglash.mn
+SMTP_PORT=465
+SMTP_SECURE=true
+SMTP_USER=noreply@hatantsetseglash.mn
+SMTP_PASS=<мэйл хайрцгийн нууц үг>
+SMTP_FROM=noreply@hatantsetseglash.mn
+QPAY_USERNAME=HATANTSETSEG_MN
+QPAY_PASSWORD=<QPay нууц үг>
+QPAY_INVOICE_CODE=HATANTSETSEG_MN_INVOICE
+```
+
+> `AUTH_SECRET` үүсгэх: `node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"`
+
+---
+
+## 4. Суулгах ба build
+
+cPanel Terminal (эсвэл "Run NPM Install" → дараа нь):
 
 ```bash
-# Node 20 суулгасан гэж үзвэл
-git clone <repo> salon && cd salon
+cd ~/repositories/salon
+source /home/hatantse/nodevenv/repositories/salon/20/bin/activate   # cPanel-ийн заасан activate мөр
 npm install
 npm run build
-# Орчны хувьсагчдыг .env.local-д хийх (дээрхтэй ижил)
-npm install -g pm2
-PORT=3000 pm2 start server.js --name salon
-pm2 save && pm2 startup
+mkdir -p public/uploads        # зураг байршуулах фолдер (бичигдэх эрхтэй)
 ```
 
-Дараа нь **nginx** reverse proxy:
-
-```nginx
-server {
-  server_name таны-домэйн;
-  location / { proxy_pass http://127.0.0.1:3000; proxy_set_header Host $host; }
-}
-```
-
-SSL: `certbot --nginx`.
+Дараа нь **Restart** дарж аппликейшнаа дахин асаа.
 
 ---
 
-## C. Зөвхөн static/PHP hosting (Node БАЙХГҮЙ)
+## 5. Нууц үг сэргээх имэйл (SMTP)
 
-⚠️ Энэ тохиолдолд **QPay төлбөр, нууц үг сэргээх, admin-ийн серверийн үйлдлүүд АЖИЛЛАХГҮЙ**
-(API routes Node шаарддаг). Сонголтууд:
+cPanel → **Email Accounts** → `noreply@hatantsetseglash.mn` үүсгэ → нууц үгийг
+`SMTP_PASS`-д бич. (Имэйл хүрэлтийг сайжруулахад cPanel → **Email Deliverability**-д
+SPF/DKIM-г идэвхжүүл.)
 
-1. **Зөвлөмж:** Node дэмждэг багц руу шилжих (Datacom-д Node hosting/VPS асуу), эсвэл Vercel дээр үлдээх.
-2. Эсвэл зөвхөн **статик front** тавиад QPay-г өөр Node сервер дээр (Vercel functions) байршуулж холбох — нэмэлт тохиргоо шаардана.
-3. Хэрэв статик хувилбар хүсвэл `next.config.mjs`-д `output: 'export'` болгож, `/api/*`-ийг түр салгана (QPay-гүй).
+---
 
-> Аль нь болохыг хэлбэл тохирох тохиргоог хийж өгье.
+## 6. Хуучин дата зөөх (Supabase → MySQL)
+
+**Арга A — JSON экспорт (Supabase API хязгаарлагдсан үед ч ажилладаг):**
+1. Supabase Dashboard → **SQL Editor** → бүх хүснэгтийг нэг JSON болгох асуулга ажиллуулна
+   (төслийн `README`/чат дахь `json_build_object(...)` асуулгыг хар) → үр дүнг
+   `supabase-export.json` нэрээр хадгална.
+2. Файлыг сервер дээрх `~/repositories/salon`-д байршуул (File Manager/scp).
+3. Импортол:
+   ```bash
+   cd ~/repositories/salon
+   DB_HOST=localhost DB_USER=hatantse_salon DB_PASSWORD=<...> DB_NAME=hatantse_salon \
+   node scripts/import-from-json.mjs supabase-export.json
+   ```
+   (Энэ нь seed-ийг цэвэрлээд бодит датаг оруулна.)
+
+**Арга B — Supabase API шууд (project идэвхтэй бол):**
+```bash
+SUPABASE_URL=<...> SUPABASE_SERVICE_ROLE_KEY=<...> \
+DB_HOST=localhost DB_USER=hatantse_salon DB_PASSWORD=<...> DB_NAME=hatantse_salon \
+node scripts/migrate-from-supabase.mjs
+```
+
+> **Анхаар:** Үйлчлүүлэгчдийн нууц үг зөөгдөхгүй — тэд **дахин бүртгүүлнэ** (захиалга нь
+> имэйлээр харагдсан хэвээр). **Admin** шинээр `/`-д бүртгүүлэхэд `NEXT_PUBLIC_ADMIN_EMAILS`
+> дотор байвал автоматаар админ болно. `supabase-export.json`-д хувийн мэдээлэл байгаа тул
+> зөөж дууссаны дараа серверээс **устга**.
+
+---
+
+## 7. Эцсийн шалгалт
+
+- Сайт нээгдэх (`https://hatantsetseglash.mn`) — үйлчилгээ/артист/багц харагдана.
+- Admin имэйлээр бүртгүүлж нэвтэр → `/admin` руу шилжинэ → CRUD ажиллана.
+- Захиалга үүсгэх → QPay QR гарна. **QPay merchant**-д callback домэйнаа
+  `https://hatantsetseglash.mn` болгож бүртгүүл.
+
+> "Passenger" 503 өгвөл: `.next` үүссэн эсэх, Node version, startup `server.js`,
+> DB env зөв эсэхийг шалга. Логийг cPanel → Setup Node.js App → "Open Log" дотроос хар.
 
 ---
 
 ## Анхаарах
 
-- `.env.local`, `node_modules`, `.next` -ийг GitHub/хостингд **бүү commit/upload** хий (build дээр нь хийгдэнэ).
-- `NEXT_PUBLIC_SITE_URL`-ийг шинэ домэйнаараа солихоо мартуузай (QPay callback ашиглана).
+- `.env.local`, `node_modules`, `.next`, `public/uploads`-ийг GitHub-д **commit ХИЙХГҮЙ**.
+- DB нууц үг, `AUTH_SECRET`, QPay/SMTP нууц үгийг зөвхөн Environment Variables-д хадгал.
+- `NEXT_PUBLIC_SITE_URL`-ийг домэйнаараа тааруул (имэйл/QPay callback ашиглана).

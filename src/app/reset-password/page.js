@@ -2,12 +2,12 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { supabase } from '@/lib/supabase';
 
 export default function ResetPasswordPage() {
   const router = useRouter();
-  const [ready, setReady]     = useState(false);   // recovery session бэлэн эсэх
+  const [ready, setReady]     = useState(false);   // хүчинтэй token байгаа эсэх
   const [checked, setChecked] = useState(false);
+  const [token, setToken]     = useState(null);
   const [pass, setPass]       = useState('');
   const [pass2, setPass2]     = useState('');
   const [loading, setLoading] = useState(false);
@@ -16,26 +16,31 @@ export default function ResetPasswordPage() {
   const [show, setShow]       = useState(false);
 
   useEffect(() => {
-    // supabase-js нь URL hash доторх recovery token-г автоматаар уншиж session үүсгэнэ
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'PASSWORD_RECOVERY' || session) setReady(true);
-    });
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) setReady(true);
-      setChecked(true);
-    });
-    return () => subscription.unsubscribe();
+    // Сэргээх холбоос: /reset-password?token=...
+    const params = new URLSearchParams(window.location.search);
+    const t = params.get('token');
+    if (t) { setToken(t); setReady(true); }
+    setChecked(true);
   }, []);
 
   const submit = async () => {
     if (!/^[0-9]{6}$/.test(pass)) { setMsg({ type: 'err', text: 'Нууц үг 6 оронтой тоо байх ёстой.' }); return; }
     if (pass !== pass2)  { setMsg({ type: 'err', text: 'Нууц үгнүүд таарахгүй байна.' }); return; }
     setLoading(true);
-    const { error } = await supabase.auth.updateUser({ password: pass });
-    setLoading(false);
-    if (error) { setMsg({ type: 'err', text: error.message }); return; }
-    setDone(true);
-    setTimeout(() => router.replace('/'), 2500);
+    try {
+      const r = await fetch('/api/auth/reset-confirm', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token, password: pass }),
+      });
+      const j = await r.json().catch(() => ({}));
+      setLoading(false);
+      if (!r.ok) { setMsg({ type: 'err', text: j.error || 'Алдаа гарлаа.' }); return; }
+      setDone(true);
+      setTimeout(() => router.replace('/'), 2500);
+    } catch (e) {
+      setLoading(false);
+      setMsg({ type: 'err', text: e.message || 'Сүлжээний алдаа.' });
+    }
   };
 
   const inp = 'w-full px-4 py-3 border border-gold/20 rounded-xl text-[14px] font-sans outline-none transition-all bg-[#606060] focus:border-gold focus:shadow-[0_0_0_3px_rgba(255,51,153,.12)] text-pink-200 placeholder:text-pink-400';
