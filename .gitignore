@@ -9,6 +9,7 @@ node_modules
 
 # Байршуулсан зургууд (runtime)
 /uploads/
+/public/uploads/
 
 # Supabase-аас экспортолсон дата (хувийн мэдээлэл агуулна — бүү commit)
 supabase-export*.json
