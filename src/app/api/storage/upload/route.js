@@ -17,10 +17,10 @@ export async function POST(req) {
   if (!file || typeof file === 'string') return NextResponse.json({ error: 'Файл алга.' }, { status: 400 });
 
   const safe = (rawName.replace(/[^a-zA-Z0-9._-]/g, '_') || `img-${Date.now()}`).slice(0, 120);
-  const dir = path.join(process.cwd(), 'public', 'uploads');
+  const dir = path.join(process.cwd(), 'uploads');
   await mkdir(dir, { recursive: true });
   const buf = Buffer.from(await file.arrayBuffer());
   await writeFile(path.join(dir, safe), buf);
 
-  return NextResponse.json({ path: safe, publicUrl: `/uploads/${safe}` });
+  return NextResponse.json({ path: safe, publicUrl: `/api/uploads/${safe}` });
 }

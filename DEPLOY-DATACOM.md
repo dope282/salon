@@ -71,7 +71,7 @@ cd ~/repositories/salon
 source /home/hatantse/nodevenv/repositories/salon/20/bin/activate   # cPanel-ийн заасан activate мөр
 npm install
 npm run build
-mkdir -p public/uploads        # зураг байршуулах фолдер (бичигдэх эрхтэй)
+mkdir -p uploads        # зураг байршуулах фолдер (бичигдэх эрхтэй)
 ```
 
 Дараа нь **Restart** дарж аппликейшнаа дахин асаа.

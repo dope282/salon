@@ -144,7 +144,7 @@ const storage = {
         return { data: { path: j.path }, error: null };
       },
       getPublicUrl(name) {
-        return { data: { publicUrl: `/uploads/${name}` } };
+        return { data: { publicUrl: `/api/uploads/${name}` } };
       },
     };
   },

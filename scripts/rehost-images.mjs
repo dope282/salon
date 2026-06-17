@@ -21,7 +21,7 @@ const db = await mysql.createConnection({
   charset: 'utf8mb4',
 });
 
-const UP_DIR = path.join(process.cwd(), 'public', 'uploads');
+const UP_DIR = path.join(process.cwd(), 'uploads');
 await mkdir(UP_DIR, { recursive: true });
 
 // Зураг агуулж болзошгүй хүснэгт ба багана
@@ -50,7 +50,7 @@ async function fetchOne(url) {
     const buf = Buffer.from(await r.arrayBuffer());
     await writeFile(path.join(UP_DIR, name), buf);
     usedNames.add(name);
-    const newUrl = `/uploads/${name}`;
+    const newUrl = `/api/uploads/${name}`;
     cache.set(url, newUrl); downloaded++;
     console.log('  ✓', name, `(${buf.length}B)`);
     return newUrl;
